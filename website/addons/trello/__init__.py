@@ -30,7 +30,7 @@ INCLUDE_JS = {
 }
 
 INCLUDE_CSS = {
-    'page': [],
+    'page': ['/addons/static/trello/trelloboard.css'],
 }
 
 WIDGET_HELP = 'Trello Add-on Alpha'

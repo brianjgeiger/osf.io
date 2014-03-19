@@ -90,6 +90,9 @@ class Trello(object):
     def get_lists_from_board(self,board_id):
         return self.get_trello().boards.get_list(board_id)
 
+    def get_card(self,card_id):
+        return self.get_trello().cards.get(card_id)
+
     def get_comments_from_card(self,card_id):
         return self.get_trello().cards.get_action(card_id,filter="commentCard")
 

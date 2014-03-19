@@ -90,6 +90,8 @@ def trello_page(auth, project, node, **kwargs):
             trello_list[u'cards'] = trello_api.get_cards_from_list(trello_list[u'id'])
             for card in trello_list[u'cards']:
                 # TODO: Slloooww. Needs optimization probably need to bundle trello requests if possible
+                # More likely will limit data on initial pull and have javascript fill in the blanks after.
+                # TODO: Move a bunch of this stuff into the model
                 card[u'comments'] = trello_api.get_comments_from_card(card[u'id'])
                 checklists = trello_api.get_checklists_from_card(card[u'id'])
                 checkItemCount = 0
@@ -142,5 +144,42 @@ def trello_page(auth, project, node, **kwargs):
 
         }
     return_value.update(data)
+
+    return return_value
+
+@must_be_contributor_or_public
+@must_have_addon('trello', 'node')
+def trello_card_details(**kwargs):
+    node_settings = kwargs['node_addon']
+
+    card_id = kwargs['cardid']
+    return_value = {
+            'complete': True,
+            'trello_card': {},
+            'trello_card_id': card_id,
+        }
+    trello_board_name = node_settings.trello_board_name.strip()
+
+    if trello_board_name is not None:
+        trello_api = Trello.from_settings(node_settings.user_settings)
+        #TODO: This does not handle properly if a card doesn't exist. Need to find the right way to handle that exception (HTTPError 400)
+        try:
+            card = trello_api.get_card(card_id)
+            card[u'comments'] = trello_api.get_comments_from_card(card_id)
+            card[u'checklists'] = trello_api.get_checklists_from_card(card_id)
+            for checklist in card[u'checklists']:
+                checklist[u'checkItems'] = trello_api.get_checkitems(checklist[u'id'])
+            return_value = {
+                'complete': True,
+                'trello_card': card,
+                'trello_card_id': card_id,
+            }
+        except HTTPError as e:
+            return_value = {
+                'complete': True,
+                'HTTPError': e,
+                'trello_card': {},
+                'trello_card_id': card_id,
+            }
 
     return return_value

@@ -77,6 +77,7 @@ settings_routes = {
             views.auth.trello_oauth_callback,
             json_renderer,
         ),
+
     ],
     'prefix': '/api/v1',
 }
@@ -87,5 +88,18 @@ page_routes = {
             '/project/<pid>/trello/',
             '/project/<pid>/node/<nid>/trello/',
         ], 'get', views.misc.trello_page, OsfWebRenderer('../addons/trello/templates/trello_page.mako')),
+
+        # Data Gathering for Javascript
+          Rule(
+            [
+            '/<nid>/trello/card/<cardid>',
+            '/<pid>/node/<nid>/trello/card/<cardid>',
+            ],
+            'get',
+            views.misc.trello_card_details,
+            json_renderer,
+        ),
+
     ],
+
 }
