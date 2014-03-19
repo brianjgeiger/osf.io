@@ -1,0 +1,129 @@
+/* @override http://localhost:5000/addons/static/trello/trelloboard.css */
+
+div#TrelloBoard
+{
+	display: block;
+    overflow-x: scroll;
+    white-space: nowrap;
+	background-color: #28729d;
+	float: left;
+}
+
+.TrelloBoardName a
+{
+	color: #feffff;
+	text-indent: 10px;
+	font-size: 24px;
+	vertical-align: top;
+	padding-left: 5px;
+}
+
+
+div.TrelloListBlock
+{
+	background-color: #dbdbdb;
+	display: inline-block;
+	margin-top: 0;
+	margin-bottom: 20px;
+	float: left;
+	margin-left: 10px;
+	width: 220px;
+	position: relative;
+	border-radius: 5px;
+	
+}
+
+ul#TrelloList
+{
+list-style-type: none;
+	overflow: auto;
+	white-space: normal;
+}
+
+#TrelloBoard
+{
+margin: 0 0 0 65px;
+padding: 0;
+text-align: left;
+}
+
+ul#TrelloList li 
+{
+list-style-type: none;
+font: bold 18px arial, verdana, sans-serif;
+	color: #000;
+	padding: 5px;
+}
+
+.TrelloCardLinkIcon
+{
+	float: right;
+	display: none;
+}
+
+
+
+div.TrelloCoverImage img {
+	max-width: 175px;
+	height: auto;
+	margin-bottom: 5px;
+	display: block;
+}
+
+
+
+div.TrelloCard
+{
+font: normal normal 10px/22px arial, verdana, sans-serif;
+	display: block;
+	border-style: none;
+	border-width: 1px;
+	width: 200px;
+	background-color: #fefefc;
+	margin: 10px;
+	border-bottom-style: outset;
+	border-bottom-color: #fcfcfc;
+	border-radius: 5px;
+}
+
+/* My Comment */
+
+ul#TrelloCardList
+{
+	left: 0;
+	display: inline;
+}
+
+ul#TrelloCardList li
+{
+	list-style-type: none;
+	color: #000;
+	font-size: 12px;
+	font-weight: normal;
+	font-style: normal;
+}
+ul#TrelloCheckList li
+{
+	border-style: none;
+	display: none;
+}
+
+ul#TrelloCheckItem li
+{
+}
+
+#TrelloBoard
+{
+text-align: left;
+margin: 0;
+padding-left: 0;
+}
+
+ul#navlist ul
+{
+position: absolute;
+top: 0;
+left: 4em;
+}
+
+
