@@ -3,7 +3,7 @@
     <link rel="stylesheet" type="text/css" href="${addon_css}">
 %endfor
 %for addon_js in addon_page_js:
-    <script src="${addon_js}"></script>
+    <script type="text/javascript" src="${addon_js}"></script>
 %endfor
 
 %if trello_board_name is not None:
@@ -20,7 +20,8 @@
 
             <ul id="TrelloCardList">
             % for card in list[u'cards']:
-                <div class="TrelloCard" id="tc-${card[u'id']}"
+                <div class="TrelloCard" id="tc-${card[u'id']}" draggable="true"
+                     onclick="displayCard('${card[u'id']}');"
                      onmouseover="document.getElementById('tcli-${card[u'id']}').style.display = 'inline';"
                      onmouseout="document.getElementById('tcli-${card[u'id']}').style.display = 'none';">
                 <div class="TrelloCardLinkIcon" id="tcli-${card[u'id']}"><a href="${card[u'url']}" target=":_blank">
