@@ -89,33 +89,19 @@ def trello_page(auth, project, node, **kwargs):
         for trello_list in trello_lists:
             trello_list[u'cards'] = trello_api.get_cards_from_list(trello_list[u'id'])
             for card in trello_list[u'cards']:
-                # TODO: Slloooww. Needs optimization probably need to bundle trello requests if possible
-                # More likely will limit data on initial pull and have javascript fill in the blanks after.
-                # TODO: Move a bunch of this stuff into the model
-                card[u'comments'] = trello_api.get_comments_from_card(card[u'id'])
-                checklists = trello_api.get_checklists_from_card(card[u'id'])
-                checkItemCount = 0
-                checkedItemCount = 0
-                for checklist in checklists:
-                    checkItems = trello_api.get_checkitems(checklist[u'id'])
-                    for checkItem in checkItems:
-                        checkItemCount += 1
-                        if checkItem[u'state'] == 'complete':
-                           checkedItemCount += 1
-                card[u'checkItemCount'] = checkItemCount
-                card[u'checkedItemCount'] = checkedItemCount
-                attachments = trello_api.get_attachments_from_card(card[u'id'],filter="cover")
-                for attachment in attachments:
-                    if "previews" in attachment:
-                        previews = attachment[u'previews']
-                        logger.log(10,"Card:" + card[u'name'])
-                        logger.log(10,previews)
-                        for preview in previews:
-                            if "url" in preview:
-                                card[u'coverURL'] = preview[u'url']
-                                logger.log(10,card[u'coverURL'])
-                            else:
-                                logger.log(10,"No Preview URL")
+                if card[u'badges'][u'attachments'] > 0:
+                    attachments = trello_api.get_attachments_from_card(card[u'id'],filter="cover")
+                    for attachment in attachments:
+                        if "previews" in attachment:
+                            previews = attachment[u'previews']
+                            logger.log(10,"Card:" + card[u'name'])
+                            logger.log(10,previews)
+                            for preview in previews:
+                                if "url" in preview:
+                                    card[u'coverURL'] = preview[u'url']
+                                    logger.log(10,card[u'coverURL'])
+                                else:
+                                    logger.log(10,"No Preview URL")
         data = _view_project(node, auth)
 
         # xml = trello._fetch_references()
@@ -179,6 +165,39 @@ def trello_card_details(**kwargs):
                 'complete': True,
                 'HTTPError': e,
                 'trello_card': {},
+                'trello_card_id': card_id,
+            }
+
+    return return_value
+
+@must_be_contributor_or_public
+@must_have_addon('trello', 'node')
+def trello_card_attachments(**kwargs):
+    node_settings = kwargs['node_addon']
+
+    card_id = kwargs['cardid']
+    return_value = {
+            'complete': True,
+            'attachments': {},
+            'trello_card_id': card_id,
+        }
+    trello_board_name = node_settings.trello_board_name.strip()
+
+    if trello_board_name is not None:
+        trello_api = Trello.from_settings(node_settings.user_settings)
+        #TODO: This does not handle properly if a card doesn't exist. Need to find the right way to handle that exception (HTTPError 400)
+        try:
+            attachments = trello_api.get_attachments_from_card(card_id)
+            return_value = {
+                'complete': True,
+                'attachments': attachments,
+                'trello_card_id': card_id,
+            }
+        except HTTPError as e:
+            return_value = {
+                'complete': True,
+                'HTTPError': e,
+                'attachments': {},
                 'trello_card_id': card_id,
             }
 

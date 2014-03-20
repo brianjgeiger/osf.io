@@ -26,7 +26,7 @@ CONFIGS = ['node', 'user']
 CATEGORIES = ['other']
 
 INCLUDE_JS = {
-    'page': ['/addons/static/trello/card_detail.js'],
+    'page': ['/addons/static/trello/card_detail.js',],
 }
 
 INCLUDE_CSS = {

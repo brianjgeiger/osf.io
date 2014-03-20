@@ -99,6 +99,15 @@ page_routes = {
             views.misc.trello_card_details,
             json_renderer,
         ),
+          Rule(
+            [
+            '/<nid>/trello/attachments/<cardid>',
+            '/<pid>/node/<nid>/trello/attachments/<cardid>',
+            ],
+            'get',
+            views.misc.trello_card_attachments,
+            json_renderer,
+        ),
 
     ],
 
