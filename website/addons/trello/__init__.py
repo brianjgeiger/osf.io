@@ -26,11 +26,14 @@ CONFIGS = ['node', 'user']
 CATEGORIES = ['other']
 
 INCLUDE_JS = {
-    'page': ['/addons/static/trello/card_detail.js',],
+    'page': [
+        '/addons/static/trello/card_detail.js',
+             ],
 }
 
 INCLUDE_CSS = {
-    'page': ['/addons/static/trello/trelloboard.css'],
+    'page': ['/addons/static/trello/trelloboard.css',
+             '//code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css'],
 }
 
 WIDGET_HELP = 'Trello Add-on Alpha'

@@ -162,8 +162,24 @@ div.trello_card_detail_checklist_checkitem {
 	text-indent: 10px;
 }
 
+
+
 div.trello_card_detail_checklist_checkitem span.complete {
 	text-decoration: line-through;
 }
 
 
+  .portlet-toggle {
+    position: absolute;
+    top: 50%;
+    right: 0;
+    margin-top: -8px;
+  }
+  .portlet-content {
+    padding: 0.4em;
+  }
+  .portlet-placeholder {
+    border: 1px dotted black;
+    margin: 0 1em 1em 0;
+    height: 50px;
+  }

@@ -1,8 +1,15 @@
 function displayCard(cardID) {
-    var the_url = "card/" + cardID;
-    $.getJSON( the_url, buildDetailCard);
+    var domElement =$(event.target);
+    var callerValue = domElement[0].attributes[0].value;
+//    This makes sure the detail card doesn't show when clicking on the "open in trello" link
+    if(callerValue != "/addons/static/trello/to_trello_16.png"){
+        var the_url = "card/" + cardID;
+        $.getJSON( the_url, buildDetailCard);
+    }
 }
+
 var box_contents = "";
+
 function buildDetailCard(data) {
     box_contents = '<div class="trello_card_detail_name">' + data.trello_card.name
         + '<a href="'+ data.trello_card.url + '" target=":_blank">'

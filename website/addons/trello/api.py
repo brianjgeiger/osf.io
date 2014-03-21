@@ -109,3 +109,8 @@ class Trello(object):
         resp = requests.get("https://trello.com/1/cards/%s/attachments" % (card_id), params=dict(key=self.client_token, token=self.owner_token, fields=fields, filter=filter), data=None)
         resp.raise_for_status()
         return json.loads(resp.content)
+
+    def update_card(self, card_id, name=None, desc=None, closed=None, idList=None, due=None, pos=None):
+        resp = requests.put("https://trello.com/1/cards/%s" % (card_id), params=dict(key=self.client_token, token=self.owner_token), data=dict(name=name, desc=desc, closed=closed, idList=idList, due=due, pos=pos))
+        resp.raise_for_status()
+        return json.loads(resp.content)

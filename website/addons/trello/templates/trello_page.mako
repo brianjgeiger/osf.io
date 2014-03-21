@@ -5,23 +5,20 @@
 %for addon_js in addon_page_js:
     <script type="text/javascript" src="${addon_js}"></script>
 %endfor
-##<script>
-##  var bin = document.querySelector('.TrelloListBlock');
-##
-##  addEvent(bin, 'dragover', function (e) {
-##    if (e.preventDefault) e.preventDefault(); // allows us to drop
-##    this.className = 'over';
-##    e.dataTransfer.dropEffect = 'copy';
-##    return false;
-##  });
-##
-##
-##</script>
+  <script>
+  $(function() {
+    $( ".TrelloListBlock" ).sortable({
+      connectWith: ".TrelloListBlock"
+    }).disableSelection();
+  });
+  </script>
+
+
+
 %if trello_board_name is not None:
     <div id="TrelloBoard">
     <span class="TrelloBoardName"><a href="${trello_board_url}" target=":_blank">${trello_board_name }
         <img src = "/addons/static/trello/to_trello_24.png" title="Open '${trello_board_name }' on Trello"></a></span>
-
 
     <div id="TrelloList">
     % for list in trello_lists:
@@ -31,7 +28,7 @@
 
 
             % for card in list[u'cards']:
-                <div class="TrelloCard" id="tc-${card[u'id']}" draggable="true"
+                <div class="TrelloCard" id="tc-${card[u'id']}"
                      onclick="displayCard('${card[u'id']}');"
                      onmouseover="document.getElementById('tcli-${card[u'id']}').style.display = 'inline';"
                      onmouseout="document.getElementById('tcli-${card[u'id']}').style.display = 'none';">
