@@ -64,10 +64,25 @@ function buildDetailCard(data) {
 function addAttachmentInfo(data){
     box_contents += '<div class = "trello_card_detail_attchment_header">Attachments</div>';
     $.each(data.attachments, function(key, value){
-        box_contents += '<div class = "trello_card_detail_attachment">'
-        + '<a href="' + value.url + '">' + value.name + '</a>'
+        var nameSplit = value.name.split(".");
+        var previewContents = "";
+        if (nameSplit.length > 1) {
+            previewContents = nameSplit[nameSplit.length-1];
+        }
 
-        + '</div>';
+        if(value.previews.length > 0){
+            previewItem = Math.min(1,value.previews.length);
+            previewContents = '<img src = "' + value.previews[previewItem].url + '" title = "'
+                + value.name + '">';
+        }
+        box_contents += '<div class = "trello_card_detail_attachment">'
+                + '<span class = "attachment_preview">'
+                    + previewContents
+                + '</span>'
+                + '<span class = "attachment_description">'
+                    + '<a href="' + value.url + '">' + value.name + '</a>'
+                + '</span>'
+            + '</div>';
 
     });
     showDetailCard();

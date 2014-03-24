@@ -77,6 +77,25 @@ div.TrelloCardName {
 	padding-right: 15px;
 }
 
+span.attachment_preview {
+	width: 250px;
+	height: 150px;
+	display: inline-block;
+	color: #000;
+	background-color: #efefef;
+	overflow: hidden;
+	margin-right: 10px;
+	margin-bottom: 10px;
+	text-align: center;
+	line-height: 125px;
+	font-variant: small-caps;
+	font-size: 18px;
+}
+
+span.attachment_description {
+	display: inline-block;
+}
+
 
 
 
