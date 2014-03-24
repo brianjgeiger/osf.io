@@ -202,3 +202,26 @@ def trello_card_attachments(**kwargs):
             }
 
     return return_value
+
+@must_have_permission('write')
+@must_have_addon('trello', 'node')
+def trello_card_move(**kwargs):
+    node_settings = kwargs['node_addon']
+    node = node_settings.owner
+
+    trello = node.get_addon('trello')
+    try:
+        new_list_id = request.json.get('listid','')
+        new_card_pos = request.json.get('cardpos','')
+        card_id = request.json.get('cardid','')
+    except:
+        raise HTTPError(http.BAD_REQUEST)
+
+    if not new_list_id and new_card_pos and card_id:
+        raise HTTPError(http.BAD_REQUEST)
+
+    trello_board_name = node_settings.trello_board_name.strip()
+
+    if trello_board_name is not None:
+        trello_api = Trello.from_settings(node_settings.user_settings)
+        trello_api.update_card(card_id,idList=new_list_id,pos=new_card_pos)

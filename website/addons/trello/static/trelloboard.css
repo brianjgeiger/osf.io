@@ -5,16 +5,17 @@ div#TrelloBoard
     overflow-x: scroll;
     overflow-y: auto;
     white-space: nowrap;
-	background-color: #28729d;
+	background-color: #730b03;
 	border: 1px solid #28729d;
 	border-radius: 5px;
 	border-bottom-width: 0;
 	border-top-width: 0;
+	max-height: 600px;
+	/*background-color: #28729d;*/
 }
 
 
 div#TrelloList {
-	
 }
 
 div.TrelloListBlock
@@ -22,8 +23,8 @@ div.TrelloListBlock
 	background-color: #dbdbdb;
 	margin-top: 0;
 	margin-bottom: 20px;
-	margin-left: 10px;
-	width: 220px;
+	margin-left: 5px;
+	width: 240px;
 	border-radius: 5px;
 	display: inline-block;
 }
@@ -58,7 +59,7 @@ font: normal normal 12px arial, verdana, sans-serif;
 	display: block;
 	border-style: none;
 	border-width: 1px;
-	width: 200px;
+	width: 220px;
 	background-color: #fefefc;
 	border-bottom-style: outset;
 	border-bottom-color: #fcfcfc;
@@ -70,6 +71,10 @@ font: normal normal 12px arial, verdana, sans-serif;
 	float: left;
 	min-height: 40px;
 	margin: 5px 5px 5px 9px;
+}
+
+div.TrelloCardName {
+	padding-right: 15px;
 }
 
 

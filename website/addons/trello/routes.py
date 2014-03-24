@@ -101,6 +101,15 @@ page_routes = {
         ),
           Rule(
             [
+            '/<nid>/trello/card',
+            '/<pid>/node/<nid>/trello/card',
+            ],
+            'post',
+            views.misc.trello_card_move,
+            json_renderer,
+        ),
+          Rule(
+            [
             '/<nid>/trello/attachments/<cardid>',
             '/<pid>/node/<nid>/trello/attachments/<cardid>',
             ],

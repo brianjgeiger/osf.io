@@ -11,6 +11,7 @@ function displayCard(cardID) {
 var box_contents = "";
 
 function buildDetailCard(data) {
+    var converter = new Showdown.converter();
     box_contents = '<div class="trello_card_detail_name">' + data.trello_card.name
         + '<a href="'+ data.trello_card.url + '" target=":_blank">'
         + '<img src = "/addons/static/trello/to_trello_24.png" title="Open'+ data.trello_card.name +' on Trello"></a>'
@@ -39,16 +40,16 @@ function buildDetailCard(data) {
                     +    '<div class = "trello_card_detail_comment_header">'
                     +    '<div class = "trello_card_detail_comment_date">';
 
-                theDate = new Date(value.date);
+                commentDate = new Date(value.date);
 
                 box_contents +=
-                       theDate.toLocaleDateString() +" "
-                    +  theDate.toLocaleTimeString() + '</div>'
+                       commentDate.toLocaleDateString() +" "
+                    +  commentDate.toLocaleTimeString() + '</div>'
                     +    '<div class =  "trello_card_detail_comment_owner">'
                     +       value.memberCreator.fullName + '</div>'
                     +    '</div>'
                     +    '<div class = "trello_card_detail_comment_comment"><p>'
-                    +       replaceURLWithHTMLLinks(value.data.text) + '</p></div>'
+                    +       converter.makeHtml(replaceURLWithHTMLLinks(value.data.text)) + '</p></div>'
                     + '</div>';
            });
         }
@@ -80,7 +81,5 @@ function showDetailCard() {
 
 function replaceURLWithHTMLLinks(text) {
   var exp = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig;
-    text = text.replace(/\n\n/g, "</p><p>");
-    text = text.replace(/\n/g, "<br />");
   return text.replace(exp,"<a href='$1'>$1</a>");
 }
