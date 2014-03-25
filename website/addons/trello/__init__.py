@@ -30,7 +30,7 @@ INCLUDE_JS = {
         '/addons/static/trello/card_detail.js',
         '/addons/static/trello/showdown.js',
         '/addons/static/trello/card_sorting.js',
-        # '/addons/static/trello/jquery.kinetic.js' ,
+        '/addons/static/trello/jquery.kinetic.js' ,
     ]
 }
 

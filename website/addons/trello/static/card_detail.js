@@ -16,7 +16,7 @@ function buildDetailCard(data) {
         + '<a href="'+ data.trello_card.url + '" target=":_blank">'
         + '<img src = "/addons/static/trello/to_trello_24.png" title="Open'+ data.trello_card.name +' on Trello"></a>'
         + "</div>"
-        + '<div class="trello_card_detail_desc">' + data.trello_card.desc + "</div>";
+        + '<div class="trello_card_detail_desc">' + converter.makeHtml(replaceURLWithHTMLLinks(data.trello_card.desc)) + "</div>";
         if(data.trello_card.badges.checkItems > 0){
             $.each(data.trello_card.checklists, function(key,value) {
                 box_contents += '<div class = "trello_card_detail_checklist_name">' + value.name +'</div>';
@@ -80,7 +80,7 @@ function addAttachmentInfo(data){
                     + previewContents
                 + '</span>'
                 + '<span class = "attachment_description">'
-                    + '<a href="' + value.url + '">' + value.name + '</a>'
+                    + '<a href="' + value.url + '" target="_none">' + value.name + '</a>'
                 + '</span>'
             + '</div>';
 

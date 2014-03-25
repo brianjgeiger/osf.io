@@ -8,9 +8,7 @@ div#TrelloBoard
 	background-color: #730b03;
 	border: 1px solid #28729d;
 	border-radius: 5px;
-	border-bottom-width: 0;
-	border-top-width: 0;
-	max-height: 600px;
+	/*max-height: 600px;*/
 	/*background-color: #28729d;*/
 }
 
@@ -21,12 +19,11 @@ div#TrelloList {
 div.TrelloListBlock
 {
 	background-color: #dbdbdb;
-	margin-top: 0;
-	margin-bottom: 20px;
-	margin-left: 5px;
 	width: 240px;
 	border-radius: 5px;
 	display: inline-block;
+	cursor: default;
+	margin: 0 5px 20px;
 }
 
 span.TrelloListName {
@@ -38,7 +35,9 @@ div.TrelloListBlock.over {
 	background-color: #ccfefa;
 }
 
-
+div.CardList{
+	display: table;
+}
 .TrelloCardLinkIcon
 {
 	float: right;
@@ -55,7 +54,7 @@ div.TrelloCoverImage img {
 
 div.TrelloCard
 {
-font: normal normal 12px arial, verdana, sans-serif;
+	font: normal normal 12px arial, verdana, sans-serif;
 	display: block;
 	border-style: none;
 	border-width: 1px;
@@ -71,6 +70,19 @@ font: normal normal 12px arial, verdana, sans-serif;
 	float: left;
 	min-height: 40px;
 	margin: 5px 5px 5px 9px;
+	cursor: move;
+}
+
+div.add_trello_card_link {
+	font: normal normal 12px arial, verdana, sans-serif;
+	display: block;
+	width: 220px;
+	white-space: normal;
+	padding-top: 15px;
+	float: left;
+	min-height: 40px;
+	padding-left: 10px;
+	color: #848484;
 }
 
 div.TrelloCardName {

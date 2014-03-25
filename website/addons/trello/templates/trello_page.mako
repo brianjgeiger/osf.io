@@ -20,6 +20,7 @@
     % for list in trello_lists:
         <div class="TrelloListBlock" id="tl-${list['id']}" listID = "${list['id']}">
         <span class="TrelloListName">${list[u'name']}</span>
+            <div class="CardList" id="cl-${list['id']}" listID = "${list['id']}">
         %if len(list[u'cards']) != 0:
 
 
@@ -74,32 +75,40 @@
             % endfor
 
         %endif
+                </div>
+            <div class = "add_trello_card_link" id="atcl-${list['id']}" listID = "${list['id']}">Add a card…</div>
         </div>
     % endfor
     </div>
     </div>
 
 
-##        <script type="text/javascript" charset="utf-8">
-##            $('#TrelloBoard').kinetic({
-##                filterTarget: function(target){
-##                    var returnValue = target.className.indexOf('ui-') === -1;
-##                    return returnValue;
-##                }
-##            });
-##            $('#left').click(function(){
-##                $('#TrelloBoard').kinetic('start', { velocity: -10 });
-##            });
-##            $('#right').click(function(){
-##                $('#TrelloBoard').kinetic('start', { velocity: 10 });
-##            });
-##            $('#end').click(function(){
-##                $('#TrelloBoard').kinetic('end');
-##            });
-##            $('#stop').click(function(){
-##                $('#TrelloBoard').kinetic('stop');
-##            });
-##        </script>
+        <script type="text/javascript" charset="utf-8">
+            $('#TrelloBoard').kinetic({
+                filterTarget: function(target){
+                    var returnValue = false;
+                    if(target.id){
+                        if(target.id === "TrelloList" || target.id === "TrelloBoard") {
+                            returnValue = true;
+                        }
+                    }
+
+                    return returnValue;
+                }
+            });
+            $('#left').click(function(){
+                $('#TrelloBoard').kinetic('start', { velocity: -10 });
+            });
+            $('#right').click(function(){
+                $('#TrelloBoard').kinetic('start', { velocity: 10 });
+            });
+            $('#end').click(function(){
+                $('#TrelloBoard').kinetic('end');
+            });
+            $('#stop').click(function(){
+                $('#TrelloBoard').kinetic('stop');
+            });
+        </script>
 
 %else:
     To use this module, you need to <a href="../settings">link a Trello board</a> to this project.
