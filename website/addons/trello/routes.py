@@ -104,7 +104,7 @@ page_routes = {
             '/<nid>/trello/card',
             '/<pid>/node/<nid>/trello/card',
             ],
-            'post',
+            'put',
             views.misc.trello_card_move,
             json_renderer,
         ),
@@ -117,7 +117,15 @@ page_routes = {
             views.misc.trello_card_attachments,
             json_renderer,
         ),
-
+          Rule(
+            [
+            '/<nid>/trello/card/',
+            '/<pid>/node/<nid>/trello/card/',
+            ],
+            'post',
+            views.misc.trello_add_card_to_list,
+            json_renderer,
+        ),
     ],
 
 }

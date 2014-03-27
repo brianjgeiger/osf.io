@@ -1,15 +1,15 @@
 /* @override http://localhost:5000/addons/static/trello/trelloboard.css */
 
-div#TrelloBoard
+div#KanbanBoard
 {
     overflow-x: scroll;
     overflow-y: auto;
     white-space: nowrap;
-	background-color: #730b03;
+	background-color: #fff;
 	border: 1px solid #28729d;
 	border-radius: 5px;
 	/*max-height: 600px;*/
-	/*background-color: #28729d;*/
+	background-color: #28729d;
 }
 
 
@@ -36,8 +36,12 @@ div.TrelloListBlock.over {
 }
 
 div.CardList{
+	min-height: 20px;
+	min-width: 200px;
 	display: table;
 }
+
+
 .TrelloCardLinkIcon
 {
 	float: right;
@@ -70,6 +74,10 @@ div.TrelloCard
 	float: left;
 	min-height: 40px;
 	margin: 5px 5px 5px 9px;
+
+}
+
+div.CardList .TrelloCard {
 	cursor: move;
 }
 
@@ -83,6 +91,51 @@ div.add_trello_card_link {
 	min-height: 40px;
 	padding-left: 10px;
 	color: #848484;
+}
+
+div.add_trello_card_group {
+	display: none;
+	/*display: block;*/
+	width: 230px;
+	white-space: normal;
+	padding-top: 5px;
+	float: left;
+	min-height: 40px;
+	padding-left: 10px;
+	text-align: left;
+	max-width: 230px;
+}
+
+
+textarea.add_trello_card_name {
+	font: normal normal 12px arial, verdana, sans-serif;
+	border-style: none;
+	border-width: 1px;
+	width: 100%;
+	background-color: #fefefc;
+	border-bottom-style: outset;
+	border-bottom-color: #fcfcfc;
+	border-radius: 5px;
+	white-space: normal;
+	padding-top: 5px;
+	padding-bottom: 5px;
+	resize: vertical;
+}
+
+span.add_trello_card_button {
+	padding: 5px;
+	margin: 5px;
+	display: inline-block;
+	background-color: #3db333;
+	color: #feffff;
+}
+
+span.add_trello_card_cancel {
+	display: inline-block;
+	padding-top: 5px;
+	color: #6e6e6e;
+	font: bold 20px/10px "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif;
+	margin-left: 4px;
 }
 
 div.TrelloCardName {
@@ -156,7 +209,7 @@ div.trello_card_detail_comment_header {
 
 .TrelloBoardName a
 {
-	color: #feffff;
+	color: #333;
 	text-indent: 10px;
 	font-size: 24px;
 	vertical-align: top;

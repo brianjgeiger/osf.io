@@ -12,15 +12,21 @@
 
 
 %if trello_board_name is not None:
-    <div id="TrelloBoard">
     <span class="TrelloBoardName"><a href="${trello_board_url}" target=":_blank">${trello_board_name }
         <img src = "/addons/static/trello/to_trello_24.png" title="Open '${trello_board_name }' on Trello"></a></span>
+    <div id="KanbanBoard">
 
     <div id="TrelloList">
     % for list in trello_lists:
         <div class="TrelloListBlock" id="tl-${list['id']}" listID = "${list['id']}">
         <span class="TrelloListName">${list[u'name']}</span>
-            <div class="CardList" id="cl-${list['id']}" listID = "${list['id']}">
+            % if user_can_edit:
+                <% card_list_class = '"CardList"' %>
+            % else:
+                <% card_list_class = '"CardListNoEdit"' %>
+            % endif
+
+            <div class=${card_list_class} id="cl-${list['id']}" listID = "${list['id']}">
         %if len(list[u'cards']) != 0:
 
 
@@ -76,19 +82,29 @@
 
         %endif
                 </div>
-            <div class = "add_trello_card_link" id="atcl-${list['id']}" listID = "${list['id']}">Add a card…</div>
+##            % if user_can_edit:
+                <div class = "add_trello_card_link" id="atcl-${list['id']}" listID = "${list['id']}">Add a card…</div>
+                <div class = "add_trello_card_group" id="atcg-${list['id']}" listID = "${list['id']}">
+                    <textarea maxlength="16384" rows="2" name="atcn-${list['id']}" class="add_trello_card_name" id="atcn-${list['id']}" listID = "${list['id']}"> </textarea> <br />
+                    <span class = "add_trello_card_button" id ="atcb-${list['id']}" listID = "${list['id']}">Add</span>
+                    <span class = "add_trello_card_cancel" id ="atcc-${list['id']}" listID = "${list['id']}">X</span>
+                </div>
+##            %endif
         </div>
     % endfor
     </div>
     </div>
 
+##I tried pulling this script into the javascript, but it didn't work, even after wrapping it so it only
+##runs after the dom has loaded. I didn't spend much time on it, but it would be good to get this grouped
+##with all of the rest of the UI scripts.
 
         <script type="text/javascript" charset="utf-8">
-            $('#TrelloBoard').kinetic({
+            $('#KanbanBoard').kinetic({
                 filterTarget: function(target){
                     var returnValue = false;
                     if(target.id){
-                        if(target.id === "TrelloList" || target.id === "TrelloBoard") {
+                        if(target.id === "TrelloList" || target.id === "KanbanBoard") {
                             returnValue = true;
                         }
                     }
@@ -97,16 +113,16 @@
                 }
             });
             $('#left').click(function(){
-                $('#TrelloBoard').kinetic('start', { velocity: -10 });
+                $('#KanbanBoard').kinetic('start', { velocity: -10 });
             });
             $('#right').click(function(){
-                $('#TrelloBoard').kinetic('start', { velocity: 10 });
+                $('#KanbanBoard').kinetic('start', { velocity: 10 });
             });
             $('#end').click(function(){
-                $('#TrelloBoard').kinetic('end');
+                $('#KanbanBoard').kinetic('end');
             });
             $('#stop').click(function(){
-                $('#TrelloBoard').kinetic('stop');
+                $('#KanbanBoard').kinetic('stop');
             });
         </script>
 

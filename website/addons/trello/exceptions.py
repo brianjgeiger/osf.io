@@ -1,0 +1,2 @@
+class TrelloError(Exception):
+    pass

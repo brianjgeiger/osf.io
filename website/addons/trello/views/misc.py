@@ -4,14 +4,18 @@
 
 import httplib as http
 
+# from requests.exceptions import HTTPError as RequestsHTTPError
+
 from framework import request
-from framework.exceptions import HTTPError
+from framework.exceptions import HTTPError as OSFHTTPError
 
 from website.project.decorators import must_have_permission
 from website.project.decorators import must_not_be_registration
 from website.project.decorators import must_be_contributor_or_public
 from website.project.decorators import must_have_addon
 from website.project.views.node import _view_project
+from framework.auth import get_current_user
+from website import models
 from ..api import Trello
 import logging
 
@@ -31,10 +35,10 @@ def trello_set_config(*args, **kwargs):
         trello_board_id = request.json.get('trello_board_id','')
         trello_board_name = request.json.get('trello_board_name','')
     except:
-        raise HTTPError(http.BAD_REQUEST)
+        raise OSFHTTPError(http.BAD_REQUEST)
 
     if not trello_board_id:
-        raise HTTPError(http.BAD_REQUEST)
+        raise OSFHTTPError(http.BAD_REQUEST)
 
     changed = (
         trello_board_id != node_settings.trello_board_id or
@@ -71,7 +75,7 @@ def trello_widget(*args, **kwargs):
     rv.update(trello.config.to_json())
     return rv
 
-
+#TODO: Fix perms. Currently people not logged in can see.
 @must_be_contributor_or_public
 @must_have_addon('trello', 'node')
 def trello_page(auth, project, node, **kwargs):
@@ -80,9 +84,11 @@ def trello_page(auth, project, node, **kwargs):
     trello = node.get_addon('trello')
     trello_board_name = node_settings.trello_board_name.strip()
     trello_board_id = node_settings.trello_board_id
+    user_can_edit = can_user_write_to_project_board(**kwargs)
 
     if trello_board_name is not None:
         trello_api = Trello.from_settings(node_settings.user_settings)
+
         trello_board_url = trello_api.get_board_url(trello_board_id)
         trello_lists = trello_api.get_lists_from_board(trello_board_id)
         trello_cards = trello_api.get_cards_from_board(trello_board_id)
@@ -94,14 +100,14 @@ def trello_page(auth, project, node, **kwargs):
                     for attachment in attachments:
                         if "previews" in attachment:
                             previews = attachment[u'previews']
-                            logger.log(10,"Card:" + card[u'name'])
-                            logger.log(10,previews)
+                            # logger.log(10,"Card:" + card[u'name'])
+                            # logger.log(10,previews)
                             for preview in previews:
                                 if "url" in preview:
                                     card[u'coverURL'] = preview[u'url']
-                                    logger.log(10,card[u'coverURL'])
-                                else:
-                                    logger.log(10,"No Preview URL")
+                                    # logger.log(10,card[u'coverURL'])
+                                # else:
+                                    # logger.log(10,"No Preview URL")
         data = _view_project(node, auth)
 
         # xml = trello._fetch_references()
@@ -115,6 +121,7 @@ def trello_page(auth, project, node, **kwargs):
             'trello_cards': trello_cards,
             'addon_page_js': trello.config.include_js['page'],
             'addon_page_css': trello.config.include_css['page'],
+            'user_can_edit': user_can_edit,
         }
     else:
         data = _view_project(node, auth)
@@ -127,6 +134,7 @@ def trello_page(auth, project, node, **kwargs):
             'trello_board_name': None,
             'addon_page_js': trello.config.include_js['page'],
             'addon_page_css': trello.config.include_css['page'],
+            'user_can_edit': user_can_edit,
 
         }
     return_value.update(data)
@@ -147,6 +155,7 @@ def trello_card_details(**kwargs):
     trello_board_name = node_settings.trello_board_name.strip()
 
     if trello_board_name is not None:
+        user_can_edit = can_user_write_to_project_board(**kwargs)
         trello_api = Trello.from_settings(node_settings.user_settings)
         #TODO: This does not handle properly if a card doesn't exist. Need to find the right way to handle that exception (HTTPError 400)
         try:
@@ -159,13 +168,15 @@ def trello_card_details(**kwargs):
                 'complete': True,
                 'trello_card': card,
                 'trello_card_id': card_id,
+                'user_can_edit': user_can_edit,
             }
-        except HTTPError as e:
+        except OSFHTTPError as e:
             return_value = {
                 'complete': True,
                 'HTTPError': e,
                 'trello_card': {},
                 'trello_card_id': card_id,
+                'user_can_edit': user_can_edit,
             }
 
     return return_value
@@ -193,7 +204,7 @@ def trello_card_attachments(**kwargs):
                 'attachments': attachments,
                 'trello_card_id': card_id,
             }
-        except HTTPError as e:
+        except OSFHTTPError as e:
             return_value = {
                 'complete': True,
                 'HTTPError': e,
@@ -209,19 +220,58 @@ def trello_card_move(**kwargs):
     node_settings = kwargs['node_addon']
     node = node_settings.owner
 
-    trello = node.get_addon('trello')
     try:
         new_list_id = request.json.get('listid','')
         new_card_pos = request.json.get('cardpos','')
         card_id = request.json.get('cardid','')
     except:
-        raise HTTPError(http.BAD_REQUEST)
+        raise OSFHTTPError(http.BAD_REQUEST)
 
     if not new_list_id and new_card_pos and card_id:
-        raise HTTPError(http.BAD_REQUEST)
+        raise OSFHTTPError(http.BAD_REQUEST)
 
     trello_board_name = node_settings.trello_board_name.strip()
 
     if trello_board_name is not None:
         trello_api = Trello.from_settings(node_settings.user_settings)
         trello_api.update_card(card_id,idList=new_list_id,pos=new_card_pos)
+
+@must_have_permission('write')
+@must_have_addon('trello', 'node')
+def trello_add_card_to_list(**kwargs):
+    node_settings = kwargs['node_addon']
+    node = node_settings.owner
+    return_value = None
+    try:
+        list_id = request.json.get('listid','')
+        new_card_name = request.json.get('cardname','')
+    except:
+        raise OSFHTTPError(http.BAD_REQUEST)
+
+    if not list_id and new_card_name:
+        raise OSFHTTPError(http.BAD_REQUEST)
+
+    trello_board_name = node_settings.trello_board_name.strip()
+
+    if trello_board_name is not None:
+        trello_api = Trello.from_settings(node_settings.user_settings)
+        return_value = trello_api.create_card_in_list(card_name=new_card_name,list_id=list_id)
+    return return_value
+
+
+# Reasons why a user can write (user always needs their own user token)
+# 1) Board is public
+# 2) Board is private, but user is a member of the board
+# 3) Board is private, but user is a member of organization that is allowed to write
+# Currently this is only checking for the user to have write permission to the project, not anything trello-related
+def can_user_write_to_project_board(**kwargs):
+    user_can_edit = False
+    user = get_current_user()
+
+    nid = kwargs.get('nid') or kwargs.get('pid')
+    node_model = models.Node.load(nid) if nid else None
+
+    if user and node_model and node_model.can_edit(user=user):
+        user_can_edit = True
+
+    return user_can_edit

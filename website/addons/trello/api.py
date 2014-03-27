@@ -11,37 +11,26 @@ from framework.auth import get_current_user
 from requests_oauthlib import OAuth1Session
 import requests
 import json
+import logging
 from website.addons.trello import settings as trello_settings
+from framework.exceptions import HTTPError as OSFHTTPError
 
-
+logger = logging.getLogger(__name__)
+#TODO Make a decorator that catches requests's HTTPError, grabs the info, and passes it as a TrelloError
 class Trello(object):
 
-#     def __init__(self, app_key=None, oauth_token=None):
-#         self.app_key = app_key
-#         if app_key and oauth_token:
-#             self.trello_api = TrelloApi(app_key,oauth_token)
-#         else:
-#             self.trello_api = None
-#
-#     @classmethod
-#     def from_settings(cls, settings):
-#         if settings:
-#             return cls(
-#                 access_token=settings.oauth_token,
-#                 token_type=settings.oauth_token_type,
-#             )
-#         return cls()
+    def __init__(self, client_token, client_secret, owner_token, owner_secret, user_token):
 
-
-    def __init__(self, client_token, client_secret, owner_token, owner_secret):
         # if no OAuth
         if owner_token is None:
             self.session = requests
+            self.user_session = requests
         else:
             self.client_token = client_token
             self.client_secret = client_secret
             self.owner_token = owner_token
             self.owner_secret = owner_secret
+            self.user_token = user_token
 
             self.session = OAuth1Session(
                 client_token,
@@ -50,18 +39,37 @@ class Trello(object):
                 resource_owner_secret=owner_secret,
                 signature_type='auth_header'
             )
+
+            if(user_token is not None):
+                self.user_session = OAuth1Session(
+                client_token,
+                client_secret=client_secret,
+                resource_owner_key=user_token,
+                resource_owner_secret=owner_secret,
+                signature_type='auth_header'
+            )
+
         self.last_error = None
 
     @classmethod
     def from_settings(cls, settings):
         if settings is None or not hasattr(settings, 'oauth_access_token'):
-            return cls(None, None, None, None)
+            return cls(None, None, None, None, None)
         else:
+            user = get_current_user()
+            user_token = None
+            if user is not None:
+                trello_user = user.get_addon('trello')
+                if trello_user is not None:
+                    # Swap the comment on the following two lines to enable user-specific trello write access based on user trello tokens
+                    # user_token = trello_user.oauth_access_token
+                    user_token = settings.oauth_access_token
             return cls(
                 client_token=trello_settings.CLIENT_ID,
                 client_secret=trello_settings.CLIENT_SECRET,
                 owner_token=settings.oauth_access_token,
                 owner_secret=settings.oauth_access_token_secret,
+                user_token=user_token
             )
 
     def _get_last_error(self):
@@ -71,6 +79,9 @@ class Trello(object):
 
     def get_trello(self):
         return TrelloApi(self.client_token,self.owner_token)
+
+    def get_user_trello(self):
+        return TrelloApi(self.client_token,self.user_token)
 
     def get_boards(self):
         trello_api = self.get_trello()
@@ -110,7 +121,40 @@ class Trello(object):
         resp.raise_for_status()
         return json.loads(resp.content)
 
+    def get_board_user_prefs(self,board_id):
+        return self.get_user_trello().boards.get_myPref(board_id)
+
+    def can_user_write_to_board(self,board_id):
+        return_val = False
+        board_prefs = self.get_board_prefs_from_user_perspective(board_id)
+        if board_prefs is not None:
+            return_val = True
+        return return_val
+
+    def get_board_prefs_from_user_perspective(self,board_id):
+        if(self.user_token is not None):
+            resp = requests.put("https://api.trello.com/1/boards/%s" % (board_id), params=dict(key=self.client_token, token=self.user_token), data=None)
+            logger.log(10,resp.content)
+            if resp.status_code == 401:
+                return None
+            else:
+                resp.raise_for_status()
+            return json.loads(resp.content)
+        else:
+            return None
+
+    def get_board_prefs_from_owner_perspective(self,board_id):
+            resp = requests.put("https://api.trello.com/1/boards/%s" % (board_id), params=dict(key=self.client_token, token=self.owner_token), data=None)
+            resp.raise_for_status()
+            return json.loads(resp.content)
+
     def update_card(self, card_id, name=None, desc=None, closed=None, idList=None, due=None, pos=None):
-        resp = requests.put("https://trello.com/1/cards/%s" % (card_id), params=dict(key=self.client_token, token=self.owner_token), data=dict(name=name, desc=desc, closed=closed, idList=idList, due=due, pos=pos))
-        resp.raise_for_status()
-        return json.loads(resp.content)
+        if(self.user_token is not None):
+            resp = requests.put("https://trello.com/1/cards/%s" % (card_id), params=dict(key=self.client_token, token=self.user_token), data=dict(name=name, desc=desc, closed=closed, idList=idList, due=due, pos=pos))
+            resp.raise_for_status()
+            return json.loads(resp.content)
+        else:
+            return None
+
+    def create_card_in_list(self,card_name,list_id):
+        return self.get_user_trello().lists.new_card(list_id,card_name)
