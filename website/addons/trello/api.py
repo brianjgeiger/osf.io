@@ -150,7 +150,9 @@ class Trello(object):
 
     def update_card(self, card_id, name=None, desc=None, closed=None, idList=None, due=None, pos=None):
         if(self.user_token is not None):
-            resp = requests.put("https://trello.com/1/cards/%s" % (card_id), params=dict(key=self.client_token, token=self.user_token), data=dict(name=name, desc=desc, closed=closed, idList=idList, due=due, pos=pos))
+            resp = requests.put("https://trello.com/1/cards/%s" % (card_id),
+                                params=dict(key=self.client_token, token=self.user_token),
+                                data=dict(name=name, desc=desc, closed=closed, idList=idList, due=due, pos=pos))
             resp.raise_for_status()
             return json.loads(resp.content)
         else:
@@ -158,3 +160,13 @@ class Trello(object):
 
     def create_card_in_list(self,card_name,list_id):
         return self.get_user_trello().lists.new_card(list_id,card_name)
+
+    def update_checkitem(self,card_id,checklist_id,checkitem_id,state):
+        if(self.user_token is not None):
+            resp = requests.put("https://trello.com/1/cards/%s/checklist/%s/checkItem/%s/state" % (card_id,checklist_id,checkitem_id),
+                                params=dict(key=self.client_token, token=self.user_token),
+                                data=dict(idChecklist=checklist_id,idCheckItem=checkitem_id,value=state))
+            resp.raise_for_status()
+            return json.loads(resp.content)
+        else:
+            return None

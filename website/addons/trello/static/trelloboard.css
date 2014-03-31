@@ -10,6 +10,7 @@ div#KanbanBoard
 	border-radius: 5px;
 	/*max-height: 600px;*/
 	background-color: #28729d;
+	min-height: 200px;
 }
 
 
@@ -40,6 +41,7 @@ div.CardList{
 	min-width: 200px;
 	display: table;
 }
+
 
 
 .TrelloCardLinkIcon
@@ -209,12 +211,13 @@ div.trello_card_detail_comment_header {
 
 .TrelloBoardName a
 {
-	color: #333;
+	color: #feffff;
 	text-indent: 10px;
 	font-size: 24px;
 	vertical-align: top;
 	padding-left: 5px;
 }
+
 
 div.trello_card_detail_name {
 	font: bold 18px "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif;

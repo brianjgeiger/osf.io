@@ -101,11 +101,38 @@ page_routes = {
         ),
           Rule(
             [
+            '/<nid>/trello/list/<listid>',
+            '/<pid>/node/<nid>/trello/list/<listid>',
+            ],
+            'get',
+            views.misc.trello_list_cards,
+            json_renderer,
+        ),
+           Rule(
+            [
+            '/<nid>/trello/lists',
+            '/<pid>/node/<nid>/trello/lists',
+            ],
+            'get',
+            views.misc.get_trello_lists,
+            json_renderer,
+        ),
+         Rule(
+            [
             '/<nid>/trello/card',
             '/<pid>/node/<nid>/trello/card',
             ],
             'put',
             views.misc.trello_card_move,
+            json_renderer,
+        ),
+         Rule(
+            [
+            '/<nid>/trello/checkitem',
+            '/<pid>/node/<nid>/trello/checkitem',
+            ],
+            'put',
+            views.misc.trello_set_check_item,
             json_renderer,
         ),
           Rule(

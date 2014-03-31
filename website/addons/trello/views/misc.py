@@ -18,6 +18,7 @@ from framework.auth import get_current_user
 from website import models
 from ..api import Trello
 import logging
+import dateutil
 
 logger = logging.getLogger(__name__)
 
@@ -75,7 +76,6 @@ def trello_widget(*args, **kwargs):
     rv.update(trello.config.to_json())
     return rv
 
-#TODO: Fix perms. Currently people not logged in can see.
 @must_be_contributor_or_public
 @must_have_addon('trello', 'node')
 def trello_page(auth, project, node, **kwargs):
@@ -87,34 +87,49 @@ def trello_page(auth, project, node, **kwargs):
     user_can_edit = can_user_write_to_project_board(**kwargs)
 
     if trello_board_name is not None:
-        trello_api = Trello.from_settings(node_settings.user_settings)
-
-        trello_board_url = trello_api.get_board_url(trello_board_id)
-        trello_lists = trello_api.get_lists_from_board(trello_board_id)
-        trello_cards = trello_api.get_cards_from_board(trello_board_id)
-        for trello_list in trello_lists:
-            trello_list[u'cards'] = trello_api.get_cards_from_list(trello_list[u'id'])
-            for card in trello_list[u'cards']:
-                if card[u'badges'][u'attachments'] > 0:
-                    attachments = trello_api.get_attachments_from_card(card[u'id'],filter="cover")
-                    for attachment in attachments:
-                        if "previews" in attachment:
-                            previews = attachment[u'previews']
-                            # logger.log(10,"Card:" + card[u'name'])
-                            # logger.log(10,previews)
-                            for preview in previews:
-                                if "url" in preview:
-                                    card[u'coverURL'] = preview[u'url']
-                                    # logger.log(10,card[u'coverURL'])
-                                # else:
-                                    # logger.log(10,"No Preview URL")
         data = _view_project(node, auth)
-
-        # xml = trello._fetch_references()
-
         return_value = {
             'complete': True,
             # 'xml': xml,
+            'trello_board_name': trello_board_name,
+            'trello_board_id': trello_board_id,
+            'addon_page_js': trello.config.include_js['page'],
+            'addon_page_css': trello.config.include_css['page'],
+            'user_can_edit': user_can_edit,
+        }
+    else:
+        data = _view_project(node, auth)
+        return_value = {
+            'complete': False,
+            'trello_board_name': None,
+            'trello_board_id': None,
+            'addon_page_js': trello.config.include_js['page'],
+            'addon_page_css': trello.config.include_css['page'],
+            'user_can_edit': user_can_edit,
+        }
+    return_value.update(data)
+    return return_value
+
+@must_be_contributor_or_public
+@must_have_addon('trello', 'node')
+def get_trello_lists(auth, project, node, **kwargs):
+    node = node or project
+    node_settings = kwargs['node_addon']
+    trello = node.get_addon('trello')
+    trello_board_name = node_settings.trello_board_name.strip()
+    trello_board_id = node_settings.trello_board_id
+    user_can_edit = can_user_write_to_project_board(**kwargs)
+
+    if trello_board_name is not None:
+        trello_api = Trello.from_settings(node_settings.user_settings)
+        trello_board_url = trello_api.get_board_url(trello_board_id)
+        trello_lists = trello_api.get_lists_from_board(trello_board_id)
+        trello_cards = {} # trello_api.get_cards_from_board(trello_board_id)
+        for trello_list in trello_lists:
+            trello_list['cards'] = {}
+        data = _view_project(node, auth)
+        return_value = {
+            'complete': True,
             'trello_board_name': trello_board_name,
             'trello_board_url': trello_board_url,
             'trello_lists': trello_lists,
@@ -127,7 +142,6 @@ def trello_page(auth, project, node, **kwargs):
         data = _view_project(node, auth)
         return_value = {
             'complete': False,
-            # 'xml': xml,
             'trello_lists': {u'name': "", },
             'trello_cards': {},
             'trello_board_url': None,
@@ -138,8 +152,8 @@ def trello_page(auth, project, node, **kwargs):
 
         }
     return_value.update(data)
-
     return return_value
+
 
 @must_be_contributor_or_public
 @must_have_addon('trello', 'node')
@@ -164,6 +178,11 @@ def trello_card_details(**kwargs):
             card[u'checklists'] = trello_api.get_checklists_from_card(card_id)
             for checklist in card[u'checklists']:
                 checklist[u'checkItems'] = trello_api.get_checkitems(checklist[u'id'])
+                for checkItem in checklist[u'checkItems']:
+                    if checkItem['state']=='complete':
+                        checkItem['checked'] = 'checked'
+                    else:
+                        checkItem['checked'] = ''
             return_value = {
                 'complete': True,
                 'trello_card': card,
@@ -183,6 +202,56 @@ def trello_card_details(**kwargs):
 
 @must_be_contributor_or_public
 @must_have_addon('trello', 'node')
+def trello_list_cards(**kwargs):
+    node_settings = kwargs['node_addon']
+
+    list_id = kwargs['listid']
+    return_value = {
+            'complete': True,
+            'trello_cards': {},
+            'trello_list_id': list_id,
+        }
+    trello_board_name = node_settings.trello_board_name.strip()
+
+    if trello_board_name is not None:
+        user_can_edit = can_user_write_to_project_board(**kwargs)
+        trello_api = Trello.from_settings(node_settings.user_settings)
+        try:
+            cards = trello_api.get_cards_from_list(list_id)
+            for card in cards:
+                if card['badges']['due'] is not None:
+                    due_date = dateutil.parser.parse(card['badges']['due'])
+                    card['due_date_string'] = due_date.strftime('%b %d')
+                else:
+                    card['due_date_string'] = ""
+                if card[u'badges'][u'attachments'] > 0:
+                    attachments = trello_api.get_attachments_from_card(card[u'id'],filter="cover")
+                    for attachment in attachments:
+                        if "previews" in attachment:
+                            previews = attachment[u'previews']
+                            for preview in previews:
+                                if "url" in preview:
+                                    card[u'coverURL'] = preview[u'url']
+
+            return_value = {
+                'complete': True,
+                'trello_cards': cards,
+                'trello_list_id': list_id,
+                'user_can_edit': user_can_edit,
+            }
+        except OSFHTTPError as e:
+            return_value = {
+                'complete': True,
+                'HTTPError': e,
+                'trello_cards': {},
+                'trello_list_id': list_id,
+                'user_can_edit': user_can_edit,
+            }
+    return return_value
+
+
+@must_be_contributor_or_public
+@must_have_addon('trello', 'node')
 def trello_card_attachments(**kwargs):
     node_settings = kwargs['node_addon']
 
@@ -196,9 +265,19 @@ def trello_card_attachments(**kwargs):
 
     if trello_board_name is not None:
         trello_api = Trello.from_settings(node_settings.user_settings)
-        #TODO: This does not handle properly if a card doesn't exist. Need to find the right way to handle that exception (HTTPError 400)
         try:
             attachments = trello_api.get_attachments_from_card(card_id)
+            for attachment in attachments:
+                attachment['previewType']=""
+                attachment['previewURL']=""
+                number_of_previews = len(attachment['previews'])
+                if number_of_previews > 0:
+                    previewItem = min(1,number_of_previews)
+                    attachment['previewURL'] = attachment['previews'][previewItem]['url']
+                else:
+                    name_split = attachment['name'].split('.')
+                    if len(name_split) > 1:
+                        attachment['previewType']=name_split[len(name_split)-1]
             return_value = {
                 'complete': True,
                 'attachments': attachments,
@@ -256,6 +335,31 @@ def trello_add_card_to_list(**kwargs):
     if trello_board_name is not None:
         trello_api = Trello.from_settings(node_settings.user_settings)
         return_value = trello_api.create_card_in_list(card_name=new_card_name,list_id=list_id)
+    return return_value
+
+
+@must_have_permission('write')
+@must_have_addon('trello', 'node')
+def trello_set_check_item(**kwargs):
+    node_settings = kwargs['node_addon']
+    node = node_settings.owner
+    return_value = None
+    try:
+        card_id = request.json.get('cardid','')
+        checklist_id = request.json.get('checklistid','')
+        checkitem_id = request.json.get('checkitemid','')
+        checkitem_state = request.json.get('state','')
+    except:
+        raise OSFHTTPError(http.BAD_REQUEST)
+
+    if not card_id and checklist_id and checkitem_id and checkitem_state:
+        raise OSFHTTPError(http.BAD_REQUEST)
+
+    trello_board_name = node_settings.trello_board_name.strip()
+
+    if trello_board_name is not None:
+        trello_api = Trello.from_settings(node_settings.user_settings)
+        return_value = trello_api.update_checkitem(card_id=card_id,checklist_id=checklist_id,checkitem_id=checkitem_id,state=checkitem_state)
     return return_value
 
 
