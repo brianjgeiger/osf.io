@@ -25,7 +25,8 @@ function loadBoard() {
         $(".TrelloListBlock").each(function() {
             listID = $(this).attr('listID');
             loadListCards(listID);
-            activateAddCardLinks(listID);
+            activateAddThingLinks("atc",listID);
+            activateAddCardSubmit(listID);
         });
 
     });
@@ -138,26 +139,51 @@ function buildDetailCard(data) {
     if(data.user_can_edit){
         card_writer = "*"
     }
+
     box_contents = cardTemplate(data);
+
+    $("#KanbanBoard").append(box_contents);
+
+    cardBeingDisplayed = false;
+    $(document).mouseup(function (e) {
+        var container = $(".trello_card_detail_card");
+
+        if (!container.is(e.target) // if the target of the click isn't the container...
+            && container.has(e.target).length === 0) // ... nor a descendant of the container
+        {
+            $(".trello_card_detail").remove();
+        }
+    });
+        activateEditThingLinks("tcden",data.trello_card_id);
+        activateEditCardNameSubmit(data.trello_card_id);
+        activateArchiveCardSubmit(data.trello_card_id);
+    $(".trello_card_detail_checklist").each(function() {
+        checkListID = $(this).attr("checklistID");
+        activateAddThingLinks("tcdaci",checkListID);
+        activateAddCheckItemSubmit(checkListID);
+
+    });
+
+    $(".trello_card_detail_checklist_checkitem").each(function() {
+        checkItemID = $(this).attr("checkitemid");
+        activateEditThingLinks("tcdeci",checkItemID);
+        activateEditCheckItemSubmit(checkItemID);
+        activateDeleteCheckItemSubmit(checkItemID);
+    });
+
+
+
     if(data.trello_card.badges.attachments>0){
         the_url = "attachments/" + data.trello_card_id;
         $.getJSON( the_url, addAttachmentInfo);
-    } else {
-        showDetailCard();
     }
+
 }
 
 
 function addAttachmentInfo(data){
     cardTemplate = Handlebars.compile($("#kanban-card-detail-attachments-template").html());
-    box_contents += cardTemplate(data);
-    showDetailCard();
-}
-
-
-function showDetailCard() {
-    cardBeingDisplayed = false;
-     bootbox.alert(box_contents);
+    $(".trello_card_detail_card").append(cardTemplate(data));
 }
 
 
@@ -170,85 +196,311 @@ function replaceURLWithHTMLLinks(text) {
 // Add a card
 //
 
-function activateAddCardLinks(listID) {
-        $("#atcl-"+listID).click(function() {
+function activateAddCardSubmit(listID){
+    $("#atcb-"+listID).click(function() {
+//        Make sure the box isn't empty, then send the contents and the list to the create new card method
+    //listID = $(this).attr("listID");
+    cardName = $("#atcn-" + listID).val();
+    if (cardName.trim() != ""){
+//          Send the card name and list id to trello
+      $.ajax({
+                type: 'POST',
+                url: 'card/',
+                contentType: 'application/json',
+                dataType: 'json',
+                data: JSON.stringify({
+                    listid: listID,
+                    cardname: cardName
+                })
+            }).done(function(data) {
+//            Add a card div to the bottom of the list
+//            Also, not at all happy about needing to re-write the contents. Really should be templated (or done all in JS rather than
+//            writing html by hand. Still a bit duplicate-y).
+          cardTemplate = Handlebars.compile($("#kanban-card-template").html());
+          newDiv = cardTemplate(data);
+        $("#cl-" + listID).append(newDiv);
+
+
+//          Clear out the contents of the textarea, hide the name input div,
+//          and show the add card div (i.e. click the cancel button)
+        $("#atcc-"+listID).click();
+      }).fail(function(xhr) {
+                console.log("Card creation failed.");
+            });
+    }
+});
+}
+
+function activateAddCheckItemSubmit(checklistID){
+    $("#tcdacib-"+checklistID).click(function() {
+    //        Make sure the box isn't empty, then send the contents and the list to the create new card method
+    //listID = $(this).attr("listID");
+    checkItemName = $("#tcdacin-" + checklistID).val();
+        cardID = $("#tcdacin-" + checklistID).attr("cardid");
+
+    if (checkItemName.trim() != ""){
+    //          Send the card name and list id to trello
+      $.ajax({
+                type: 'POST',
+                url: 'checkitem/',
+                contentType: 'application/json',
+                dataType: 'json',
+                data: JSON.stringify({
+                    checklistid: checklistID,
+                    checkitemname: checkItemName
+                })
+            }).done(function(data) {
+    //            Add a card div to the bottom of the list
+    //            Also, not at all happy about needing to re-write the contents. Really should be templated (or done all in JS rather than
+    //            writing html by hand. Still a bit duplicate-y).
+          cardTemplate = Handlebars.compile($("#kanban-card-detail-checkitem-template").html());
+          data.checklistid = checklistID;
+          data.cardid = cardID;
+
+          newDiv = cardTemplate(data);
+        $("#tcdccl-" + checklistID).append(newDiv);
+        activateEditThingLinks("tcdeci",data.id);
+        activateEditCheckItemSubmit(data.id);
+        activateDeleteCheckItemSubmit(data.id);
+   //          Clear out the contents of the textarea, hide the name input div,
+    //          and show the add card div (i.e. click the cancel button)
+        $("#tcdacic-"+checklistID).click();
+      }).fail(function(xhr) {
+                console.log("Card creation failed.");
+            });
+    }
+    });
+
+}
+
+function activateEditCheckItemSubmit(checkitemID){
+    $("#tcdecib-"+checkitemID).click(function() {
+    //        Make sure the box isn't empty, then send the contents and the list to the create new card method
+
+        checkItemName = $("#tcdecin-" + checkitemID).val();
+        theCheckItemID = checkitemID;
+        checklistID = $("#tcdecin-" + checkitemID).attr("checklistid");
+        cardID = $("#tcdecin-" + checkitemID).attr("cardid");
+
+    if (checkItemName.trim() != ""){
+    //          Send the checkitem name, checklist id, checkitem id, and card id to trello
+      $.ajax({
+                type: 'PUT',
+                url: 'checkitem/',
+                contentType: 'application/json',
+                dataType: 'json',
+                data: JSON.stringify({
+                    checklistid: checklistID,
+                    name: checkItemName,
+                    cardid: cardID,
+                    checkitemid: theCheckItemID
+                })
+            }).done(function(data) {
+                $("#tcdecio-"+theCheckItemID).text(checkItemName);
+                $("#tcdecic-"+theCheckItemID).click();
+      }).fail(function(xhr) {
+                $("#tcdecic-"+theCheckItemID).click();
+                console.log("Checkitem update failed.");
+            });
+    }
+    });
+}
+
+
+function activateEditCardNameSubmit(cardID){
+    $("#tcdenb-"+cardID).click(function() {
+    //        Make sure the box isn't empty, then send the contents and the list to the create new card method
+
+        cardName = $("#tcdenn-" + cardID).val();
+        theCardID = cardID;
+
+    if (cardName.trim() != ""){
+    //          Send the checkitem name, checklist id, checkitem id, and card id to trello
+      $.ajax({
+                type: 'PUT',
+                url: 'card/',
+                contentType: 'application/json',
+                dataType: 'json',
+                data: JSON.stringify({
+                    cardname: cardName,
+                    cardid: theCardID
+                })
+            }).done(function(data) {
+                $("#tcdeno-"+theCardID).text(cardName);
+                $("#tcdenc-"+theCardID).click();
+      }).fail(function(xhr) {
+                $("#tcdenc-"+theCardID).click();
+                console.log("Checkitem update failed.");
+            });
+    }
+    });
+}
+
+
+function activateDeleteCheckItemSubmit(checkitemID){
+    $("#tcdecid-"+checkitemID).click(function() {
+    //        Make sure the box isn't empty, then send the contents and the list to the create new card method
+
+        theCheckItemID = checkitemID;
+        checklistID = $("#tcdecin-" + checkitemID).attr("checklistid");
+
+
+    //          Send the checkitem name, checklist id, checkitem id, and card id to trello
+      $.ajax({
+                type: 'DELETE',
+                url: 'checkitem/',
+                contentType: 'application/json',
+                dataType: 'json',
+                data: JSON.stringify({
+                    checklistid: checklistID,
+                    checkitemid: theCheckItemID
+                })
+            }).done(function(data) {
+                $("#tcdecig-"+theCheckItemID).remove();
+                $("#tcdeciog-"+theCheckItemID).remove();
+      }).fail(function(xhr) {
+                $("#tcdecic-"+theCheckItemID).click();
+                console.log("Checkitem delete failed.");
+            });
+
+    });
+}
+
+
+function activateArchiveCardSubmit(cardID){
+    $("#tcdend-"+cardID).click(function() {
+        theCardID = cardID;
+      $.ajax({
+                type: 'PUT',
+                url: 'card/',
+                contentType: 'application/json',
+                dataType: 'json',
+                data: JSON.stringify({
+                    cardid: theCardID,
+                    closed: "true"
+                })
+            }).done(function(data) {
+//          Remove the detail view and, from the summary view, the card archived
+                $(".trello_card_detail").remove();
+                $("#tc-"+theCardID).remove();
+      }).fail(function(xhr) {
+                console.log("Card archive failed.");
+            });
+
+    });
+}
+
+//
+// Add a <thing>
+//
+
+function activateAddThingLinks(prefix,identifier) {
+        $("#"+prefix+"l-"+identifier).click(function() {
     //        Show the div with the editing controls, hide the div with the add a link button
     //        Also hide all the other editing divs, because someone could switch from one to the other
     //        and only one should show at a time
             //listID = $(this).attr("listID");
-            $(this).hide();
-            $("#atcg-"+listID).show();
-            $("#atcn-"+listID).focus();
-            $(".add_trello_card_group").trigger("hideAllOthers",[listID]);
+            $("#"+prefix+"l-"+identifier).hide();
+            $("#"+prefix+"g-"+identifier).show();
+            $("#"+prefix+"n-"+identifier).focus();
+            groupPrefix = prefix+"g-";
+//            Find all the other divs and hide them
+            $('[id^='+groupPrefix+']').each(function(){
+                thisID=$(this).attr("id");
+                if(thisID != prefix+"g-"+identifier){
+                    $(this).trigger("hideMe");
+                }
+                });
         });
 
-        $("#atcb-"+listID).click(function() {
-    //        Make sure the box isn't empty, then send the contents and the list to the create new card method
+        $("#"+prefix+"c-"+identifier).click(function() {
+     //        Clear out the textarea, hide the edit div, show the add div
             //listID = $(this).attr("listID");
-            cardName = $("#atcn-" + listID).val();
-            if (cardName.trim() != ""){
-    //          Send the card name and list id to trello
-              $.ajax({
-                        type: 'POST',
-                        url: 'card/',
-                        contentType: 'application/json',
-                        dataType: 'json',
-                        data: JSON.stringify({
-                            listid: listID,
-                            cardname: cardName
-                        })
-                    }).done(function(data) {
-                  console.log(data);
-    //            Add a card div to the bottom of the list
-    //            Also, not at all happy about needing to re-write the contents. Really should be templated (or done all in JS rather than
-    //            writing html by hand. Still a bit duplicate-y).
-                  cardTemplate = Handlebars.compile($("#kanban-card-template").html());
-                  newDiv = cardTemplate(data);
-                $("#cl-" + listID).append(newDiv);
-
-
-    //          Clear out the contents of the textarea, hide the name input div,
-    //          and show the add card div (i.e. click the cancel button)
-                $("#atcc-"+listID).click();
-              }).fail(function(xhr) {
-                        console.log("Card creation failed.");
-                    });
-            }
+            $("#"+prefix+"n-" + identifier).val('');
+            $("#"+prefix+"g-" + identifier).hide();
+            $("#"+prefix+"l-" + identifier).show();
         });
 
-        $("#atcc-"+listID).click(function() {
-    //        Clear out the textarea, hide the edit div, show the add div
-            //listID = $(this).attr("listID");
-            $("#atcn-" + listID).val('');
-            $("#atcg-" + listID).hide();
-            $("#atcl-" + listID).show();
-        });
-
-        $("#atcn-"+listID).keypress(function(e) {
+        $("#"+prefix+"n-"+identifier).keypress(function(e) {
     //        Prevent the enter key from adding a return into the box. Otherwise act like pressing the add button
            if(e.keyCode == 13) // Enter key is pressed
            {
                event.preventDefault();
                //listID = $(this).attr("listID");
-                $("#atcb-"+listID).click();
+                $("#"+prefix+"b-"+identifier).click();
            }
         });
 
-        $("#atcn-"+listID).keyup(function(e) {
+        $("#"+prefix+"n-"+identifier).keyup(function(e) {
     //        Act like hitting the cancel button
             if (e.keyCode == 27) { // esc key is released
                 //listID = $(this).attr("listID");
-                $("#atcc-"+listID).click();
+                $("#"+prefix+"c-"+identifier).click();
             }
          });
 
-        $("#atcg-"+listID).on( "hideAllOthers", function( event, listIdNotToHide ) {
-    //        Hide every edit div but the current one so you can only add one card at a time
+        $("#"+prefix+"g-"+identifier).on("hideMe", function(event) {
+               $("#"+prefix+"g-" + identifier).hide();
+                $("#"+prefix+"l-" + identifier).show();
+    });
+
+}
+
+
+//
+// Edit a <thing>
+//
+
+
+function activateEditThingLinks(prefix,identifier) {
+        $("#"+prefix+"o-"+identifier).click(function() {
+    //        Show the div with the editing controls, hide the div with the original version
+    //        Also hide all the other editing divs, because someone could switch from one to the other
+    //        and only one should show at a time
             //listID = $(this).attr("listID");
-            if (listIdNotToHide != listID){
-                $("#atcg-" + listID).hide();
-                $("#atcl-" + listID).show();
+            $("#"+prefix+"og-"+identifier).hide();
+            $("#"+prefix+"g-"+identifier).show();
+            $("#"+prefix+"n-"+identifier).focus();
+            groupPrefix = prefix+"g-";
+//            Find all the other divs and hide them
+            $('[id^='+groupPrefix+']').each(function(){
+                thisID=$(this).attr("id");
+                if(thisID != prefix+"g-"+identifier){
+                    $(this).trigger("hideMe");
+                }
+                });
+        });
+
+        $("#"+prefix+"c-"+identifier).click(function() {
+     //        Replace contents of text box with original text, hide the edit div, show the add div
+            //listID = $(this).attr("listID");
+            originalText = $("#"+prefix+"o-"+identifier).text();
+            $("#"+prefix+"n-" + identifier).val(originalText);
+            $("#"+prefix+"g-" + identifier).hide();
+            $("#"+prefix+"og-" + identifier).show();
+        });
+
+        $("#"+prefix+"n-"+identifier).keypress(function(e) {
+    //        Prevent the enter key from adding a return into the box. Otherwise act like pressing the add button
+           if(e.keyCode == 13) // Enter key is pressed
+           {
+               event.preventDefault();
+               //listID = $(this).attr("listID");
+                $("#"+prefix+"b-"+identifier).click();
+           }
+        });
+
+        $("#"+prefix+"n-"+identifier).keyup(function(e) {
+    //        Act like hitting the cancel button
+            if (e.keyCode == 27) { // esc key is released
+                //listID = $(this).attr("listID");
+                $("#"+prefix+"c-"+identifier).click();
             }
+         });
+
+        $("#"+prefix+"g-"+identifier).on("hideMe", function(event) {
+               $("#"+prefix+"g-" + identifier).hide();
+                $("#"+prefix+"og-" + identifier).show();
     });
 
 }
@@ -294,10 +546,6 @@ function checkCheckItem(cardID,checkListID,checkItemID){
         console.log("Update failed.");
     });
 }
-
-//
-//  Add checkitem
-//
 
 
 

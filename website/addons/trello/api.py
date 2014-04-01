@@ -161,12 +161,21 @@ class Trello(object):
     def create_card_in_list(self,card_name,list_id):
         return self.get_user_trello().lists.new_card(list_id,card_name)
 
-    def update_checkitem(self,card_id,checklist_id,checkitem_id,state):
+    def update_checkitem(self,card_id,checklist_id,checkitem_id,state=None,name=None,pos=None,closed=None):
         if(self.user_token is not None):
-            resp = requests.put("https://trello.com/1/cards/%s/checklist/%s/checkItem/%s/state" % (card_id,checklist_id,checkitem_id),
+            resp = requests.put("https://trello.com/1/cards/%s/checklist/%s/checkItem/%s" % (card_id,checklist_id,checkitem_id),
                                 params=dict(key=self.client_token, token=self.user_token),
-                                data=dict(idChecklist=checklist_id,idCheckItem=checkitem_id,value=state))
+                                data=dict(idChecklist=checklist_id,idCheckItem=checkitem_id,value=state,pos=pos,name=name,closed=closed))
             resp.raise_for_status()
             return json.loads(resp.content)
         else:
             return None
+
+    def create_checkitem_in_checklist(self,checklist_id,checkitem_name):
+        return self.get_user_trello().checklists.new_checkItem(checklist_id,checkitem_name)
+
+    def delete_checkitem(self,checkitem_id,checklist_id):
+        return self.get_user_trello().checklists.delete_checkItem_idCheckItem(checkitem_id,checklist_id)
+
+    def delete_card(self,card_id):
+        return self.get_user_trello().cards.delete(card_id)

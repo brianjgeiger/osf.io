@@ -123,7 +123,7 @@ page_routes = {
             '/<pid>/node/<nid>/trello/card',
             ],
             'put',
-            views.misc.trello_card_move,
+            views.misc.trello_card_update,
             json_renderer,
         ),
          Rule(
@@ -132,7 +132,7 @@ page_routes = {
             '/<pid>/node/<nid>/trello/checkitem',
             ],
             'put',
-            views.misc.trello_set_check_item,
+            views.misc.trello_edit_checkitem,
             json_renderer,
         ),
           Rule(
@@ -153,6 +153,33 @@ page_routes = {
             views.misc.trello_add_card_to_list,
             json_renderer,
         ),
-    ],
+          Rule(
+            [
+            '/<nid>/trello/card/',
+            '/<pid>/node/<nid>/trello/card/',
+            ],
+            'delete',
+            views.misc.trello_delete_card,
+            json_renderer,
+        ),
+          Rule(
+            [
+            '/<nid>/trello/checkitem/',
+            '/<pid>/node/<nid>/trello/checkitem/',
+            ],
+            'post',
+            views.misc.trello_add_item_to_checklist,
+            json_renderer,
+        ),
+          Rule(
+            [
+            '/<nid>/trello/checkitem/',
+            '/<pid>/node/<nid>/trello/checkitem/',
+            ],
+            'delete',
+            views.misc.trello_delete_checkitem,
+            json_renderer,
+        ),
+   ],
 
 }

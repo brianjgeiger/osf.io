@@ -174,9 +174,11 @@ div.trello_card_detail_comment {
 	padding: 5px;
 	margin-bottom: 10px;
 	margin-top: 10px;
-	text-align: left;
 	overflow: hidden;
+	text-align: left; 
 }
+
+
 
 div.trello_card_detail_comment_comment {
 	font: 13px/1.5 Georgia, "Times New Roman", Times, serif;
@@ -222,8 +224,17 @@ div.trello_card_detail_comment_header {
 div.trello_card_detail_name {
 	font: bold 18px "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif;
 	margin-bottom: 5px;
+	width: 70%;
+	display: inline-block;
 }
 
+div.trello_card_detail_edit_name_original_group {
+}
+
+.trello_card_detail_edit_name_original_group img{
+	display: inline-block;
+	vertical-align: 1px;
+}
 .trello_card_detail_name img{
 	float: right;
 	margin-right: 20px;
@@ -260,6 +271,235 @@ div.trello_card_detail_checklist_checkitem span.complete {
 	text-decoration: line-through;
 }
 
+div.trello_card_detail_checklist {
+	margin-bottom: 10px;
+}
+
+.trello_card_detail_add_checkitem_link {
+	font-size: 11px;
+	color: gray;
+	padding-left: 10px;
+	cursor: pointer;
+}
+
+.trello_card_detail_checklist_checkitem input{
+	margin-right: 6px;
+	cursor: pointer;
+}
+
+div.trello_card_detail_add_checkitem_group {
+	display: none;
+	/*display: block;*/
+	width: 100%;
+	white-space: normal;
+	padding-top: 5px;
+	min-height: 40px;
+	padding-left: 10px;
+	text-align: left;
+	min-height: 100px;
+}
+
+.add_trello_card_detail_add_checkitem_name{
+		font: normal normal 12px arial, verdana, sans-serif;
+	border-style: none;
+	border-width: 1px;
+	width: 60%;
+	background-color: #fefefc;
+	border-style: outset;
+	border-bottom-color: #fcfcfc;
+	border-radius: 5px;
+	white-space: normal;
+	padding-top: 5px;
+	padding-bottom: 5px;
+	resize: vertical;
+}
+
+.trello_card_detail_add_checkitem_cancel {
+		display: inline-block;
+	padding-top: 5px;
+	color: #6e6e6e;
+	font: bold 20px/10px "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif;
+	margin-left: 4px;
+}
+
+.trello_card_detail_add_checkitem_button {
+		padding: 5px;
+	margin: 5px;
+	display: inline-block;
+	background-color: #3db333;
+	color: #feffff;
+}
+
+.trello_card_detail_add_checkitem_link {
+	font: normal normal 12px arial, verdana, sans-serif;
+	display: block;
+	white-space: normal;
+	padding-top: 5px;
+	padding-left: 10px;
+	color: #848484;
+	width: 100%;
+}
+
+
+/* Edit Checkitem Links */
+
+
+
+div.trello_card_detail_edit_checkitem_group {
+	display: none;
+	/*display: block;*/
+	width: 100%;
+	white-space: normal;
+	padding-top: 5px;
+	min-height: 40px;
+	padding-left: 10px;
+	text-align: left;
+	min-height: 100px;
+}
+
+.trello_card_detail_edit_checkitem_name{
+		font: normal normal 12px arial, verdana, sans-serif;
+	border-style: none;
+	border-width: 1px;
+	width: 100%;
+	background-color: #fefefc;
+	border-style: outset;
+	border-bottom-color: #fcfcfc;
+	border-radius: 5px;
+	white-space: normal;
+	padding-top: 5px;
+	padding-bottom: 5px;
+	resize: vertical;
+}
+
+.trello_card_detail_edit_checkitem_cancel {
+		display: inline-block;
+	padding-top: 5px;
+	color: #6e6e6e;
+	font: bold 20px/10px "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif;
+	margin-left: 4px;
+}
+
+.trello_card_detail_edit_checkitem_delete {
+	display: inline-block;
+	padding-top: 5px;
+	color: #6e6e6e;
+	font: 12px/10px "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif;
+	margin-left: 4px;
+	text-align: right;
+	padding-left: 40px;
+}
+
+.trello_card_detail_edit_checkitem_button {
+		padding: 5px;
+	margin: 5px;
+	display: inline-block;
+	background-color: #3db333;
+	color: #feffff;
+}
+
+.trello_card_detail_edit_checkitem_link {
+	font: normal normal 12px arial, verdana, sans-serif;
+	display: block;
+	white-space: normal;
+	padding-top: 5px;
+	padding-left: 10px;
+	color: #848484;
+	width: 100%;
+}
+
+/*trello_card_detail_edit_name_*/
+
+div.trello_card_detail_edit_name_group {
+	display: none;
+	width: 100%;
+	white-space: normal;
+	padding-top: 5px;
+	min-height: 40px;
+	text-align: left;
+	min-height: 100px;
+}
+
+.trello_card_detail_edit_name_name{
+	border-style: none;
+	border-width: 1px;
+	width: 100%;
+	background-color: #fefefc;
+	border-style: outset;
+	border-bottom-color: #fcfcfc;
+	border-radius: 5px;
+	white-space: normal;
+	padding-top: 5px;
+	padding-bottom: 5px;
+	resize: vertical;
+	font: normal bold 18px arial, verdana, sans-serif;
+}
+
+.trello_card_detail_edit_name_cancel {
+		display: inline-block;
+	padding-top: 5px;
+	color: #6e6e6e;
+	font: bold 20px/10px "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif;
+	margin-left: 4px;
+}
+
+.trello_card_detail_edit_name_delete {
+	display: inline-block;
+	padding-top: 5px;
+	color: #6e6e6e;
+	font: 12px/10px "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif;
+	margin-left: 4px;
+	text-align: right;
+	padding-left: 40px;
+	margin-right: 20px;
+}
+
+.trello_card_detail_edit_name_button {
+		padding: 5px;
+	margin: 5px;
+	display: inline-block;
+	background-color: #3db333;
+	color: #feffff;
+}
+
+.trello_card_detail_edit_name_link {
+	font: normal normal 12px arial, verdana, sans-serif;
+	display: block;
+	white-space: normal;
+	padding-top: 5px;
+	padding-left: 10px;
+	color: #848484;
+	width: 100%;
+}
+
+
+
+/* Trello card detail dialog box */
+
+.trello_card_detail {
+	width: 100%;
+	height: 100%;
+	position: fixed;
+	top: 0;
+	left: 0;
+	display: block;
+	background-color: rgba(0,0,0,0.57);
+	cursor: default;
+	z-index: 999999;
+}
+
+.trello_card_detail_card {
+	display: inline;
+	width: 600px;
+	height: 90%;
+	padding: 20px;
+	background-color: #feffff;
+	top: 5%;
+	left: 33%;
+	position: absolute;
+	border-radius:5px;
+	overflow: scroll;
+}
 
   .portlet-toggle {
     position: absolute;
