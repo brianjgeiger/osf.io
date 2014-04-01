@@ -280,18 +280,20 @@
             <div class="TrelloListBlock" id="tl-{{id}}" listID="{{id}}">
             <span class="TrelloListName">{{name}}</span>
                 {{#if ../user_can_edit}}
-                    <div class="CardList" id="cl-{{id}}" listID="{{id}}"></div>
+                    <div class="CardList" id="cl-{{id}}" listID="{{id}}">
+                        <div class = "add_trello_card_group" id="atcg-{{id}}" listID = "{{id}}">
+                            <textarea maxlength="16384" rows="2" name="atcn-{{id}}"
+                                class="add_trello_card_name" id="atcn-{{id}}" listID = "{{id}}"> </textarea> <br />
+                            <span class = "add_trello_card_button" id ="atcb-{{id}}" listID = "{{id}}">Add</span>
+                            <span class = "add_trello_card_cancel" id ="atcc-{{id}}" listID = "{{id}}">X</span>
+                        </div>
+                    </div>
                 {{else}}
                     <div class="CardListNoEdit" id="cl-{{id}}" listID="{{id}}"></div>
                 {{/if}}
                 {{#if ../user_can_edit}}
                     <div class = "add_trello_card_link" id="atcl-{{id}}" listID = "{{id}}">Add a card…</div>
-                    <div class = "add_trello_card_group" id="atcg-{{id}}" listID = "{{id}}">
-                        <textarea maxlength="16384" rows="2" name="atcn-{{id}}"
-                            class="add_trello_card_name" id="atcn-{{id}}" listID = "{{id}}"> </textarea> <br />
-                        <span class = "add_trello_card_button" id ="atcb-{{id}}" listID = "{{id}}">Add</span>
-                        <span class = "add_trello_card_cancel" id ="atcc-{{id}}" listID = "{{id}}">X</span>
-                    </div>
+
                 {{/if}}
             </div>
         {{/each}}

@@ -25,6 +25,7 @@ div.TrelloListBlock
 	display: inline-block;
 	cursor: default;
 	margin: 0 5px 20px;
+	min-height: 20px;
 }
 
 span.TrelloListName {
@@ -620,6 +621,7 @@ div.trello_card_detail_edit_name_group {
 }
 
 .trello_card_detail_card {
+	white-space: normal;
 	display: inline;
 	width: 600px;
 	height: 90%;
