@@ -105,7 +105,7 @@ page_routes = {
             '/<pid>/node/<nid>/trello/list/<listid>',
             ],
             'get',
-            views.misc.trello_list_cards,
+            views.misc.trello_cards_from_lists,
             json_renderer,
         ),
            Rule(
@@ -114,7 +114,7 @@ page_routes = {
             '/<pid>/node/<nid>/trello/lists',
             ],
             'get',
-            views.misc.get_trello_lists,
+            views.misc.trello_lists,
             json_renderer,
         ),
          Rule(
@@ -132,7 +132,25 @@ page_routes = {
             '/<pid>/node/<nid>/trello/checkitem',
             ],
             'put',
-            views.misc.trello_edit_checkitem,
+            views.misc.trello_checkitem_update,
+            json_renderer,
+        ),
+         Rule(
+            [
+            '/<nid>/trello/checklist',
+            '/<pid>/node/<nid>/trello/checklist',
+            ],
+            'put',
+            views.misc.trello_checklist_update,
+            json_renderer,
+        ),
+         Rule(
+            [
+            '/<nid>/trello/checklist',
+            '/<pid>/node/<nid>/trello/checklist',
+            ],
+            'post',
+            views.misc.trello_checklist_add,
             json_renderer,
         ),
           Rule(
@@ -150,7 +168,7 @@ page_routes = {
             '/<pid>/node/<nid>/trello/card/',
             ],
             'post',
-            views.misc.trello_add_card_to_list,
+            views.misc.trello_card_add,
             json_renderer,
         ),
           Rule(
@@ -159,7 +177,7 @@ page_routes = {
             '/<pid>/node/<nid>/trello/card/',
             ],
             'delete',
-            views.misc.trello_delete_card,
+            views.misc.trello_card_delete,
             json_renderer,
         ),
           Rule(
@@ -168,7 +186,7 @@ page_routes = {
             '/<pid>/node/<nid>/trello/checkitem/',
             ],
             'post',
-            views.misc.trello_add_item_to_checklist,
+            views.misc.trello_checkitem_add,
             json_renderer,
         ),
           Rule(
@@ -177,7 +195,16 @@ page_routes = {
             '/<pid>/node/<nid>/trello/checkitem/',
             ],
             'delete',
-            views.misc.trello_delete_checkitem,
+            views.misc.trello_checkitem_delete,
+            json_renderer,
+        ),
+          Rule(
+            [
+            '/<nid>/trello/checklist/',
+            '/<pid>/node/<nid>/trello/checklist/',
+            ],
+            'delete',
+            views.misc.trello_checklist_delete,
             json_renderer,
         ),
    ],

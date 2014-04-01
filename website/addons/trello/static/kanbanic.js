@@ -154,18 +154,27 @@ function buildDetailCard(data) {
             $(".trello_card_detail").remove();
         }
     });
+//    edit card name and archive card
         activateEditThingLinks("tcden",data.trello_card_id);
         activateEditCardNameSubmit(data.trello_card_id);
         activateArchiveCardSubmit(data.trello_card_id);
+//    Add checklist
+        activateAddThingLinks("tcdacl",data.trello_card_id);
+        activateAddChecklistSubmit(data.trello_card_id);
     $(".trello_card_detail_checklist").each(function() {
         checkListID = $(this).attr("checklistID");
+//        add checkitems
         activateAddThingLinks("tcdaci",checkListID);
         activateAddCheckItemSubmit(checkListID);
-
+//        edit checklist names
+        activateEditThingLinks("tcdec",checkListID);
+        activateEditChecklistNameSubmit(checkListID)
+        activateDeleteChecklistSubmit(checkListID);
     });
 
     $(".trello_card_detail_checklist_checkitem").each(function() {
         checkItemID = $(this).attr("checkitemid");
+//        edit checkitems
         activateEditThingLinks("tcdeci",checkItemID);
         activateEditCheckItemSubmit(checkItemID);
         activateDeleteCheckItemSubmit(checkItemID);
@@ -199,36 +208,70 @@ function replaceURLWithHTMLLinks(text) {
 function activateAddCardSubmit(listID){
     $("#atcb-"+listID).click(function() {
 //        Make sure the box isn't empty, then send the contents and the list to the create new card method
-    //listID = $(this).attr("listID");
-    cardName = $("#atcn-" + listID).val();
-    if (cardName.trim() != ""){
+        checklistName = $("#atcn-" + listID).val();
+        if (checklistName.trim() != ""){
 //          Send the card name and list id to trello
-      $.ajax({
-                type: 'POST',
-                url: 'card/',
-                contentType: 'application/json',
-                dataType: 'json',
-                data: JSON.stringify({
-                    listid: listID,
-                    cardname: cardName
-                })
-            }).done(function(data) {
-//            Add a card div to the bottom of the list
-//            Also, not at all happy about needing to re-write the contents. Really should be templated (or done all in JS rather than
-//            writing html by hand. Still a bit duplicate-y).
-          cardTemplate = Handlebars.compile($("#kanban-card-template").html());
-          newDiv = cardTemplate(data);
-        $("#cl-" + listID).append(newDiv);
+          $.ajax({
+                    type: 'POST',
+                    url: 'card/',
+                    contentType: 'application/json',
+                    dataType: 'json',
+                    data: JSON.stringify({
+                        listid: listID,
+                        cardname: checklistName
+                    })
+                }).done(function(data) {
+    //            Add a card div to the bottom of the list
+              cardTemplate = Handlebars.compile($("#kanban-card-template").html());
+              newDiv = cardTemplate(data);
+            $("#cl-" + listID).append(newDiv);
+    //          Clear out the contents of the textarea, hide the name input div,
+    //          and show the add card div (i.e. click the cancel button)
+            $("#atcc-"+listID).click();
+          }).fail(function(xhr) {
+                    console.log("Card creation failed.");
+                });
+        }
+    });
+}
 
-
-//          Clear out the contents of the textarea, hide the name input div,
-//          and show the add card div (i.e. click the cancel button)
-        $("#atcc-"+listID).click();
-      }).fail(function(xhr) {
-                console.log("Card creation failed.");
-            });
-    }
-});
+function activateAddChecklistSubmit(cardID){
+    $("#tcdaclb-"+cardID).click(function() {
+//        Make sure the box isn't empty, then send the contents and the list to the create new card method
+        theCardID=cardID
+        checklistName = $("#tcdacln-" + theCardID).val();
+        if (checklistName.trim() != ""){
+//          Send the card name and list id to trello
+          $.ajax({
+                    type: 'POST',
+                    url: 'checklist/',
+                    contentType: 'application/json',
+                    dataType: 'json',
+                    data: JSON.stringify({
+                        cardid: theCardID,
+                        checklistname: checklistName
+                    })
+                }).done(function(data) {
+    //            Add a checklist div to the bottom of the list
+              data.cardid=theCardID;
+              cardTemplate = Handlebars.compile($("#kanban-card-detail-checklist-template").html());
+              newDiv = cardTemplate(data);
+            $(".trello_card_detail_checklist_list").append(newDiv);
+            //        add checkitems
+                activateAddThingLinks("tcdaci",data.id);
+                activateAddCheckItemSubmit(data.id);
+             //        edit checklist names
+                activateEditThingLinks("tcdec",data.id);
+                activateEditChecklistNameSubmit(data.id)
+                activateDeleteChecklistSubmit(data.id);
+    //          Clear out the contents of the textarea, hide the name input div,
+    //          and show the add card div (i.e. click the cancel button)
+            $("#tcdaclc-"+theCardID).click();
+          }).fail(function(xhr) {
+                    console.log("Card creation failed.");
+                });
+        }
+    });
 }
 
 function activateAddCheckItemSubmit(checklistID){
@@ -278,7 +321,7 @@ function activateEditCheckItemSubmit(checkitemID){
     //        Make sure the box isn't empty, then send the contents and the list to the create new card method
 
         checkItemName = $("#tcdecin-" + checkitemID).val();
-        theCheckItemID = checkitemID;
+        theCheckListID = checkitemID;
         checklistID = $("#tcdecin-" + checkitemID).attr("checklistid");
         cardID = $("#tcdecin-" + checkitemID).attr("cardid");
 
@@ -293,13 +336,13 @@ function activateEditCheckItemSubmit(checkitemID){
                     checklistid: checklistID,
                     name: checkItemName,
                     cardid: cardID,
-                    checkitemid: theCheckItemID
+                    checkitemid: theCheckListID
                 })
             }).done(function(data) {
-                $("#tcdecio-"+theCheckItemID).text(checkItemName);
-                $("#tcdecic-"+theCheckItemID).click();
+                $("#tcdecio-"+theCheckListID).text(checkItemName);
+                $("#tcdecic-"+theCheckListID).click();
       }).fail(function(xhr) {
-                $("#tcdecic-"+theCheckItemID).click();
+                $("#tcdecic-"+theCheckListID).click();
                 console.log("Checkitem update failed.");
             });
     }
@@ -311,22 +354,21 @@ function activateEditCardNameSubmit(cardID){
     $("#tcdenb-"+cardID).click(function() {
     //        Make sure the box isn't empty, then send the contents and the list to the create new card method
 
-        cardName = $("#tcdenn-" + cardID).val();
+        checklistName = $("#tcdenn-" + cardID).val();
         theCardID = cardID;
 
-    if (cardName.trim() != ""){
-    //          Send the checkitem name, checklist id, checkitem id, and card id to trello
+    if (checklistName.trim() != ""){
       $.ajax({
                 type: 'PUT',
                 url: 'card/',
                 contentType: 'application/json',
                 dataType: 'json',
                 data: JSON.stringify({
-                    cardname: cardName,
+                    cardname: checklistName,
                     cardid: theCardID
                 })
             }).done(function(data) {
-                $("#tcdeno-"+theCardID).text(cardName);
+                $("#tcdeno-"+theCardID).text(checklistName);
                 $("#tcdenc-"+theCardID).click();
       }).fail(function(xhr) {
                 $("#tcdenc-"+theCardID).click();
@@ -337,15 +379,42 @@ function activateEditCardNameSubmit(cardID){
 }
 
 
-function activateDeleteCheckItemSubmit(checkitemID){
-    $("#tcdecid-"+checkitemID).click(function() {
+function activateEditChecklistNameSubmit(checklistID){
+    $("#tcdecb-"+checklistID).click(function() {
     //        Make sure the box isn't empty, then send the contents and the list to the create new card method
 
-        theCheckItemID = checkitemID;
+        checklistName = $("#tcdecn-" + checklistID).val();
+        theCardID = checklistID;
+
+    if (checklistName.trim() != ""){
+      $.ajax({
+                type: 'PUT',
+                url: 'checklist/',
+                contentType: 'application/json',
+                dataType: 'json',
+                data: JSON.stringify({
+                    checklistname: checklistName,
+                    checklistid: theCardID
+                })
+            }).done(function(data) {
+                $("#tcdeco-"+theCardID).text(checklistName);
+                $("#tcdecc-"+theCardID).click();
+      }).fail(function(xhr) {
+                $("#tcdecc-"+theCardID).click();
+                console.log("Checkitem update failed.");
+            });
+    }
+    });
+}
+
+
+function activateDeleteCheckItemSubmit(checkitemID){
+    $("#tcdecid-"+checkitemID).click(function() {
+
+        theCheckListID = checkitemID;
         checklistID = $("#tcdecin-" + checkitemID).attr("checklistid");
 
 
-    //          Send the checkitem name, checklist id, checkitem id, and card id to trello
       $.ajax({
                 type: 'DELETE',
                 url: 'checkitem/',
@@ -353,13 +422,43 @@ function activateDeleteCheckItemSubmit(checkitemID){
                 dataType: 'json',
                 data: JSON.stringify({
                     checklistid: checklistID,
-                    checkitemid: theCheckItemID
+                    checkitemid: theCheckListID
                 })
             }).done(function(data) {
-                $("#tcdecig-"+theCheckItemID).remove();
-                $("#tcdeciog-"+theCheckItemID).remove();
+                $("#tcdecig-"+theCheckListID).remove();
+                $("#tcdeciog-"+theCheckListID).remove();
       }).fail(function(xhr) {
-                $("#tcdecic-"+theCheckItemID).click();
+                $("#tcdecic-"+theCheckListID).click();
+                console.log("Checkitem delete failed.");
+            });
+
+    });
+}
+
+
+function activateDeleteChecklistSubmit(checklistID){
+    $("#tcdecd-"+checklistID).click(function() {
+
+        theCheckListID = checklistID;
+        cardID = $("#tcdecn-" + checklistID).attr("cardID");
+
+
+      $.ajax({
+                type: 'DELETE',
+                url: 'checklist/',
+                contentType: 'application/json',
+                dataType: 'json',
+                data: JSON.stringify({
+                    checklistid: checklistID,
+                    cardid: cardID
+                })
+            }).done(function(data) {
+                $("#tcdecg-"+theCheckListID).remove();
+                $("#tcdecog-"+theCheckListID).remove();
+                $("#tcdacig-"+theCheckListID).remove();
+                $("#tcdacil-"+theCheckListID).remove();
+      }).fail(function(xhr) {
+                $("#tcdecc-"+theCheckListID).click();
                 console.log("Checkitem delete failed.");
             });
 

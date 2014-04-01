@@ -75,6 +75,44 @@
                         </div>
 </script>
 
+<script id="kanban-card-detail-checklist-template" type="text/x-handlebars-template">
+                    <div class="trello_card_detail_checklist" id="tcdcl-{{id}}" checklistID="{{id}}">
+                        <div class = "trello_card_detail_checklist_original_group" id="tcdecog-{{id}}">
+                            <div class = "trello_card_detail_checklist_name" id="tcdeco-{{id}}">{{name}}</div>
+                        </div>
+                        <div class = "trello_card_detail_edit_checklist_group" id="tcdecg-{{id}}">
+                            <textarea maxlength="16384" rows="2" name="tcdecn-{{id}}"
+                               checklistID="{{id}}" cardID="{{cardid}}"
+                               class="trello_card_detail_edit_checklist_name" id="tcdecn-{{id}}">{{name}}</textarea> <br />
+                            <div class="trello_card_detail_edit_checklist_button" id="tcdecb-{{id}}">
+                                Save
+                            </div>
+                            <div class="trello_card_detail_edit_checklist_cancel" id="tcdecc-{{id}}">
+                                X
+                            </div>
+                            <div class="trello_card_detail_edit_checklist_delete" id="tcdecd-{{id}}">
+                                Delete
+                            </div>
+                        </div>
+                        <div class="trello_card_detail_checklist_checkitem_list" id="tcdccl-{{id}}" checklistID="{{id}}">
+                        </div>
+                    </div>
+                    <div class="trello_card_detail_add_checkitem_group" id="tcdacig-{{id}}" checklistID="{{id}}" cardID="{{cardid}}">
+                         <textarea maxlength="16384" rows="2" name="tcdacin-{{id}}"
+                            listID="{{id}}" cardID="{{cardid}}"
+                         class="add_trello_card_detail_add_checkitem_name" id="tcdacin-{{id}}"></textarea> <br />
+                    <div class="trello_card_detail_add_checkitem_button" id="tcdacib-{{id}}" checklistID="{{id}}" cardID="{{cardid}}">
+                        Add
+                    </div>
+                    <div class="trello_card_detail_add_checkitem_cancel" id="tcdacic-{{id}}" checklistID="{{id}}" cardID="{{cardid}}">
+                        X
+                    </div>
+                </div>
+                <div class="trello_card_detail_add_checkitem_link" id="tcdacil-{{id}}" checklistID="{{id}}" cardID="{{cardid}}">
+                    Add an item…
+                </div>
+</script>
+
 <script id="kanban-card-detail-template" type="text/x-handlebars-template">
     <div class="trello_card_detail">
         <div class="trello_card_detail_card">
@@ -91,25 +129,45 @@
             {{#if user_can_edit}}
             <div class = "trello_card_detail_edit_name_group" id="tcdeng-{{trello_card.id}}">
                 <textarea maxlength="16384" rows="2" name="tcdenn-{{trello_card.id}}"
-                               cardID="{{trello_card.id}}"
-                               class="trello_card_detail_edit_name_name" id="tcdenn-{{trello_card.id}}">{{trello_card.name}}</textarea> <br />
-                            <div class="trello_card_detail_edit_name_button" id="tcdenb-{{trello_card.id}}">
-                                Save
-                            </div>
-                            <div class="trello_card_detail_edit_name_cancel" id="tcdenc-{{trello_card.id}}">
-                                X
-                            </div>
+                   cardID="{{trello_card.id}}"
+                   class="trello_card_detail_edit_name_name" id="tcdenn-{{trello_card.id}}">{{trello_card.name}}</textarea> <br />
+                <div class="trello_card_detail_edit_name_button" id="tcdenb-{{trello_card.id}}">
+                    Save
+                </div>
+                <div class="trello_card_detail_edit_name_cancel" id="tcdenc-{{trello_card.id}}">
+                    X
+                </div>
             </div>
             {{/if}}
 
 
-         <div class="trello_card_detail_desc">{{markdown desc}}</div>
+        <div class="trello_card_detail_desc">{{markdown desc}}</div>
+        <div class="trello_card_detail_checklist_list">
             {{#if trello_card.badges.checkItems}}
                 {{#each trello_card.checklists}}
                     <div class="trello_card_detail_checklist" id="tcdcl-{{id}}" checklistID="{{id}}">
-                    <div class = "trello_card_detail_checklist_name">{{name}}</div>
+                        <div class = "trello_card_detail_checklist_original_group" id="tcdecog-{{id}}">
+                            <div class = "trello_card_detail_checklist_name" id="tcdeco-{{id}}">{{name}}</div>
+                        </div>
+                        {{#if ../user_can_edit}}
+                        <div class = "trello_card_detail_edit_checklist_group" id="tcdecg-{{id}}">
+                            <textarea maxlength="16384" rows="2" name="tcdecn-{{id}}"
+                               checklistID="{{id}}" cardID="{{../../trello_card.id}}"
+                               class="trello_card_detail_edit_checklist_name" id="tcdecn-{{id}}">{{name}}</textarea> <br />
+                            <div class="trello_card_detail_edit_checklist_button" id="tcdecb-{{id}}">
+                                Save
+                            </div>
+                            <div class="trello_card_detail_edit_checklist_cancel" id="tcdecc-{{id}}">
+                                X
+                            </div>
+                            <div class="trello_card_detail_edit_checklist_delete" id="tcdecd-{{id}}">
+                                Delete
+                            </div>
+                        </div>
+                        {{/if}}
                         <div class="trello_card_detail_checklist_checkitem_list" id="tcdccl-{{id}}" checklistID="{{id}}">
                     {{#each checkItems}}
+                        {{#if ../../user_can_edit}}
                         <div class = "trello_card_detail_edit_checkitem_group" id="tcdecig-{{id}}">
                             <textarea maxlength="16384" rows="2" name="tcdecin-{{id}}"
                                checklistID="{{../id}}" cardID="{{../../../trello_card.id}}"
@@ -124,6 +182,7 @@
                                 Delete
                             </div>
                         </div>
+                        {{/if}}
                         <div class = "trello_card_detail_checklist_checkitem" checkitemid="{{id}}" id="tcdeciog-{{id}}" >
                             {{#if ../../user_can_edit}}
                                 <input type="checkbox" {{checked}} id="tcdc-ci-{{id}}" value="{{id}}"
@@ -136,44 +195,61 @@
                     {{/each}}
                             </div>
                     {{#if ../user_can_edit}}
-                        <div class="trello_card_detail_add_checkitem_group" id="tcdacig-{{id}}" checklistID="{{id}} cardID={{../../trello_card.id}}">
+                        <div class="trello_card_detail_add_checkitem_group" id="tcdacig-{{id}}" checklistID="{{id}}" cardID="{{../../trello_card.id}}">
                                  <textarea maxlength="16384" rows="2" name="tcdacin-{{id}}"
                                     listID="{{id}}" cardID="{{../../trello_card.id}}"
                                  class="add_trello_card_detail_add_checkitem_name" id="tcdacin-{{id}}"></textarea> <br />
-                            <div class="trello_card_detail_add_checkitem_button" id="tcdacib-{{id}}" checklistID="{{id}} cardID={{../../trello_card.id}}">
+                            <div class="trello_card_detail_add_checkitem_button" id="tcdacib-{{id}}" checklistID="{{id}}" cardID="{{../../trello_card.id}}">
                                 Add
                             </div>
-                            <div class="trello_card_detail_add_checkitem_cancel" id="tcdacic-{{id}}" checklistID="{{id}} cardID={{../../trello_card.id}}">
+                            <div class="trello_card_detail_add_checkitem_cancel" id="tcdacic-{{id}}" checklistID="{{id}}" cardID="{{../../trello_card.id}}">
                                 X
                             </div>
                         </div>
-                        <div class="trello_card_detail_add_checkitem_link" id="tcdacil-{{id}}" checklistID="{{id}} cardID={{../../trello_card.id}}">
+                        <div class="trello_card_detail_add_checkitem_link" id="tcdacil-{{id}}" checklistID="{{id}}" cardID="{{../../trello_card.id}}">
                             Add an item…
                         </div>
                     {{/if}}
                     </div>
                 {{/each}}
             {{/if}}
-            {{#if trello_card.badges.comments}}
-                {{#each trello_card.comments}}
-                    <div class = "trello_card_detail_comment">
-                        <div class = "trello_card_detail_comment_header">
-                            <div class = "trello_card_detail_comment_date">
-                                {{localTime date}}
-                            </div>
-                            <div class =  "trello_card_detail_comment_owner">
-                                {{memberCreator.fullName}}
-                            </div>
+            </div>
+            {{#if user_can_edit}}
+                <div class="trello_card_detail_add_checklist_group" id="tcdaclg-{{trello_card.id}}" cardID="{{trello_card.id}}">
+                    <textarea maxlength="16384" rows="2" name="tcdacln-{{trello_card.id}}" cardID="{{trello_card.id}}"
+                     class="add_trello_card_detail_add_checklist_name" id="tcdacln-{{trello_card.id}}"></textarea> <br />
+                    <div class="trello_card_detail_add_checklist_button" id="tcdaclb-{{trello_card.id}}" cardID="{{trello_card.id}}">
+                        Add
+                    </div>
+                    <div class="trello_card_detail_add_checklist_cancel" id="tcdaclc-{{trello_card.id}}" cardID="{{trello_card.id}}">
+                        X
+                    </div>
+                </div>
+                <div class="trello_card_detail_add_checklist_link" id="tcdacll-{{trello_card.id}}" cardID="{{trello_card.id}}">
+                    Add a checklist…
+                </div>
+            {{/if}}
+
+        {{#if trello_card.badges.comments}}
+            {{#each trello_card.comments}}
+                <div class = "trello_card_detail_comment">
+                    <div class = "trello_card_detail_comment_header">
+                        <div class = "trello_card_detail_comment_date">
+                            {{localTime date}}
                         </div>
-                        <div class = "trello_card_detail_comment_comment">
-                            <p>
-                               {{markdown data.text}}
-                            </p>
+                        <div class =  "trello_card_detail_comment_owner">
+                            {{memberCreator.fullName}}
                         </div>
                     </div>
-               {{/each}}
-            {{/if}}
-         </div>
+                    <div class = "trello_card_detail_comment_comment">
+                        <p>
+                           {{markdown data.text}}
+                        </p>
+                    </div>
+                </div>
+           {{/each}}
+        {{/if}}
+        </div>
      </div>
 </script>
 

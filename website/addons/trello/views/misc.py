@@ -112,7 +112,7 @@ def trello_page(auth, project, node, **kwargs):
 
 @must_be_contributor_or_public
 @must_have_addon('trello', 'node')
-def get_trello_lists(auth, project, node, **kwargs):
+def trello_lists(auth, project, node, **kwargs):
     node = node or project
     node_settings = kwargs['node_addon']
     trello = node.get_addon('trello')
@@ -202,7 +202,7 @@ def trello_card_details(**kwargs):
 
 @must_be_contributor_or_public
 @must_have_addon('trello', 'node')
-def trello_list_cards(**kwargs):
+def trello_cards_from_lists(**kwargs):
     node_settings = kwargs['node_addon']
 
     list_id = kwargs['listid']
@@ -318,7 +318,28 @@ def trello_card_update(**kwargs):
 
 @must_have_permission('write')
 @must_have_addon('trello', 'node')
-def trello_add_card_to_list(**kwargs):
+def trello_checklist_update(**kwargs):
+    node_settings = kwargs['node_addon']
+    node = node_settings.owner
+
+    try:
+        checklist_id = request.json.get('checklistid','')
+        new_checklist_name = request.json.get('checklistname',None)
+    except:
+        raise OSFHTTPError(http.BAD_REQUEST)
+
+    if not checklist_id:
+        raise OSFHTTPError(http.BAD_REQUEST)
+
+    trello_board_name = node_settings.trello_board_name.strip()
+    if trello_board_name is not None:
+        trello_api = Trello.from_settings(node_settings.user_settings)
+        trello_api.update_checklist(checklist_id=checklist_id,name=new_checklist_name)
+
+
+@must_have_permission('write')
+@must_have_addon('trello', 'node')
+def trello_card_add(**kwargs):
     node_settings = kwargs['node_addon']
     node = node_settings.owner
     return_value = None
@@ -341,7 +362,7 @@ def trello_add_card_to_list(**kwargs):
 
 @must_have_permission('write')
 @must_have_addon('trello', 'node')
-def trello_add_item_to_checklist(**kwargs):
+def trello_checkitem_add(**kwargs):
     node_settings = kwargs['node_addon']
     node = node_settings.owner
     return_value = None
@@ -364,7 +385,30 @@ def trello_add_item_to_checklist(**kwargs):
 
 @must_have_permission('write')
 @must_have_addon('trello', 'node')
-def trello_edit_checkitem(**kwargs):
+def trello_checklist_add(**kwargs):
+    node_settings = kwargs['node_addon']
+    node = node_settings.owner
+    return_value = None
+    try:
+        card_id = request.json.get('cardid','')
+        checklist_name = request.json.get('checklistname','')
+    except:
+        raise OSFHTTPError(http.BAD_REQUEST)
+
+    if not card_id and checklist_name:
+        raise OSFHTTPError(http.BAD_REQUEST)
+
+    trello_board_name = node_settings.trello_board_name.strip()
+
+    if trello_board_name is not None:
+        trello_api = Trello.from_settings(node_settings.user_settings)
+        return_value = trello_api.create_checklist_in_card(card_id,checklist_name)
+    return return_value
+
+
+@must_have_permission('write')
+@must_have_addon('trello', 'node')
+def trello_checkitem_update(**kwargs):
     node_settings = kwargs['node_addon']
     node = node_settings.owner
     return_value = None
@@ -377,7 +421,6 @@ def trello_edit_checkitem(**kwargs):
         checkitem_name = request.json.get('name',None)
     except:
         raise OSFHTTPError(http.BAD_REQUEST)
-
     if not card_id and checklist_id and checkitem_id:
         raise OSFHTTPError(http.BAD_REQUEST)
 
@@ -385,14 +428,20 @@ def trello_edit_checkitem(**kwargs):
 
     if trello_board_name is not None:
         trello_api = Trello.from_settings(node_settings.user_settings)
-        return_value = trello_api.update_checkitem\
-            (card_id=card_id,checklist_id=checklist_id,checkitem_id=checkitem_id,state=checkitem_state,name=checkitem_name,pos=checkitem_pos)
+        return_value = trello_api.update_checkitem(
+            card_id=card_id,
+             checklist_id=checklist_id,
+             checkitem_id=checkitem_id,
+             state=checkitem_state,
+             name=checkitem_name,
+             pos=checkitem_pos,
+             )
     return return_value
 
 
 @must_have_permission('write')
 @must_have_addon('trello', 'node')
-def trello_delete_checkitem(**kwargs):
+def trello_checkitem_delete(**kwargs):
     node_settings = kwargs['node_addon']
     node = node_settings.owner
     return_value = None
@@ -414,7 +463,29 @@ def trello_delete_checkitem(**kwargs):
 
 @must_have_permission('write')
 @must_have_addon('trello', 'node')
-def trello_delete_card(**kwargs):
+def trello_checklist_delete(**kwargs):
+    node_settings = kwargs['node_addon']
+    node = node_settings.owner
+    return_value = None
+    try:
+        card_id = request.json.get('cardid','')
+        checklist_id = request.json.get('checklistid','')
+    except:
+        raise OSFHTTPError(http.BAD_REQUEST)
+
+    if not card_id and checklist_id:
+        raise OSFHTTPError(http.BAD_REQUEST)
+
+    trello_board_name = node_settings.trello_board_name.strip()
+
+    if trello_board_name is not None:
+        trello_api = Trello.from_settings(node_settings.user_settings)
+        return_value = trello_api.delete_checklist_from_card(card_id=card_id,checklistID=checklist_id)
+        return return_value
+
+@must_have_permission('write')
+@must_have_addon('trello', 'node')
+def trello_card_delete(**kwargs):
     node_settings = kwargs['node_addon']
     node = node_settings.owner
     return_value = None
