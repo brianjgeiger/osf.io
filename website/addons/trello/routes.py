@@ -146,6 +146,15 @@ page_routes = {
         ),
          Rule(
             [
+            '/<nid>/trello/card/description',
+            '/<pid>/node/<nid>/trello/card/description',
+            ],
+            'put',
+            views.misc.trello_card_description_update,
+            json_renderer,
+        ),
+         Rule(
+            [
             '/<nid>/trello/checklist',
             '/<pid>/node/<nid>/trello/checklist',
             ],

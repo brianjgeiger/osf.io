@@ -171,7 +171,6 @@ def trello_card_details(**kwargs):
     if trello_board_name is not None:
         user_can_edit = can_user_write_to_project_board(**kwargs)
         trello_api = Trello.from_settings(node_settings.user_settings)
-        #TODO: This does not handle properly if a card doesn't exist. Need to find the right way to handle that exception (HTTPError 400)
         try:
             card = trello_api.get_card(card_id)
             card[u'comments'] = trello_api.get_comments_from_card(card_id)
@@ -315,6 +314,24 @@ def trello_card_update(**kwargs):
     if trello_board_name is not None:
         trello_api = Trello.from_settings(node_settings.user_settings)
         trello_api.update_card(card_id,idList=new_list_id,pos=new_card_pos,name=new_card_name,closed=card_closed)
+
+@must_have_permission('write')
+@must_have_addon('trello', 'node')
+def trello_card_description_update(**kwargs):
+    node_settings = kwargs['node_addon']
+    node = node_settings.owner
+    try:
+        card_id = request.json.get('cardid','')
+        new_desc = request.json.get('desc', None)
+    except:
+        raise OSFHTTPError(http.BAD_REQUEST)
+    if not card_id and new_desc:
+        raise OSFHTTPError(http.BAD_REQUEST)
+    trello_board_name = node_settings.trello_board_name.strip()
+    if trello_board_name is not None:
+        trello_api = Trello.from_settings(node_settings.user_settings)
+        trello_api.update_card_description(card_id=card_id,desc=new_desc)
+
 
 @must_have_permission('write')
 @must_have_addon('trello', 'node')

@@ -138,10 +138,28 @@
                     X
                 </div>
             </div>
+        <div class = "trello_card_detail_description_original_group" id="tcdedog-{{trello_card.id}}">
+            <div class="trello_card_detail_desc" id="tcdedom-{{trello_card.id}}">{{noBlankDescriptionMarkdown trello_card.desc}}</div>
+            <div class="trello_card_detail_desc_hidden" id="tcdedo-{{trello_card.id}}">{{trello_card.desc}}</div>
+        </div>
+            {{else}}
+             <div class = "trello_card_detail_description_original_group" id="tcdedog-{{trello_card.id}}">
+                <div class="trello_card_detail_desc" id="tcdedom-{{trello_card.id}}">{{markdown trello_card.desc}}</div>
+            </div>
             {{/if}}
-
-
-        <div class="trello_card_detail_desc">{{markdown desc}}</div>
+        {{#if user_can_edit}}
+            <div class = "trello_card_detail_edit_description_group" id="tcdedg-{{trello_card.id}}">
+                <textarea maxlength="16384" rows="2" name="tcdedn-{{trello_card.id}}"
+                   cardID="{{trello_card.id}}" submitOnReturn="false"
+                   class="trello_card_detail_edit_description_name" id="tcdedn-{{trello_card.id}}">{{trello_card.desc}}</textarea> <br />
+                <div class="trello_card_detail_edit_description_button" id="tcdedb-{{trello_card.id}}">
+                    Save
+                </div>
+                <div class="trello_card_detail_edit_description_cancel" id="tcdedc-{{trello_card.id}}">
+                    X
+                </div>
+            </div>
+        {{/if}}
         <div class="trello_card_detail_checklist_list">
             {{#if trello_card.badges.checkItems}}
                 {{#each trello_card.checklists}}
@@ -170,7 +188,7 @@
                         {{#if ../../user_can_edit}}
                         <div class = "trello_card_detail_edit_checkitem_group" id="tcdecig-{{id}}">
                             <textarea maxlength="16384" rows="2" name="tcdecin-{{id}}"
-                               checklistID="{{../id}}" cardID="{{../../../trello_card.id}}"
+                               checklistID="{{../../id}}" cardID="{{../../../trello_card.id}}"
                                class="trello_card_detail_edit_checkitem_name" id="tcdecin-{{id}}">{{name}}</textarea> <br />
                             <div class="trello_card_detail_edit_checkitem_button" id="tcdecib-{{id}}">
                                 Save
@@ -249,6 +267,12 @@
                 </div>
            {{/each}}
         {{/if}}
+            {{#if user_can_edit}}
+            <div class="trello_card_detail_comment_unsupported">
+                Commenting is not currently supported.
+                To add or edit a comment, <a href="{{trello_card.url}}" target="_blank">visit the card on Trello</a>.
+            </div>
+            {{/if}}
         </div>
      </div>
 </script>
@@ -281,12 +305,13 @@
             <span class="TrelloListName">{{name}}</span>
                 {{#if ../user_can_edit}}
                     <div class="CardList" id="cl-{{id}}" listID="{{id}}">
-                        <div class = "add_trello_card_group" id="atcg-{{id}}" listID = "{{id}}">
-                            <textarea maxlength="16384" rows="2" name="atcn-{{id}}"
-                                class="add_trello_card_name" id="atcn-{{id}}" listID = "{{id}}"> </textarea> <br />
-                            <span class = "add_trello_card_button" id ="atcb-{{id}}" listID = "{{id}}">Add</span>
-                            <span class = "add_trello_card_cancel" id ="atcc-{{id}}" listID = "{{id}}">X</span>
-                        </div>
+
+                    </div>
+                    <div class = "add_trello_card_group" id="atcg-{{id}}" listID = "{{id}}">
+                        <textarea maxlength="16384" rows="2" name="atcn-{{id}}"
+                            class="add_trello_card_name" id="atcn-{{id}}" listID = "{{id}}"> </textarea> <br />
+                        <span class = "add_trello_card_button" id ="atcb-{{id}}" listID = "{{id}}">Add</span>
+                        <span class = "add_trello_card_cancel" id ="atcc-{{id}}" listID = "{{id}}">X</span>
                     </div>
                 {{else}}
                     <div class="CardListNoEdit" id="cl-{{id}}" listID="{{id}}"></div>
@@ -301,15 +326,29 @@
 </script>
 
 <script>
+     $( document ).ajaxStart(function() {
+        $("#progressbar").show();
+     }).ajaxStop(function() {
+        $("#progressbar").hide();
+     });
+
     $( document ).ready(function() {
+     $(function() {
+        $( "#progressbar" ).progressbar({
+          value: false
+        });
+
+     });
         $("#KanbanBoard").each(function() {
            loadBoard();
         });
     });
 </script>
 
+
 %if trello_board_name is not None:
     <div id="KanbanBoard">
+        <div id="progressbar"></div>
     </div>
 
     <%doc>
@@ -319,7 +358,8 @@
     </%doc>
 
         <script type="text/javascript" charset="utf-8">
-            $('#KanbanBoard').kinetic({
+           $('#KanbanBoard').kinetic({
+               slowdown: 0,
                 filterTarget: function(target){
                     var returnValue = false;
                     if(target.id){
@@ -327,20 +367,10 @@
                             returnValue = true;
                         }
                     }
-
                     return returnValue;
                 }
             });
-            $('#left').click(function(){
-                $('#KanbanBoard').kinetic('start', { velocity: -10 });
-            });
-            $('#right').click(function(){
-                $('#KanbanBoard').kinetic('start', { velocity: 10 });
-            });
-            $('#end').click(function(){
-                $('#KanbanBoard').kinetic('end');
-            });
-            $('#stop').click(function(){
+            $('#KanbanBoard').mouseleave(function(){
                 $('#KanbanBoard').kinetic('stop');
             });
         </script>

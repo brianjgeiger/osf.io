@@ -33,6 +33,20 @@ function loadBoard() {
 }
 
 //
+// Card reloading
+//
+
+function reloadCardFromTrello(cardID) {
+    cardTemplate = Handlebars.compile($("#kanban-card-template").html());
+    the_url = "card/"+cardID;
+    $.getJSON( the_url, function(data){
+        newDiv = cardTemplate(data.trello_card);
+        $("#tc-"+cardID).replaceWith(newDiv);
+    });
+}
+
+
+//
 // Card Sorting
 //
 
@@ -40,10 +54,12 @@ function makeCardListsSortable() {
     $( ".CardList" ).sortable({
       connectWith: ".CardList",
       stop: function(ui, event){
-//      Gather card data
+        //        Gather card data
         var cardID = event.item.attr('cardID');
+        var cardDivID = event.item.attr('id');
         var cardPos = event.item.attr('cardPos');
         var oldList = ui.target;
+        var oldListDivID = oldList.getAttribute('id');
         var oldListID =  oldList.getAttribute('listID');
         var newList = event.item[0].parentElement;
         var newListID = newList.getAttribute('listID');
@@ -55,22 +71,22 @@ function makeCardListsSortable() {
         prevCard = movedCard.prev();
         nextCard = movedCard.next();
         var newCardPos = "";
-//          New card should be either at the top of the list, at the bottom, or halfway between existing cards
+        //          New card should be either at the top of the list, at the bottom, or halfway between existing cards
         if(movedCard[0] && movedCard[0].getAttribute("cardPos") ){
           if(prevCard && prevCard.length > 0 && prevCard[0].getAttribute("cardPos") && prevCard[0].getAttribute("cardPos") != null ){
             var prevCardPos = parseInt(prevCard[0].getAttribute("cardPos"));
             if(nextCard && nextCard.length > 0 && nextCard[0].getAttribute("cardPos") && nextCard[0].getAttribute("cardPos") != null ){
-//                There are cards on both sides, so get the positions, and divide by two
+        //                There are cards on both sides, so get the positions, and divide by two
               var nextCardPos = parseInt(nextCard[0].getAttribute("cardPos"));
               newCardPos = (prevCardPos + nextCardPos)/2;
             } else {
-//                There's no next card
+        //                There's no next card
                 nextCardPos = null;
                 newCardPos= "bottom";
 
             }
          } else {
-//              There's no previous card (and may or may not be a next card, but whatever)
+        //              There's no previous card (and may or may not be a next card, but whatever)
               prevCardPos = null;
               newCardPos = "top";
           }
@@ -89,7 +105,21 @@ function makeCardListsSortable() {
             }).done(function() {
         //                    console.log("Update done.");
             }).fail(function(xhr) {
-                // TODO: move the card back to oldListID and position cardPos
+              //  console.log(originalCardAfter);
+                prevCard = null;
+                $("#"+oldListDivID).find(".TrelloCard").each(function(){
+                    oldCardPos = parseFloat($("#"+cardDivID).attr('cardPos'));
+                    iterationCardPos = parseFloat($(this).attr('cardPos'));
+
+                    if(oldCardPos > iterationCardPos){
+                        prevCard=$(this);
+                    }
+                });
+                if(prevCard) {
+                    prevCard.after($("#"+cardDivID));
+                } else {
+                    $("#"+cardDivID).prependTo(oldList);
+                }
                 console.log("Update failed.");
             });
         }
@@ -118,15 +148,36 @@ function displayCard(cardID) {
 }
 
 var box_contents = "";
+$(document).click(function (e) {
+    container = $(".trello_card_detail_card");
+
+    if (!container.is(e.target) // if the target of the click isn't the container...
+        && container.has(e.target).length === 0) // ... nor a descendant of the container
+    {
+        $(".trello_card_detail").remove();
+    }
+});
 
 function buildDetailCard(data) {
 
     Handlebars.registerHelper('markdown', function(text) {
-        if(text && text != ""){
+         if(text && text != ""){
             converter = new Showdown.converter();
-            return new Handlebars.SafeString(converter.makeHtml(replaceURLWithHTMLLinks(text)));
+            converted = new Handlebars.SafeString(converter.makeHtml(replaceURLWithHTMLLinks(text)));
+            return converted;
         }
-        return text;
+        return "";
+
+    });
+
+    Handlebars.registerHelper('noBlankDescriptionMarkdown', function(text) {
+        converter = new Showdown.converter();
+        converted = new Handlebars.SafeString(converter.makeHtml(replaceURLWithHTMLLinks("*Edit description…*")));
+        if(text && text != ""){
+            converted = new Handlebars.SafeString(converter.makeHtml(replaceURLWithHTMLLinks(text)));
+        }
+        return converted;
+
     });
 
     Handlebars.registerHelper('localTime', function(date) {
@@ -136,51 +187,48 @@ function buildDetailCard(data) {
     });
     cardTemplate = Handlebars.compile($("#kanban-card-detail-template").html());
     var card_writer = "";
-    if(data.user_can_edit){
-        card_writer = "*"
-    }
+
 
     box_contents = cardTemplate(data);
 
     $("#KanbanBoard").append(box_contents);
 
     cardBeingDisplayed = false;
-    $(document).mouseup(function (e) {
-        var container = $(".trello_card_detail_card");
 
-        if (!container.is(e.target) // if the target of the click isn't the container...
-            && container.has(e.target).length === 0) // ... nor a descendant of the container
-        {
-            $(".trello_card_detail").remove();
-        }
-    });
-//    edit card name and archive card
-        activateEditThingLinks("tcden",data.trello_card_id);
-        activateEditCardNameSubmit(data.trello_card_id);
-        activateArchiveCardSubmit(data.trello_card_id);
-//    Add checklist
-        activateAddThingLinks("tcdacl",data.trello_card_id);
-        activateAddChecklistSubmit(data.trello_card_id);
-    $(".trello_card_detail_checklist").each(function() {
-        checkListID = $(this).attr("checklistID");
-//        add checkitems
-        activateAddThingLinks("tcdaci",checkListID);
-        activateAddCheckItemSubmit(checkListID);
-//        edit checklist names
-        activateEditThingLinks("tcdec",checkListID);
-        activateEditChecklistNameSubmit(checkListID)
-        activateDeleteChecklistSubmit(checkListID);
-    });
+    if(data.user_can_edit){
 
-    $(".trello_card_detail_checklist_checkitem").each(function() {
-        checkItemID = $(this).attr("checkitemid");
-//        edit checkitems
-        activateEditThingLinks("tcdeci",checkItemID);
-        activateEditCheckItemSubmit(checkItemID);
-        activateDeleteCheckItemSubmit(checkItemID);
-    });
+    //    edit card name and archive card
+            activateEditThingLinks("tcden",data.trello_card_id);
+            activateEditCardNameSubmit(data.trello_card_id);
+            activateArchiveCardSubmit(data.trello_card_id);
+    //    edit card description
+          activateEditThingLinks("tcded",data.trello_card_id);
+          activateEditCardDescriptionSubmit(data.trello_card_id);
 
+    //    Add checklist
+            activateAddThingLinks("tcdacl",data.trello_card_id);
+            activateAddChecklistSubmit(data.trello_card_id);
+        $(".trello_card_detail_checklist").each(function() {
+            checkListID = $(this).attr("checklistID");
+    //        add checkitems
+            activateAddThingLinks("tcdaci",checkListID);
+            activateAddCheckItemSubmit(checkListID);
+    //        edit checklist names
+            activateEditThingLinks("tcdec",checkListID);
+            activateEditChecklistNameSubmit(checkListID)
+            activateDeleteChecklistSubmit(checkListID);
 
+        });
+
+        $(".trello_card_detail_checklist_checkitem").each(function() {
+            checkItemID = $(this).attr("checkitemid");
+    //        edit checkitems
+            activateEditThingLinks("tcdeci",checkItemID);
+            activateEditCheckItemSubmit(checkItemID);
+            activateDeleteCheckItemSubmit(checkItemID);
+        });
+
+    }
 
     if(data.trello_card.badges.attachments>0){
         the_url = "attachments/" + data.trello_card_id;
@@ -267,6 +315,7 @@ function activateAddChecklistSubmit(cardID){
     //          Clear out the contents of the textarea, hide the name input div,
     //          and show the add card div (i.e. click the cancel button)
             $("#tcdaclc-"+theCardID).click();
+              reloadCardFromTrello(theCardID);
           }).fail(function(xhr) {
                     console.log("Card creation failed.");
                 });
@@ -308,6 +357,7 @@ function activateAddCheckItemSubmit(checklistID){
    //          Clear out the contents of the textarea, hide the name input div,
     //          and show the add card div (i.e. click the cancel button)
         $("#tcdacic-"+checklistID).click();
+          reloadCardFromTrello(cardID);
       }).fail(function(xhr) {
                 console.log("Card creation failed.");
             });
@@ -319,14 +369,12 @@ function activateAddCheckItemSubmit(checklistID){
 function activateEditCheckItemSubmit(checkitemID){
     $("#tcdecib-"+checkitemID).click(function() {
     //        Make sure the box isn't empty, then send the contents and the list to the create new card method
-
         checkItemName = $("#tcdecin-" + checkitemID).val();
-        theCheckListID = checkitemID;
+        theCheckItemID = checkitemID;
         checklistID = $("#tcdecin-" + checkitemID).attr("checklistid");
         cardID = $("#tcdecin-" + checkitemID).attr("cardid");
 
     if (checkItemName.trim() != ""){
-    //          Send the checkitem name, checklist id, checkitem id, and card id to trello
       $.ajax({
                 type: 'PUT',
                 url: 'checkitem/',
@@ -336,13 +384,14 @@ function activateEditCheckItemSubmit(checkitemID){
                     checklistid: checklistID,
                     name: checkItemName,
                     cardid: cardID,
-                    checkitemid: theCheckListID
+                    checkitemid: theCheckItemID
                 })
             }).done(function(data) {
-                $("#tcdecio-"+theCheckListID).text(checkItemName);
-                $("#tcdecic-"+theCheckListID).click();
+                $("#tcdecio-"+theCheckItemID).text(checkItemName);
+                $("#tcdecic-"+theCheckItemID).click();
+                reloadCardFromTrello(cardID);
       }).fail(function(xhr) {
-                $("#tcdecic-"+theCheckListID).click();
+                $("#tcdecic-"+theCheckItemID).click();
                 console.log("Checkitem update failed.");
             });
     }
@@ -370,6 +419,7 @@ function activateEditCardNameSubmit(cardID){
             }).done(function(data) {
                 $("#tcdeno-"+theCardID).text(checklistName);
                 $("#tcdenc-"+theCardID).click();
+                reloadCardFromTrello(theCardID);
       }).fail(function(xhr) {
                 $("#tcdenc-"+theCardID).click();
                 console.log("Checkitem update failed.");
@@ -378,6 +428,41 @@ function activateEditCardNameSubmit(cardID){
     });
 }
 
+function activateEditCardDescriptionSubmit(cardID){
+    $("#tcdedb-"+cardID).click(function() {
+    //        Make sure the box isn't empty, then send the contents and the list to the create new card method
+        theCardID = cardID;
+        cardDescription = $("#tcdedn-" + cardID).val();
+
+
+
+      $.ajax({
+                type: 'PUT',
+                url: 'card/description/',
+                contentType: 'application/json',
+                dataType: 'json',
+                data: JSON.stringify({
+                    desc: cardDescription,
+                    cardid: theCardID
+                })
+            }).done(function(data) {
+                $("#tcdedo-"+theCardID).text(cardDescription);
+                converter = new Showdown.converter();
+                if(cardDescription != "") {
+                    converted = converter.makeHtml(replaceURLWithHTMLLinks(cardDescription));
+                } else {
+                    converted = converter.makeHtml(replaceURLWithHTMLLinks("*Edit description…*"));
+                }
+                $("#tcdedom-"+theCardID).html(converted);
+                $("#tcdedc-"+theCardID).click();
+                reloadCardFromTrello(theCardID);
+      }).fail(function(xhr) {
+                $("#tcdedc-"+theCardID).click();
+                console.log("Checkitem update failed.");
+            });
+
+    });
+}
 
 function activateEditChecklistNameSubmit(checklistID){
     $("#tcdecb-"+checklistID).click(function() {
@@ -413,6 +498,7 @@ function activateDeleteCheckItemSubmit(checkitemID){
 
         theCheckListID = checkitemID;
         checklistID = $("#tcdecin-" + checkitemID).attr("checklistid");
+        cardID = $("#tcdecin-" + checkitemID).attr("cardID");
 
 
       $.ajax({
@@ -427,6 +513,8 @@ function activateDeleteCheckItemSubmit(checkitemID){
             }).done(function(data) {
                 $("#tcdecig-"+theCheckListID).remove();
                 $("#tcdeciog-"+theCheckListID).remove();
+                reloadCardFromTrello(cardID);
+
       }).fail(function(xhr) {
                 $("#tcdecic-"+theCheckListID).click();
                 console.log("Checkitem delete failed.");
@@ -457,6 +545,7 @@ function activateDeleteChecklistSubmit(checklistID){
                 $("#tcdecog-"+theCheckListID).remove();
                 $("#tcdacig-"+theCheckListID).remove();
                 $("#tcdacil-"+theCheckListID).remove();
+                reloadCardFromTrello(cardID);
       }).fail(function(xhr) {
                 $("#tcdecc-"+theCheckListID).click();
                 console.log("Checkitem delete failed.");
@@ -570,10 +659,15 @@ function activateEditThingLinks(prefix,identifier) {
                 });
         });
 
+        $("#"+prefix+"om-"+identifier).click(function() {
+            $("#"+prefix+"o-"+identifier).click();
+        });
+
         $("#"+prefix+"c-"+identifier).click(function() {
      //        Replace contents of text box with original text, hide the edit div, show the add div
             //listID = $(this).attr("listID");
             originalText = $("#"+prefix+"o-"+identifier).text();
+
             $("#"+prefix+"n-" + identifier).val(originalText);
             $("#"+prefix+"g-" + identifier).hide();
             $("#"+prefix+"og-" + identifier).show();
@@ -583,9 +677,11 @@ function activateEditThingLinks(prefix,identifier) {
     //        Prevent the enter key from adding a return into the box. Otherwise act like pressing the add button
            if(e.keyCode == 13) // Enter key is pressed
            {
-               event.preventDefault();
-               //listID = $(this).attr("listID");
-                $("#"+prefix+"b-"+identifier).click();
+               if($("#"+prefix+"n-"+identifier).attr("submitOnReturn") != "false") {
+                   event.preventDefault();
+                   //listID = $(this).attr("listID");
+                    $("#"+prefix+"b-"+identifier).click();
+               }
            }
         });
 
@@ -603,11 +699,6 @@ function activateEditThingLinks(prefix,identifier) {
     });
 
 }
-
-
-//
-//  Edit description
-//
 
 
 
@@ -636,7 +727,6 @@ function checkCheckItem(cardID,checkListID,checkItemID){
         //                    console.log("Update done.");
     }).fail(function(xhr) {
         // if it fails, revert the check/uncheck
-        // TODO: Add a warning about not being able to do stuff
         if($("#tcdc-ci-"+checkItemID).is(':checked')){
             $("#tcdc-ci-"+checkItemID).prop('checked', false);
         }else {
@@ -646,19 +736,3 @@ function checkCheckItem(cardID,checkListID,checkItemID){
     });
 }
 
-
-
-//
-//  Add comment
-//
-
-
-
-//
-//  Add/edit due date
-//
-
-
-//
-//  Add Lists
-//

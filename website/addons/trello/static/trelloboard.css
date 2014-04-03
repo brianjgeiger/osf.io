@@ -1,4 +1,7 @@
-/* @override http://localhost:5000/addons/static/trello/trelloboard.css */
+/* @override 
+	http://localhost:5000/addons/static/trello/trelloboard.css
+	http://127.0.0.1:8000/addons/static/trello/trelloboard.css
+*/
 
 div#KanbanBoard
 {
@@ -15,6 +18,12 @@ div#KanbanBoard
 
 
 div#TrelloList {
+	-webkit-touch-callout: none;
+-webkit-user-select: none;
+-khtml-user-select: none;
+-moz-user-select: none;
+-ms-user-select: none;
+user-select: none;
 }
 
 div.TrelloListBlock
@@ -26,11 +35,25 @@ div.TrelloListBlock
 	cursor: default;
 	margin: 0 5px 20px;
 	min-height: 20px;
+	
+	-webkit-touch-callout: none;
+-webkit-user-select: none;
+-khtml-user-select: none;
+-moz-user-select: none;
+-ms-user-select: none;
+user-select: none;
 }
 
 span.TrelloListName {
 	font: bold 18px arial, verdana, sans-serif;
 	padding-left: 5px;
+	
+	-webkit-touch-callout: none;
+-webkit-user-select: none;
+-khtml-user-select: none;
+-moz-user-select: none;
+-ms-user-select: none;
+user-select: none;
 }
 
 div.TrelloListBlock.over {
@@ -41,6 +64,13 @@ div.CardList{
 	min-height: 20px;
 	min-width: 200px;
 	display: table;
+	
+	-webkit-touch-callout: none;
+-webkit-user-select: none;
+-khtml-user-select: none;
+-moz-user-select: none;
+-ms-user-select: none;
+user-select: none;
 }
 
 
@@ -77,6 +107,13 @@ div.TrelloCard
 	float: left;
 	min-height: 40px;
 	margin: 5px 5px 5px 9px;
+	
+	-webkit-touch-callout: none;
+-webkit-user-select: none;
+-khtml-user-select: none;
+-moz-user-select: none;
+-ms-user-select: none;
+user-select: none;
 
 }
 
@@ -142,7 +179,7 @@ span.add_trello_card_cancel {
 }
 
 div.TrelloCardName {
-	padding-right: 15px;
+	padding-right: 20px;
 }
 
 span.attachment_preview {
@@ -225,7 +262,7 @@ div.trello_card_detail_comment_header {
 div.trello_card_detail_name {
 	font: bold 18px "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif;
 	margin-bottom: 5px;
-	width: 70%;
+	width: 65%;
 	display: inline-block;
 }
 
@@ -241,6 +278,10 @@ div.trello_card_detail_edit_name_original_group {
 	margin-right: 20px;
 }
 
+.trello_card_detail_comment_unsupported {
+	font-size: 11px;
+	margin-top: 10px;
+}
 div.trello_card_detail_attchment_header {
 	font-weight: bold;
 	font-size: 14px;
@@ -604,7 +645,74 @@ div.trello_card_detail_edit_name_group {
 	width: 100%;
 }
 
+/*trello_card_detail_edit_description_*/
 
+div.trello_card_detail_edit_description_group {
+	display: none;
+	width: 100%;
+	white-space: normal;
+	padding-top: 5px;
+	min-height: 40px;
+	text-align: left;
+	min-height: 100px;
+}
+
+.trello_card_detail_edit_description_name{
+	border-style: none;
+	border-width: 1px;
+	width: 100%;
+	background-color: #fefefc;
+	border-style: outset;
+	border-bottom-color: #fcfcfc;
+	border-radius: 5px;
+	white-space: normal;
+	padding-top: 5px;
+	padding-bottom: 5px;
+	resize: vertical;
+	font: 12px arial, verdana, sans-serif;
+}
+
+.trello_card_detail_edit_description_cancel {
+		display: inline-block;
+	padding-top: 5px;
+	color: #6e6e6e;
+	font: bold 20px/10px "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif;
+	margin-left: 4px;
+}
+
+.trello_card_detail_edit_description_delete {
+	display: inline-block;
+	padding-top: 5px;
+	color: #6e6e6e;
+	font: 12px/10px "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif;
+	margin-left: 4px;
+	text-align: right;
+	padding-left: 40px;
+	margin-right: 20px;
+}
+
+.trello_card_detail_edit_description_button {
+		padding: 5px;
+	margin: 5px;
+	display: inline-block;
+	background-color: #3db333;
+	color: #feffff;
+}
+
+.trello_card_detail_edit_description_link {
+	font: normal normal 12px arial, verdana, sans-serif;
+	display: block;
+	white-space: normal;
+	padding-top: 5px;
+	padding-left: 10px;
+	color: #848484;
+	width: 100%;
+}
+
+.trello_card_detail_desc_hidden {
+	display: none;
+	visibility: hidden;
+}
 
 /* Trello card detail dialog box */
 
@@ -624,14 +732,14 @@ div.trello_card_detail_edit_name_group {
 	white-space: normal;
 	display: inline;
 	width: 600px;
-	height: 90%;
+	max-height: 90%;
 	padding: 20px;
 	background-color: #feffff;
 	top: 5%;
 	left: 33%;
 	position: absolute;
 	border-radius:5px;
-	overflow: scroll;
+	overflow-y: auto;
 }
 
   .portlet-toggle {
@@ -648,3 +756,17 @@ div.trello_card_detail_edit_name_group {
     margin: 0 1em 1em 0;
     height: 50px;
   }
+  
+  
+ /* Progress bar */
+
+div.ui-progressbar {
+	width: 100%;
+	position: fixed;
+	height: 10px;
+	display: block;
+	float: right;
+	z-index: 999999;
+	left: 0;
+	top: 50px;
+}
