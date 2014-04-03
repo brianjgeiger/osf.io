@@ -31,6 +31,7 @@ INCLUDE_JS = {
         '/addons/static/trello/kanbanic.js',
         '/addons/static/trello/jquery.kinetic.js' ,
         '/addons/static/trello/handlebars-v1.3.0.js',
+        '/addons/static/trello/Autolinker.js',
     ]
 }
 
