@@ -115,7 +115,6 @@ def trello_page(auth, project, node, **kwargs):
 def trello_lists(auth, project, node, **kwargs):
     node = node or project
     node_settings = kwargs['node_addon']
-    trello = node.get_addon('trello')
     trello_board_name = node_settings.trello_board_name.strip()
     trello_board_id = node_settings.trello_board_id
     user_can_edit = can_user_write_to_project_board(**kwargs)
@@ -123,19 +122,12 @@ def trello_lists(auth, project, node, **kwargs):
     if trello_board_name is not None:
         trello_api = Trello.from_settings(node_settings.user_settings)
         trello_board_url = trello_api.get_board_url(trello_board_id)
-        trello_lists = trello_api.get_lists_from_board(trello_board_id)
-        trello_cards = {} # trello_api.get_cards_from_board(trello_board_id)
-        for trello_list in trello_lists:
-            trello_list['cards'] = {}
-        data = _view_project(node, auth)
+        the_lists = trello_api.get_lists_from_board(trello_board_id)
         return_value = {
             'complete': True,
             'trello_board_name': trello_board_name,
             'trello_board_url': trello_board_url,
-            'trello_lists': trello_lists,
-            'trello_cards': trello_cards,
-            'addon_page_js': trello.config.include_js['page'],
-            'addon_page_css': trello.config.include_css['page'],
+            'trello_lists': the_lists,
             'user_can_edit': user_can_edit,
         }
     else:
@@ -143,15 +135,11 @@ def trello_lists(auth, project, node, **kwargs):
         return_value = {
             'complete': False,
             'trello_lists': {u'name': "", },
-            'trello_cards': {},
             'trello_board_url': None,
             'trello_board_name': None,
-            'addon_page_js': trello.config.include_js['page'],
-            'addon_page_css': trello.config.include_css['page'],
             'user_can_edit': user_can_edit,
 
         }
-    return_value.update(data)
     return return_value
 
 

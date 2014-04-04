@@ -1,0 +1,32 @@
+{
+    "complete": true,
+    "trello_board_name": "OSF Trello",
+    "trello_board_url": "https://trello.com/b/Kg6ZmCRJ/osf-trello",
+    "trello_lists": [
+        {
+            "closed": false,
+            "id": "1",
+            "idBoard": "53189b693b58e0d16ac26e51",
+            "name": "One",
+            "pos": 10000,
+            "subscribed": false
+        },
+        {
+            "closed": false,
+            "id": "2",
+            "idBoard": "53189b693b58e0d16ac26e51",
+            "name": "Two",
+            "pos": 30000,
+            "subscribed": false
+        },
+        {
+            "closed": false,
+            "id": "3",
+            "idBoard": "53189b693b58e0d16ac26e51",
+            "name": "Three",
+            "pos": 30000,
+            "subscribed": false
+        }
+    ],
+    "user_can_edit": false
+}
