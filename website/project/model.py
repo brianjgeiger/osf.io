@@ -84,7 +84,8 @@ def ensure_schemas(clear=True):
 
     """
     if clear:
-        MetaSchema.remove()
+        None
+        # MetaSchema.remove()
     for schema in OSF_META_SCHEMAS:
         try:
             MetaSchema.find_one(

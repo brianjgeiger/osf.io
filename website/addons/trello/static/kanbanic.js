@@ -9,7 +9,7 @@ function loadListCards(listID) {
     $.getJSON( the_url, function(data){
         $.each(data.trello_cards, function() {
             var newDiv = cardTemplate($(this)[0]);
-            $("#cl-" + listID).append(newDiv);
+             $("#cl-" + listID).append(newDiv);
         });
         makeCardListsSortable();
     });
@@ -39,8 +39,6 @@ function reloadCardFromTrello(cardID) {
     var the_url = "card/"+cardID;
     $.getJSON( the_url, function(data){
         var newDiv = cardTemplate(data.trello_card);
-        console.log(data);
-        console.log("#tc-"+cardID);
         $("#tc-"+cardID).replaceWith(newDiv);
     });
 }

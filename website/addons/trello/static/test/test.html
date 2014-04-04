@@ -12,9 +12,7 @@
 <script src="../Autolinker.js"></script>
 <script src="jquery.mockjax.js"></script>
 
-<script id="kanban-card-template" type="text/x-handlebars-template">
-    <div id="tc-{{ id }}">id,{{id}},name,{{ name }},cardpos,{{pos}},coverURL,{{coverURL}},desc,{{ desc }},subscribed,{{ subscribed }},badges.checkItems,{{ badges.checkItems }},badges.checkItemsChecked,{{ badges.checkItemsChecked }},badges.comments,{{ badges.comments }},badges.attachments,{{ badges.attachments }},due_date_string,{{ due_date_string }}</div>
-</script>
+<script id="kanban-card-template" type="text/x-handlebars-template"><div id="tc-{{ id }}">id,{{id}},name,{{ name }},cardpos,{{pos}},coverURL,{{coverURL}},desc,{{ desc }},subscribed,{{ subscribed }},badges.checkItems,{{ badges.checkItems }},badges.checkItemsChecked,{{ badges.checkItemsChecked }},badges.comments,{{ badges.comments }},badges.attachments,{{ badges.attachments }},due_date_string,{{ due_date_string }}</div></script>
 
 <script id="kanban-card-detail-checkitem-template" type="text/x-handlebars-template">
                         <div class = "trello_card_detail_edit_checkitem_group" id="tcdecig-{{id}}">
@@ -257,35 +255,7 @@
         {{/each}}
 </script>
 
-<script id="kanban-board-template" type="text/x-handlebars-template">
-    <span class="TrelloBoardName"><a href="{{trello_board_url}}" target=":_blank">{{trello_board_name}}
-        <img src = "/addons/static/trello/to_trello_24.png" title="Open '{{trello_board_name}}' on Trello"></a></span>
-
-    <div id="TrelloList">
-        {{#each trello_lists}}
-            <div class="TrelloListBlock" id="tl-{{id}}" listID="{{id}}">
-            <span class="TrelloListName">{{name}}</span>
-                {{#if ../user_can_edit}}
-                    <div class="CardList" id="cl-{{id}}" listID="{{id}}">
-
-                    </div>
-                    <div class = "add_trello_card_group" id="atcg-{{id}}" listID = "{{id}}">
-                        <textarea maxlength="16384" rows="2" name="atcn-{{id}}"
-                            class="add_trello_card_name" id="atcn-{{id}}" listID = "{{id}}"> </textarea> <br />
-                        <span class = "add_trello_card_button" id ="atcb-{{id}}" listID = "{{id}}">Add</span>
-                        <span class = "add_trello_card_cancel" id ="atcc-{{id}}" listID = "{{id}}">X</span>
-                    </div>
-                {{else}}
-                    <div class="CardListNoEdit" id="cl-{{id}}" listID="{{id}}"></div>
-                {{/if}}
-                {{#if ../user_can_edit}}
-                    <div class = "add_trello_card_link" id="atcl-{{id}}" listID = "{{id}}">Add a card…</div>
-
-                {{/if}}
-            </div>
-        {{/each}}
-    </div>
-</script>
+<script id="kanban-board-template" type="text/x-handlebars-template">trello_board_url={{trello_board_url}},trello_board_name={{trello_board_name}}{{#each trello_lists}}<div class="TrelloListBlock" id="cl-{{ id }}" listID="{{id}}">listID={{id}},listName={{name}}</div>{{/each}}</script>
 
 
 
@@ -298,10 +268,28 @@
         proxy: 'mocks/card1.json'
 
     });
+    $.mockjax({
+        url: 'lists',
+        responseTime: 1,
+        proxy: 'mocks/lists.json'
+
+    });
+
+    $.mockjax(function(lists) {
+  // lists.url == 'list/<listnum>'
+  var listnum = lists.url.match(/list\/(.*)$/);
+  if ( listnum ) {
+    return {
+      responseTime: 1,
+      proxy: 'mocks/list' + listnum[1] + '.json'
+    };
+  }
+  return;
+});
     module("Fill out elements from AJAX calls");
-    asyncTest("should fill in a card with useful information", function(assert) {
+    asyncTest("should fill in a card with useful information - reloadCardFromTrello()", function(assert) {
         expect(1);
-        equal($("div#tc-1").html(),expectedText);
+
         var $fixture = $( "#qunit-fixture" );
         var expectedText = "id,1,name,Overview screen decorations,cardpos,327679,coverURL,,desc,,subscribed,,badges.checkItems,12,"+
             "badges.checkItemsChecked,10,badges.comments,0,badges.attachments,0,due_date_string,";
@@ -311,9 +299,29 @@
 
         //Perform ajax call, fill out Mustache template, modify div
         reloadCardFromTrello(1);
+        var textChange = false;
+
         setTimeout(function() {
+            equal($("div#tc-1").html(),expectedText);
             start();
-        }, 10);
+        }, 500);
+
+    });
+
+    asyncTest("should fill in the board with useful information - loadBoard()", function(assert) {
+        expect(1);
+
+        var $fixture = $( "#qunit-fixture" );
+        var expectedText ='trello_board_url=https://trello.com/b/Kg6ZmCRJ/osf-trello,trello_board_name=OSF Trello<div class="TrelloListBlock" id="cl-1" listid="1">listID=1,listName=One<div id="tc-1">id,1,name,One,cardpos,1462271,coverURL,,desc,Card One,subscribed,,badges.checkItems,1,badges.checkItemsChecked,0,badges.comments,0,badges.attachments,0,due_date_string,</div><div id="tc-2">id,2,name,Two,cardpos,1482751,coverURL,,desc,,subscribed,,badges.checkItems,0,badges.checkItemsChecked,0,badges.comments,0,badges.attachments,0,due_date_string,</div></div><div class="TrelloListBlock" id="cl-2" listid="2">listID=2,listName=Two<div id="tc-3">id,3,name,Three,cardpos,1462271,coverURL,,desc,Card Three,subscribed,,badges.checkItems,1,badges.checkItemsChecked,0,badges.comments,0,badges.attachments,0,due_date_string,</div><div id="tc-4">id,4,name,Four,cardpos,1482751,coverURL,,desc,,subscribed,,badges.checkItems,0,badges.checkItemsChecked,0,badges.comments,0,badges.attachments,0,due_date_string,</div></div><div class="TrelloListBlock" id="cl-3" listid="3">listID=3,listName=Three<div id="tc-5">id,5,name,Five,cardpos,1462271,coverURL,,desc,Card Five,subscribed,,badges.checkItems,1,badges.checkItemsChecked,0,badges.comments,0,badges.attachments,0,due_date_string,</div><div id="tc-6">id,6,name,Six,cardpos,1482751,coverURL,,desc,,subscribed,,badges.checkItems,0,badges.checkItemsChecked,0,badges.comments,0,badges.attachments,0,due_date_string,</div></div>';
+        // Create a card div
+        $fixture.append('<div id="KanbanBoard"></div>');
+
+        //Perform ajax call, fill out Mustache template, modify div
+        loadBoard();
+        setTimeout(function() {
+            equal($("#KanbanBoard").html(),expectedText);
+            start();
+        }, 500);
     });
 
 
@@ -326,7 +334,5 @@
 
 
 <div id="qunit-fixture">
-    <div id="KanbanBoard">
-        <div id="progressbar"></div>
-    </div>
+
 </div>
