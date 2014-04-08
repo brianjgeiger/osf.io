@@ -1,3 +1,6 @@
+function reportError(errorText){
+    alertify.error(errorText);
+}
 
 //
 //  List loading
@@ -7,12 +10,28 @@ function loadListCards(listID) {
     var cardTemplate = Handlebars.compile($("#kanban-card-template").html());
     var the_url = "list/" + listID;
     $.getJSON( the_url, function(data){
-        $.each(data.trello_cards, function() {
-            var newDiv = cardTemplate($(this)[0]);
-             $("#cl-" + listID).append(newDiv);
+        if(data.error)
+        {
+            reportError(data.errorInfo+". " +data.HTTPError );
+        }else {
+            $.each(data.trello_cards, function() {
+                var newDiv = cardTemplate($(this)[0]);
+                 $("#cl-" + listID).append(newDiv);
+            });
+            makeCardListsSortable();
+            if(data.istest){
+                ok(true,"loadListCards Succeeded");
+                if(data.oneTestOnly){
+                    var expectedText ='trello_board_url=https://trello.com/b/Kg6ZmCRJ/osf-trello,trello_board_name=OSF Trello<div class=\"TrelloListBlock\" id=\"cl-1\" listid=\"1\">listID=1,listName=One<div id=\"tc-list/1,11\">id,list/1,11,name,\"list/1,11\",cardpos,1462271,coverURL,,desc,\"list/1,11\",subscribed,,badges.checkItems,1,badges.checkItemsChecked,0,badges.comments,0,badges.attachments,0,due_date_string,</div><div id=\"tc-list/1,12\">id,list/1,12,name,\"list/1,12\",cardpos,1482751,coverURL,,desc,\"list/1,12\",subscribed,,badges.checkItems,0,badges.checkItemsChecked,0,badges.comments,0,badges.attachments,0,due_date_string,</div></div>';        // Create a card div
+                    equal($("#KanbanBoard").html(),expectedText,"Matched Div info");
+                    start();
+                }
+            }
+        }
+    }).fail(function( jqxhr, textStatus, error ) {
+            var err = textStatus + ", " + error;
+            reportError( "Request Failed: " + err );
         });
-        makeCardListsSortable();
-    });
 }
 
 function loadBoard() {
@@ -26,6 +45,9 @@ function loadBoard() {
             loadListCards(listID);
             activateAddThingLinks("atc",listID);
             activateAddCardSubmit(listID);
+            if(data.istest){
+                ok(true,"loadBoard succeeded");
+            }
         });
     });
 }
@@ -37,10 +59,25 @@ function loadBoard() {
 function reloadCardFromTrello(cardID) {
     var cardTemplate = Handlebars.compile($("#kanban-card-template").html());
     var the_url = "card/"+cardID;
-    $.getJSON( the_url, function(data){
-        var newDiv = cardTemplate(data.trello_card);
-        $("#tc-"+cardID).replaceWith(newDiv);
-    });
+    var jqxhr = $.getJSON( the_url, function(data){
+        if(data.error)
+        {
+            reportError(data.errorInfo+". " +data.HTTPError );
+        }else {
+            var newDiv = cardTemplate(data.trello_card);
+            $("#tc-"+cardID).replaceWith(newDiv);
+            if(data.istest){
+                start();
+                var expectedText = "id,1,name,Overview screen decorations,cardpos,327679,coverURL,,desc,,subscribed,,badges.checkItems,12,badges.checkItemsChecked,10,badges.comments,0,badges.attachments,0,due_date_string,";
+                equal($("div#tc-1").html(),expectedText);
+
+            }
+        }
+    })
+        .fail(function( jqxhr, textStatus, error ) {
+            var err = textStatus + ", " + error;
+            reportError( "Request Failed: " + err );
+        });
 }
 
 //
@@ -98,33 +135,38 @@ function makeCardListsSortable() {
                     cardid: cardID,
                     cardpos: newCardPos
                 })
-            }).done(function() {
-        //                    console.log("Update done.");
-            }).fail(function(xhr) {
-              //  console.log(originalCardAfter);
-                prevCard = null;
-                $("#"+oldListDivID).find(".TrelloCard").each(function(){
-                    oldCardPos = parseFloat($("#"+cardDivID).attr('cardPos'));
-                    iterationCardPos = parseFloat($(this).attr('cardPos'));
-
-                    if(oldCardPos > iterationCardPos){
-                        prevCard=$(this);
-                    }
-                });
-                if(prevCard) {
-                    prevCard.after($("#"+cardDivID));
-                } else {
-                    $("#"+cardDivID).prependTo(oldList);
+            }).done(function(data) {
+                if(data && data.error){
+                    restoreCardPosition(oldListDivID,cardDivID,oldList);
+                    reportError(data.errorInfo+". " +data.HTTPError );
                 }
-                console.log("Update failed.");
+
+            }).fail(function(xhr) {
+                console.log(xhr);
+                reportError("Update failed. " + xhr.statusText + ".");
+                restoreCardPosition(oldListDivID,cardDivID,oldList);
             });
         }
       }
     }).disableSelection();
-
-
   }
 
+function restoreCardPosition(oldListDivID,cardDivID,oldList) {
+    var prevCard = null;
+    $("#"+oldListDivID).find(".TrelloCard").each(function(){
+        var oldCardPos = parseFloat($("#"+cardDivID).attr('cardPos'));
+        var iterationCardPos = parseFloat($(this).attr('cardPos'));
+
+        if(oldCardPos > iterationCardPos){
+            prevCard=$(this);
+        }
+    });
+    if(prevCard) {
+        prevCard.after($("#"+cardDivID));
+    } else {
+        $("#"+cardDivID).prependTo(oldList);
+    }
+}
 //
 //  Card details
 //

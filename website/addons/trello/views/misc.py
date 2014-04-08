@@ -19,6 +19,8 @@ from website import models
 from ..api import Trello
 import logging
 import dateutil
+from ..exceptions import TrelloError
+from requests import HTTPError as requestsHTTPError
 
 logger = logging.getLogger(__name__)
 
@@ -69,12 +71,12 @@ def trello_widget(*args, **kwargs):
     node = kwargs['node'] or kwargs['project']
     trello = node.get_addon('trello')
     summary = trello._summarize_references()
-    rv = {
+    return_value = {
         'complete': bool(summary),
         'summary': summary,
     }
-    rv.update(trello.config.to_json())
-    return rv
+    return_value.update(trello.config.to_json())
+    return return_value
 
 @must_be_contributor_or_public
 @must_have_addon('trello', 'node')
@@ -101,6 +103,8 @@ def trello_page(auth, project, node, **kwargs):
         data = _view_project(node, auth)
         return_value = {
             'complete': False,
+            'error': True,
+            'errorInfo': "Could not find board in project settings",
             'trello_board_name': None,
             'trello_board_id': None,
             'addon_page_js': trello.config.include_js['page'],
@@ -120,7 +124,16 @@ def trello_lists(auth, project, node, **kwargs):
     user_can_edit = can_user_write_to_project_board(**kwargs)
 
     if trello_board_name is not None:
-        trello_api = Trello.from_settings(node_settings.user_settings)
+        try:
+            trello_api = Trello.from_settings(node_settings.user_settings)
+        except requestsHTTPError as e:
+            return_value = {
+                'error': True,
+                'HTTPError': e[0][0],
+                'errorInfo': "Could not connect to Trello",
+                'trello_board_id': trello_board_id,
+            }
+            return return_value
         trello_board_url = trello_api.get_board_url(trello_board_id)
         the_lists = trello_api.get_lists_from_board(trello_board_id)
         return_value = {
@@ -134,6 +147,8 @@ def trello_lists(auth, project, node, **kwargs):
         data = _view_project(node, auth)
         return_value = {
             'complete': False,
+            'error': True,
+            'errorInfo': "Could not find board in project settings",
             'trello_lists': {u'name': "", },
             'trello_board_url': None,
             'trello_board_name': None,
@@ -158,7 +173,16 @@ def trello_card_details(**kwargs):
 
     if trello_board_name is not None:
         user_can_edit = can_user_write_to_project_board(**kwargs)
-        trello_api = Trello.from_settings(node_settings.user_settings)
+        try:
+            trello_api = Trello.from_settings(node_settings.user_settings)
+        except requestsHTTPError as e:
+            return_value = {
+                'error': True,
+                'HTTPError': e[0][0],
+                'errorInfo': "Could not connect to Trello",
+                'trello_card_id': card_id,
+            }
+            return return_value
         try:
             card = trello_api.get_card(card_id)
             card[u'comments'] = trello_api.get_comments_from_card(card_id)
@@ -176,10 +200,12 @@ def trello_card_details(**kwargs):
                 'trello_card_id': card_id,
                 'user_can_edit': user_can_edit,
             }
-        except OSFHTTPError as e:
+        except TrelloError as e:
             return_value = {
                 'complete': True,
-                'HTTPError': e,
+                'error': True,
+                'errorInfo': "Could not load card details",
+                'HTTPError': e[0][0],
                 'trello_card': {},
                 'trello_card_id': card_id,
                 'user_can_edit': user_can_edit,
@@ -202,7 +228,16 @@ def trello_cards_from_lists(**kwargs):
 
     if trello_board_name is not None:
         user_can_edit = can_user_write_to_project_board(**kwargs)
-        trello_api = Trello.from_settings(node_settings.user_settings)
+        try:
+            trello_api = Trello.from_settings(node_settings.user_settings)
+        except requestsHTTPError as e:
+            return_value = {
+                'error': True,
+                'HTTPError': e[0][0],
+                'errorInfo': "Could not connect to Trello",
+                'trello_list_id': list_id,
+            }
+            return return_value
         try:
             cards = trello_api.get_cards_from_list(list_id)
             for card in cards:
@@ -226,10 +261,12 @@ def trello_cards_from_lists(**kwargs):
                 'trello_list_id': list_id,
                 'user_can_edit': user_can_edit,
             }
-        except OSFHTTPError as e:
+        except TrelloError as e:
             return_value = {
                 'complete': True,
-                'HTTPError': e,
+                'error': True,
+                'errorInfo': "Could not load cards for the list",
+                'HTTPError': e[0][0],
                 'trello_cards': {},
                 'trello_list_id': list_id,
                 'user_can_edit': user_can_edit,
@@ -270,10 +307,12 @@ def trello_card_attachments(**kwargs):
                 'attachments': attachments,
                 'trello_card_id': card_id,
             }
-        except OSFHTTPError as e:
+        except TrelloError as e:
             return_value = {
                 'complete': True,
-                'HTTPError': e,
+                'error': True,
+                'errorInfo': "Could not load attachments from card",
+                'HTTPError': e[0][0],
                 'attachments': {},
                 'trello_card_id': card_id,
             }
@@ -285,7 +324,6 @@ def trello_card_attachments(**kwargs):
 def trello_card_update(**kwargs):
     node_settings = kwargs['node_addon']
     node = node_settings.owner
-
     try:
         new_list_id = request.json.get('listid',None)
         new_card_pos = request.json.get('cardpos',None)
@@ -294,14 +332,34 @@ def trello_card_update(**kwargs):
         card_closed = request.json.get('closed',None)
     except:
         raise OSFHTTPError(http.BAD_REQUEST)
-
-    if not card_id:
-        raise OSFHTTPError(http.BAD_REQUEST)
+    else:
+        if not card_id:
+            raise OSFHTTPError(http.BAD_REQUEST)
 
     trello_board_name = node_settings.trello_board_name.strip()
     if trello_board_name is not None:
-        trello_api = Trello.from_settings(node_settings.user_settings)
-        trello_api.update_card(card_id,idList=new_list_id,pos=new_card_pos,name=new_card_name,closed=card_closed)
+        try:
+            trello_api = Trello.from_settings(node_settings.user_settings)
+        except requestsHTTPError as e:
+            return_value = {
+                'error': True,
+                'HTTPError': e[0][0],
+                'errorInfo': "Could not connect to Trello",
+                'trello_card_id': card_id,
+            }
+            return return_value
+        try:
+            trello_api.update_card(card_id=card_id,idList=new_list_id,pos=new_card_pos,name=new_card_name,closed=card_closed)
+        except TrelloError as e:
+            return_value = {
+                'error': True,
+                'HTTPError': e[0][0],
+                'errorInfo': "Could not update card",
+                'trello_card_id': card_id,
+            }
+            return return_value
+
+
 
 @must_have_permission('write')
 @must_have_addon('trello', 'node')
@@ -313,12 +371,31 @@ def trello_card_description_update(**kwargs):
         new_desc = request.json.get('desc', None)
     except:
         raise OSFHTTPError(http.BAD_REQUEST)
-    if not card_id and new_desc:
+    if not (card_id and new_desc):
         raise OSFHTTPError(http.BAD_REQUEST)
+
     trello_board_name = node_settings.trello_board_name.strip()
     if trello_board_name is not None:
-        trello_api = Trello.from_settings(node_settings.user_settings)
-        trello_api.update_card_description(card_id=card_id,desc=new_desc)
+        try:
+            trello_api = Trello.from_settings(node_settings.user_settings)
+        except requestsHTTPError as e:
+            return_value = {
+                'error': True,
+                'HTTPError': e[0][0],
+                'errorInfo': "Could not connect to Trello",
+                'trello_card_id': card_id,
+            }
+            return return_value
+        try:
+            trello_api.update_card_description(card_id=card_id,desc=new_desc)
+        except TrelloError as e:
+            return_value = {
+                'error': True,
+                'HTTPError': e[0][0],
+                'errorInfo': "Could not update card description",
+                'trello_card_id': card_id,
+            }
+            return return_value
 
 
 @must_have_permission('write')
@@ -337,9 +414,28 @@ def trello_checklist_update(**kwargs):
         raise OSFHTTPError(http.BAD_REQUEST)
 
     trello_board_name = node_settings.trello_board_name.strip()
+    trello_board_name = node_settings.trello_board_name.strip()
     if trello_board_name is not None:
-        trello_api = Trello.from_settings(node_settings.user_settings)
-        trello_api.update_checklist(checklist_id=checklist_id,name=new_checklist_name)
+        try:
+            trello_api = Trello.from_settings(node_settings.user_settings)
+        except requestsHTTPError as e:
+            return_value = {
+                'error': True,
+                'HTTPError': e[0][0],
+                'errorInfo': "Could not connect to Trello",
+                'checklist_id': checklist_id,
+            }
+            return return_value
+        try:
+            trello_api.update_checklist(checklist_id=checklist_id,name=new_checklist_name)
+        except TrelloError as e:
+            return_value = {
+                'error': True,
+                'HTTPError': e[0][0],
+                'errorInfo': "Could not update checklist",
+                'checklist_id': checklist_id,
+            }
+            return return_value
 
 
 @must_have_permission('write')
@@ -354,14 +450,33 @@ def trello_card_add(**kwargs):
     except:
         raise OSFHTTPError(http.BAD_REQUEST)
 
-    if not list_id and new_card_name:
+    if not (list_id and new_card_name):
         raise OSFHTTPError(http.BAD_REQUEST)
 
     trello_board_name = node_settings.trello_board_name.strip()
 
     if trello_board_name is not None:
-        trello_api = Trello.from_settings(node_settings.user_settings)
-        return_value = trello_api.create_card_in_list(card_name=new_card_name,list_id=list_id)
+        try:
+            trello_api = Trello.from_settings(node_settings.user_settings)
+        except requestsHTTPError as e:
+            return_value = {
+                'error': True,
+                'HTTPError': e[0][0],
+                'errorInfo': "Could not connect to Trello",
+                'list_id': list_id,
+            }
+            return return_value
+        try:
+            return_value = trello_api.create_card_in_list(card_name=new_card_name,list_id=list_id)
+        except TrelloError as e:
+            return_value = {
+                'error': True,
+                'HTTPError': e[0][0],
+                'errorInfo': "Could not add a card",
+                'list_id': list_id,
+            }
+            return return_value
+
     return return_value
 
 
@@ -377,14 +492,32 @@ def trello_checkitem_add(**kwargs):
     except:
         raise OSFHTTPError(http.BAD_REQUEST)
 
-    if not checklist_id and checkitem_name:
+    if not (checklist_id and checkitem_name):
         raise OSFHTTPError(http.BAD_REQUEST)
 
     trello_board_name = node_settings.trello_board_name.strip()
 
     if trello_board_name is not None:
-        trello_api = Trello.from_settings(node_settings.user_settings)
-        return_value = trello_api.create_checkitem_in_checklist(checklist_id,checkitem_name)
+        try:
+            trello_api = Trello.from_settings(node_settings.user_settings)
+        except requestsHTTPError as e:
+            return_value = {
+                'error': True,
+                'HTTPError': e[0][0],
+                'errorInfo': "Could not connect to Trello",
+                'checklist_id': checklist_id,
+            }
+            return return_value
+        try:
+            return_value = trello_api.create_checkitem_in_checklist(checklist_id,checkitem_name)
+        except TrelloError as e:
+            return_value = {
+                'error': True,
+                'HTTPError': e[0][0],
+                'errorInfo': "Could not add an item to the checklist",
+                'checklist_id': checklist_id,
+            }
+            return return_value
     return return_value
 
 
@@ -400,14 +533,32 @@ def trello_checklist_add(**kwargs):
     except:
         raise OSFHTTPError(http.BAD_REQUEST)
 
-    if not card_id and checklist_name:
+    if not (card_id and checklist_name):
         raise OSFHTTPError(http.BAD_REQUEST)
 
     trello_board_name = node_settings.trello_board_name.strip()
 
     if trello_board_name is not None:
-        trello_api = Trello.from_settings(node_settings.user_settings)
-        return_value = trello_api.create_checklist_in_card(card_id,checklist_name)
+        try:
+            trello_api = Trello.from_settings(node_settings.user_settings)
+        except requestsHTTPError as e:
+            return_value = {
+                'error': True,
+                'HTTPError': e[0][0],
+                'errorInfo': "Could not connect to Trello",
+                'card_id': card_id,
+            }
+            return return_value
+        try:
+            return_value = trello_api.create_checklist_in_card(card_id,checklist_name)
+        except TrelloError as e:
+            return_value = {
+                'error': True,
+                'HTTPError': e[0][0],
+                'errorInfo': "Could not add a checklist to the card",
+                'card_id': card_id,
+            }
+            return return_value
     return return_value
 
 
@@ -426,21 +577,43 @@ def trello_checkitem_update(**kwargs):
         checkitem_name = request.json.get('name',None)
     except:
         raise OSFHTTPError(http.BAD_REQUEST)
-    if not card_id and checklist_id and checkitem_id:
+    if not (card_id and checklist_id and checkitem_id):
         raise OSFHTTPError(http.BAD_REQUEST)
 
     trello_board_name = node_settings.trello_board_name.strip()
 
     if trello_board_name is not None:
-        trello_api = Trello.from_settings(node_settings.user_settings)
-        return_value = trello_api.update_checkitem(
-            card_id=card_id,
-             checklist_id=checklist_id,
-             checkitem_id=checkitem_id,
-             state=checkitem_state,
-             name=checkitem_name,
-             pos=checkitem_pos,
-             )
+        try:
+            trello_api = Trello.from_settings(node_settings.user_settings)
+        except requestsHTTPError as e:
+            return_value = {
+                'error': True,
+                'HTTPError': e[0][0],
+                'errorInfo': "Could not connect to Trello",
+                'card_id': card_id,
+                'checklist_id': checklist_id,
+                'checkitem_id': checkitem_id,
+            }
+            return return_value
+        try:
+            return_value = trello_api.update_checkitem(
+                card_id=card_id,
+                 checklist_id=checklist_id,
+                 checkitem_id=checkitem_id,
+                 state=checkitem_state,
+                 name=checkitem_name,
+                 pos=checkitem_pos,
+                 )
+        except TrelloError as e:
+            return_value = {
+                'error': True,
+                'HTTPError': e[0][0],
+                'errorInfo': "Could not update checklist item",
+                'card_id': card_id,
+                'checklist_id': checklist_id,
+                'checkitem_id': checkitem_id,
+           }
+            return return_value
     return return_value
 
 
@@ -456,14 +629,34 @@ def trello_checkitem_delete(**kwargs):
     except:
         raise OSFHTTPError(http.BAD_REQUEST)
 
-    if not checkitem_id and checklist_id:
+    if not (checkitem_id and checklist_id):
         raise OSFHTTPError(http.BAD_REQUEST)
 
     trello_board_name = node_settings.trello_board_name.strip()
 
     if trello_board_name is not None:
-        trello_api = Trello.from_settings(node_settings.user_settings)
-        return_value = trello_api.delete_checkitem(checkitem_id=checkitem_id,checklist_id=checklist_id)
+        try:
+            trello_api = Trello.from_settings(node_settings.user_settings)
+        except requestsHTTPError as e:
+            return_value = {
+                'error': True,
+                'HTTPError': e[0][0],
+                'errorInfo': "Could not connect to Trello",
+                'checklist_id': checklist_id,
+                'checkitem_id': checkitem_id,
+            }
+            return return_value
+        try:
+            return_value = trello_api.delete_checkitem(checkitem_id=checkitem_id,checklist_id=checklist_id)
+        except TrelloError as e:
+            return_value = {
+                'error': True,
+                'HTTPError': e[0][0],
+                'errorInfo': "Could not delete checklist item",
+                'checklist_id': checklist_id,
+                'checkitem_id': checkitem_id,
+           }
+            return return_value
         return return_value
 
 @must_have_permission('write')
@@ -478,14 +671,32 @@ def trello_checklist_delete(**kwargs):
     except:
         raise OSFHTTPError(http.BAD_REQUEST)
 
-    if not card_id and checklist_id:
+    if not (card_id and checklist_id):
         raise OSFHTTPError(http.BAD_REQUEST)
 
     trello_board_name = node_settings.trello_board_name.strip()
 
     if trello_board_name is not None:
-        trello_api = Trello.from_settings(node_settings.user_settings)
-        return_value = trello_api.delete_checklist_from_card(card_id=card_id,checklistID=checklist_id)
+        try:
+            trello_api = Trello.from_settings(node_settings.user_settings)
+        except requestsHTTPError as e:
+            return_value = {
+                'error': True,
+                'HTTPError': e[0][0],
+                'errorInfo': "Could not connect to Trello",
+                'checklist_id': checklist_id,
+            }
+            return return_value
+        try:
+            return_value = trello_api.delete_checklist_from_card(card_id=card_id,checklistID=checklist_id)
+        except TrelloError as e:
+            return_value = {
+                'error': True,
+                'HTTPError': e[0][0],
+                'errorInfo': "Could not delete checklist",
+                'checklist_id': checklist_id,
+           }
+            return return_value
         return return_value
 
 @must_have_permission('write')
@@ -505,11 +716,29 @@ def trello_card_delete(**kwargs):
     trello_board_name = node_settings.trello_board_name.strip()
 
     if trello_board_name is not None:
-        trello_api = Trello.from_settings(node_settings.user_settings)
-        return_value = trello_api.delete_card(card_id)
+        try:
+            trello_api = Trello.from_settings(node_settings.user_settings)
+        except requestsHTTPError as e:
+            return_value = {
+                'error': True,
+                'HTTPError': e[0][0],
+                'errorInfo': "Could not connect to Trello",
+                'card_id': card_id,
+            }
+            return return_value
+        try:
+            return_value = trello_api.delete_card(card_id)
+        except TrelloError as e:
+            return_value = {
+                'error': True,
+                'HTTPError': e[0][0],
+                'errorInfo': "Could not delete checklist",
+                'card_id': card_id,
+           }
+            return return_value
         return return_value
 
-
+#TODO: Implement users having their own tokens. When that happens, update the following method with these rules:
 # Reasons why a user can write (user always needs their own user token)
 # 1) Board is public
 # 2) Board is private, but user is a member of the board

@@ -32,11 +32,14 @@ INCLUDE_JS = {
         '/addons/static/trello/jquery.kinetic.js' ,
         '/addons/static/trello/handlebars-v1.3.0.js',
         '/addons/static/trello/Autolinker.js',
+        '/addons/static/trello/alertify.js',
     ]
 }
 
 INCLUDE_CSS = {
     'page': ['/addons/static/trello/trelloboard.css',
+             '/addons/static/trello/alertify.default.css',
+             '/addons/static/trello/alertify.core.css',
              '//code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css'],
 }
 
