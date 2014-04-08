@@ -725,7 +725,7 @@ div.trello_card_detail_edit_description_group {
 	display: block;
 	background-color: rgba(0,0,0,0.57);
 	cursor: default;
-	z-index: 999999;
+	z-index: 9999;
 }
 
 .trello_card_detail_card {
@@ -766,7 +766,7 @@ div.ui-progressbar {
 	height: 10px;
 	display: block;
 	float: right;
-	z-index: 999999;
+	z-index: 99999;
 	left: 0;
 	top: 50px;
 }

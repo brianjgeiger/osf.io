@@ -201,5 +201,13 @@ pavlov.specify("Kanbanic Helper Functions", function(){
 
         });
     });
+    describe("Showing an error", function(){
+        it("should show an error when error is thrown", function() {
+            textToReport = "Error text for test. Ignore me."
+            reportError(textToReport);
+            assert($(".alertify-log").text()).equals(textToReport);
+        });
+    });
+
  });
 }

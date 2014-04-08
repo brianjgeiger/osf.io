@@ -1,11 +1,130 @@
+function mockList(canEdit){
+   $.mockjax(function(lists) {
+        // lists.url == 'list/<listnum>'
+        var listnum = lists.url.match(/list\/(.*)$/);
+        if ( listnum ) {
+            return {
+                responseTime: 1,
+                responseText:{
+                    "istest": true,
+                    "oneTestOnly": true,
+                    "complete": true,
+                    "trello_cards": [
+                        {
+                            "badges": {
+                                "attachments": 0,
+                                "checkItems": 1,
+                                "checkItemsChecked": 0,
+                                "comments": 0,
+                                "description": true,
+                                "due": null,
+                                "fogbugz": "",
+                                "subscribed": false,
+                                "viewingMemberVoted": false,
+                                "votes": 0
+                            },
+                            "checkItemStates": [],
+                            "closed": false,
+                            "dateLastActivity": "2014-04-03T21:07:51.777Z",
+                            "desc": '"'+listnum+1+'"',
+                            "descData": {
+                                "emoji": {}
+                            },
+                            "due": null,
+                            "due_date_string": "",
+                            "id": listnum+1,
+                            "idAttachmentCover": null,
+                            "idBoard": "fakeid",
+                            "idChecklists": [
+                                '"'+listnum+1+'"'
+                            ],
+                            "idList": listnum,
+                            "idMembers": [],
+                            "idMembersVoted": [],
+                            "idShort": 113,
+                            "labels": [],
+                            "manualCoverAttachment": false,
+                            "name": '"'+listnum+1+'"',
+                            "pos": 1462271,
+                            "shortLink": "fakeshortlink",
+                            "shortUrl": "https://trello.com/c/fakeid",
+                            "subscribed": false,
+                            "url": "https://trello.com/c/fakeid/not-real"
+                        },
+                        {
+                            "badges": {
+                                "attachments": 0,
+                                "checkItems": 0,
+                                "checkItemsChecked": 0,
+                                "comments": 0,
+                                "description": false,
+                                "due": null,
+                                "fogbugz": "",
+                                "subscribed": false,
+                                "viewingMemberVoted": false,
+                                "votes": 0
+                            },
+                            "checkItemStates": [],
+                            "closed": false,
+                            "dateLastActivity": "2014-04-03T21:05:28.256Z",
+                            "desc": '"'+listnum+2+'"',
+                            "descData": null,
+                            "due": null,
+                            "due_date_string": "",
+                            "id": listnum+2,
+                            "idAttachmentCover": null,
+                            "idBoard": "fakeid",
+                            "idChecklists": [],
+                            "idList": listnum,
+                            "idMembers": [],
+                            "idMembersVoted": [],
+                            "idShort": 129,
+                            "labels": [],
+                            "manualCoverAttachment": false,
+                            "name": '"'+listnum+2+'"',
+                            "pos": 1482751,
+                            "shortLink": "g95XHvb9",
+                            "shortUrl": "https://trello.com/c/fakeid",
+                            "subscribed": false,
+                            "url": "https://trello.com/c/fakeid/not-a-real-url"
+                        }
+                    ],
+                    "trello_list_id": listnum,
+                    "user_can_edit": canEdit
+                    }
 
-function kanbanicSuccessfulJSONTests(){
+            };
+        }
+    });
+}
 
-    module("Fill out elements from AJAX calls");
+function mockBoard(canEdit){
+    $.mockjax({
+            url: 'lists',
+            responseTime: 1,
+            responseText: {
+                "istest": true,
+                "complete": true,
+                "trello_board_name": "OSF Trello",
+                "trello_board_url": "https://trello.com/b/Kg6ZmCRJ/osf-trello",
+                "trello_lists": [
+                    {
+                        "closed": false,
+                        "id": "1",
+                        "idBoard": "53189b693b58e0d16ac26e51",
+                        "name": "One",
+                        "pos": 10000,
+                        "subscribed": false
+                    }
+                ],
+                "user_can_edit": canEdit
+            }
+        });
+}
 
-    asyncTest("should fill in a card with useful information - reloadCardFromTrello()", function(assert) {
-        $.mockjax({
-            url: 'card/1',
+function mockCard(id, canEdit) {
+            $.mockjax({
+            url: 'card/'+id,
             responseTime: 1,
             responseText: {
                 "complete": true,
@@ -179,7 +298,7 @@ function kanbanicSuccessfulJSONTests(){
                     "desc": "",
                     "descData": null,
                     "due": null,
-                    "id": "1",
+                    "id": id,
                     "idAttachmentCover": null,
                     "idBoard": "53189b693b58e0d16ac26e51",
                     "idChecklists": [
@@ -195,147 +314,34 @@ function kanbanicSuccessfulJSONTests(){
                     "shortUrl": "https://trello.com/c/tvx9lxBO",
                     "url": "https://trello.com/c/tvx9lxBO/22-overview-screen-decorations"
                 },
-                "trello_card_id": "1",
-                "user_can_edit": true,
+                "trello_card_id": '"'+id+'"',
+                "user_can_edit": canEdit,
                 "istest": true
             }
         });
 
+}
+
+function kanbanicSuccessfulAJAXTests(){
+    module("Fill out elements from AJAX calls");
+
+    asyncTest("should fill in a card with useful information - reloadCardFromTrello()", function(assert) {
+        this.clock.restore();
         expect(1);
         var $fixture = $( "#qunit-fixture" );
-
+        mockCard(1, true);
 
         // Create a card div
         $fixture.append('<div id="tc-1">Unchanged</div>');
 
         //Perform ajax call, fill out Mustache template, modify div
         reloadCardFromTrello(1);
-
-
-
     });
 
     asyncTest("should fill in the board with useful information - loadBoard()", function(assert) {
-        $.mockjax({
-            url: 'lists',
-            responseTime: 1,
-            responseText: {
-                "istest": true,
-                "complete": true,
-                "trello_board_name": "OSF Trello",
-                "trello_board_url": "https://trello.com/b/Kg6ZmCRJ/osf-trello",
-                "trello_lists": [
-                    {
-                        "closed": false,
-                        "id": "1",
-                        "idBoard": "53189b693b58e0d16ac26e51",
-                        "name": "One",
-                        "pos": 10000,
-                        "subscribed": false
-                    }
-                ],
-                "user_can_edit": true
-            }
-        });
-
-        $.mockjax(function(lists) {
-            // lists.url == 'list/<listnum>'
-            var listnum = lists.url.match(/list\/(.*)$/);
-            if ( listnum ) {
-                return {
-                    responseTime: 1,
-                    responseText:{
-                        "istest": true,
-                        "oneTestOnly": true,
-                        "complete": true,
-                        "trello_cards": [
-                            {
-                                "badges": {
-                                    "attachments": 0,
-                                    "checkItems": 1,
-                                    "checkItemsChecked": 0,
-                                    "comments": 0,
-                                    "description": true,
-                                    "due": null,
-                                    "fogbugz": "",
-                                    "subscribed": false,
-                                    "viewingMemberVoted": false,
-                                    "votes": 0
-                                },
-                                "checkItemStates": [],
-                                "closed": false,
-                                "dateLastActivity": "2014-04-03T21:07:51.777Z",
-                                "desc": '"'+listnum+1+'"',
-                                "descData": {
-                                    "emoji": {}
-                                },
-                                "due": null,
-                                "due_date_string": "",
-                                "id": listnum+1,
-                                "idAttachmentCover": null,
-                                "idBoard": "53189b693b58e0d16ac26e51",
-                                "idChecklists": [
-                                    '"'+listnum+1+'"'
-                                ],
-                                "idList": listnum,
-                                "idMembers": [],
-                                "idMembersVoted": [],
-                                "idShort": 113,
-                                "labels": [],
-                                "manualCoverAttachment": false,
-                                "name": '"'+listnum+1+'"',
-                                "pos": 1462271,
-                                "shortLink": "YDXbxuTF",
-                                "shortUrl": "https://trello.com/c/YDXbxuTF",
-                                "subscribed": false,
-                                "url": "https://trello.com/c/YDXbxuTF/113-report-errors-to-users"
-                            },
-                            {
-                                "badges": {
-                                    "attachments": 0,
-                                    "checkItems": 0,
-                                    "checkItemsChecked": 0,
-                                    "comments": 0,
-                                    "description": false,
-                                    "due": null,
-                                    "fogbugz": "",
-                                    "subscribed": false,
-                                    "viewingMemberVoted": false,
-                                    "votes": 0
-                                },
-                                "checkItemStates": [],
-                                "closed": false,
-                                "dateLastActivity": "2014-04-03T21:05:28.256Z",
-                                "desc": '"'+listnum+2+'"',
-                                "descData": null,
-                                "due": null,
-                                "due_date_string": "",
-                                "id": listnum+2,
-                                "idAttachmentCover": null,
-                                "idBoard": "53189b693b58e0d16ac26e51",
-                                "idChecklists": [],
-                                "idList": listnum,
-                                "idMembers": [],
-                                "idMembersVoted": [],
-                                "idShort": 129,
-                                "labels": [],
-                                "manualCoverAttachment": false,
-                                "name": '"'+listnum+2+'"',
-                                "pos": 1482751,
-                                "shortLink": "g95XHvb9",
-                                "shortUrl": "https://trello.com/c/g95XHvb9",
-                                "subscribed": false,
-                                "url": "https://trello.com/c/g95XHvb9/129-open-add-a-checkitem-and-show-focus-when-a-new-checklist-is-added"
-                            }
-                        ],
-                        "trello_list_id": listnum,
-                        "user_can_edit": true
-                        }
-
-                };
-            }
-            return;
-        });
+        this.clock.restore();
+        mockBoard(true);
+        mockList(true);
 
         expect(3);
 
@@ -345,5 +351,14 @@ function kanbanicSuccessfulJSONTests(){
         //Perform ajax call, fill out Mustache template, modify div
         loadBoard();
 
+    });
+
+    asyncTest("should fill in a list with useful information - loadLists(listID)", function(assert) {
+        this.clock.restore();
+        expect(1);
+        mockList(true);
+
+        start();
+        ok(1,"stub");
     });
 }
