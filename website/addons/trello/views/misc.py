@@ -259,6 +259,14 @@ def trello_card_details(**kwargs):
             return return_value
         try:
             card = trello_api.get_card(card_id)
+            if card[u'badges'][u'attachments'] > 0:
+                attachments = trello_api.get_attachments_from_card(card[u'id'],filter="cover")
+                for attachment in attachments:
+                    if "previews" in attachment:
+                        previews = attachment[u'previews']
+                        for preview in previews:
+                            if "url" in preview:
+                                card[u'coverURL'] = preview[u'url']
             card[u'comments'] = trello_api.get_comments_from_card(card_id)
             card[u'checklists'] = trello_api.get_checklists_from_card(card_id)
             for checklist in card[u'checklists']:

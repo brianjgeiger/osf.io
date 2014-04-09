@@ -1,6 +1,25 @@
+// Helper Functions
 
 function reportError(errorText){ // Light wrapper in case we need to change our error reporting mechanism
     alertify.error(errorText);
+}
+
+// This useful function found on StackOverflow http://stackoverflow.com/a/7385673
+// Used to hide the detail card when you click outside of it onto its containing div
+$(document).click(function (e) {
+    var container = $(".trello_card_detail_card");
+
+    if (!container.is(e.target) // if the target of the click isn't the container...
+        && container.has(e.target).length === 0) // ... nor a descendant of the container
+    {
+        $(".trello_card_detail").remove();
+    }
+});
+
+
+function replaceURLWithHTMLLinks(text) {
+    var linkedText = Autolinker.link( text, {truncate: 50, newWindow: true } );
+  return linkedText;
 }
 
 //
@@ -35,7 +54,7 @@ function loadListCards(listID) {
     }).fail(function( jqxhr, textStatus, error ) { //Report uncaught exception
             var err = textStatus + ", " + error;
             reportError( "Request Failed: " + err );
-        });
+    });
 }
 
 //TODO: Test failure cases of loadBoard()
@@ -219,17 +238,6 @@ function displayCard(cardID) {
 
 var box_contents = "";
 
-// This useful function found on StackOverflow http://stackoverflow.com/a/7385673
-$(document).click(function (e) {
-    var container = $(".trello_card_detail_card");
-
-    if (!container.is(e.target) // if the target of the click isn't the container...
-        && container.has(e.target).length === 0) // ... nor a descendant of the container
-    {
-        $(".trello_card_detail").remove();
-    }
-});
-
 
 function buildDetailCard(data) {
 
@@ -314,11 +322,6 @@ function buildDetailCard(data) {
 function addAttachmentInfo(data){
     var cardTemplate = Handlebars.compile($("#kanban-card-detail-attachments-template").html());
     $(".trello_card_detail_card").append(cardTemplate(data));
-}
-
-function replaceURLWithHTMLLinks(text) {
-    var linkedText = Autolinker.link( text, {truncate: 50, newWindow: true } );
-  return linkedText;
 }
 
 //
