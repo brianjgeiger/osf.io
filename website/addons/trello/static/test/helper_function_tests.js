@@ -205,7 +205,11 @@ pavlov.specify("Kanbanic Helper Functions", function(){
         it("should show an error when error is thrown", function() {
             textToReport = "Error text for test. Ignore me."
             reportError(textToReport);
-            assert($(".alertify-log").text()).equals(textToReport);
+            $(".alertify-log").each( function(){
+                   if($(this).text() ==  textToReport){
+                       assert().pass("Found the error box");
+                   }
+                });
         });
     });
 

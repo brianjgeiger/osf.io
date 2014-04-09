@@ -98,6 +98,54 @@ function mockList(canEdit){
     });
 }
 
+function mockErrorList(canEdit,errorInfo){
+   $.mockjax(function(lists) {
+        // lists.url == 'list/<listnum>'
+        var listnum = lists.url.match(/list\/(.*)$/);
+        if ( listnum ) {
+            return {
+                responseTime: 1,
+                responseText: {
+                    "istest": true,
+                    "error": true,
+                    "complete": true,
+                    "errorInfo": errorInfo,
+                    "HTTPError": "Should test as an error.",
+                    "trello_list_id": listnum,
+                    "user_can_edit": canEdit
+                }
+
+            };
+        }
+    });
+}
+
+function mockErrorBoard(canEdit,errorInfo){
+        $.mockjax({
+            url: 'lists',
+            responseTime: 1,
+            responseText: {
+                "istest": true,
+                "error": true,
+                "complete": true,
+                "errorInfo": errorInfo,
+                "HTTPError": "Should test as an error.",
+                "user_can_edit": canEdit
+            }
+        });
+}
+
+function mockException(url,errorNum,extraResponse){
+    $.mockjax({
+        url: url,
+        status: errorNum,
+        responseTime: 1,
+        statusText: "Unit test "+extraResponse,
+        isTest: true
+    });
+
+}
+
 function mockBoard(canEdit){
     $.mockjax({
             url: 'lists',
@@ -322,10 +370,11 @@ function mockCard(id, canEdit) {
 
 }
 
-function kanbanicSuccessfulAJAXTests(){
+function kanbanicAJAXTests(){
     module("Fill out elements from AJAX calls");
 
     asyncTest("should fill in a card with useful information - reloadCardFromTrello()", function(assert) {
+        $.mockjaxClear();
         this.clock.restore();
         expect(1);
         var $fixture = $( "#qunit-fixture" );
@@ -339,6 +388,7 @@ function kanbanicSuccessfulAJAXTests(){
     });
 
     asyncTest("should fill in the board with useful information - loadBoard()", function(assert) {
+        $.mockjaxClear();
         this.clock.restore();
         mockBoard(true);
         mockList(true);
@@ -353,12 +403,35 @@ function kanbanicSuccessfulAJAXTests(){
 
     });
 
-    asyncTest("should fill in a list with useful information - loadLists(listID)", function(assert) {
-        this.clock.restore();
-        expect(1);
-        mockList(true);
+    module("Return error conditions from AJAX calls");
 
-        start();
-        ok(1,"stub");
+    asyncTest("should display error box - loadListCards(listID)", function(assert) {
+        $.mockjaxClear();
+        this.clock.restore();
+        expect(2);
+        mockErrorList(true,"loadListCards");
+        loadListCards(1);
+    });
+    asyncTest("should show error for 500 exception - loadListCards()", function(assert) {
+        $.mockjaxClear();
+        this.clock.restore();
+        expect(2);
+        mockException("list/1",500,"loadListCards 500");
+        loadListCards(1);
+    });
+
+    asyncTest("should display error box - loadBoard()", function(assert) {
+        $.mockjaxClear();
+        this.clock.restore();
+        expect(2);
+        mockErrorBoard(true,"loadBoard");
+        loadBoard();
+    });
+    asyncTest("should show error for 500 exception - loadBoard()", function(assert) {
+        $.mockjaxClear();
+        this.clock.restore();
+        expect(2);
+        mockException("lists",500,"loadBoard 500");
+        loadBoard();
     });
 }

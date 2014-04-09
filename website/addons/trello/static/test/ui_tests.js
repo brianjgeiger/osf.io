@@ -11,7 +11,6 @@ function setupCardMoveTestDiv(cards){
         var cardTemplate = Handlebars.compile($("#kanban-card-ui-test-template").html());
         var cardDiv = cardTemplate(element);
         $("#cl-"+element.listID).append(cardDiv);
-        console.log("listID: "+element.listID);
 
     });
 }

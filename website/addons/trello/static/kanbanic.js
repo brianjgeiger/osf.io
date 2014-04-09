@@ -26,7 +26,6 @@ function replaceURLWithHTMLLinks(text) {
 //  List loading
 //
 
-//TODO: test failure cases of loadListCards() outside of loadBoard() test
 function loadListCards(listID) {
     var cardTemplate = Handlebars.compile($("#kanban-card-template").html());
     var the_url = "list/" + listID;
@@ -34,6 +33,16 @@ function loadListCards(listID) {
         if(data.error) //Error reporting code for problems caught in the Model
         {
             reportError(data.errorInfo+". " +data.HTTPError );
+            if(data.istest){ // Unit test code
+                start();
+                ok(true,"loadListCards successfully detected the error");
+                $(".alertify-log").each( function(){
+                   if($(this).text() ==  "loadListCards. Should test as an error."){
+                       ok(true,"Found the error box");
+                   }
+                });
+            }
+
         }else {
 
             $.each(data.trello_cards, function() { //Actual code - update the div
@@ -52,12 +61,20 @@ function loadListCards(listID) {
             }
         }
     }).fail(function( jqxhr, textStatus, error ) { //Report uncaught exception
-            var err = textStatus + ", " + error;
-            reportError( "Request Failed: " + err );
+        var err = textStatus + ", " + error;
+        reportError( "Could not load the cards: " + err );
+        if(err="error, Unit test loadListCards 500"){ // Unit test code
+            start();
+            ok(true,"loadListCards successfully detected the exception");
+            $(".alertify-log").each( function(){
+               if($(this).text() ==  "Could not load the cards: error, Unit test loadListCards 500"){
+                   ok(true,"Found the error box");
+               }
+            });
+        }
     });
 }
 
-//TODO: Test failure cases of loadBoard()
 function loadBoard() {
     var cardTemplate = Handlebars.compile($("#kanban-board-template").html());
     var the_url = "lists";
@@ -65,6 +82,15 @@ function loadBoard() {
         if(data && data.error) //Caught an error in the model, so it needs to be reported
         {
             reportError(data.errorInfo+". " +data.HTTPError );
+            if(data.istest){ // Unit test code
+                start();
+                ok(true,"loadBoard successfully detected the error");
+                $(".alertify-log").each( function(){
+                   if($(this).text() ==  "loadBoard. Should test as an error."){
+                       ok(true,"Found the error box");
+                   }
+                });
+            }
         }else {
             // Actual code. Updates the div with the card data.
             var newDiv = cardTemplate(data);
@@ -80,9 +106,18 @@ function loadBoard() {
             });
         }
     }).fail(function( jqxhr, textStatus, error ) { //uncaught exception needs reporting
-            var err = textStatus + ", " + error;
-            reportError( "Could not load the Trello board: " + err );
-        });
+        var err = textStatus + ", " + error;
+        reportError( "Could not load the Trello board: " + err );
+        if(err="error, Unit test loadBoard 500"){ // Unit test code
+            start();
+            ok(true,"loadBoard successfully detected the exception");
+            $(".alertify-log").each( function(){
+               if($(this).text() ==  "Could not load the Trello board: error, Unit test loadBoard 500"){
+                   ok(true,"Found the error box");
+               }
+            });
+        }
+    });
 }
 
 //
@@ -178,7 +213,6 @@ function makeCardListsSortable() {
                 }
 
             }).fail(function(xhr) {
-                console.log(xhr);
                 reportError("Update failed. " + xhr.statusText + ".");
                 restoreCardPosition(oldListDivID,cardDivID,oldList);
             });
