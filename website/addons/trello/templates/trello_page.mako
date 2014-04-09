@@ -1,4 +1,4 @@
-<%inherit file="project/project_base.mako"/>
+<%inherit file="project/project_base.mako" />
 <%!
     import dateutil.parser
 %>
@@ -16,7 +16,7 @@
     onmouseout="document.getElementById('tcli-{{id}}').style.display = 'none';"
     cardpos="{{pos}}" cardID="{{id}}">
         <div class="TrelloCardLinkIcon" id="tcli-{{id}}"><a href="{{id}}" target=":_blank">
-            <img src = "/addons/static/trello/to_trello_16.png" title="Open '{{id}}' on Trello"></a></div>
+            <img src = "/static/addons/trello/to_trello_16.png" title="Open '{{id}}' on Trello"></a></div>
 
             {{#if coverURL}}
                 <div class = "TrelloCoverImage">
@@ -26,27 +26,27 @@
             <div class = "TrelloCardName">{{name}}</div>
             <div class = "TrelloCardSummaryInfo">
                {{#if desc}}
-                    <img src="/addons/static/trello/description_icon_16.png" title="This card has a description.">
+                    <img src="/static/addons/trello/description_icon_16.png" title="This card has a description.">
                {{/if}}
                 {{# if subscribed}}
-                    <img src="/addons/static/trello/eye_icon_16.png" title="You are subscribed to this card's notifications.">
+                    <img src="/static/addons/trello/eye_icon_16.png" title="You are subscribed to this card's notifications.">
                 {{/if}}
                {{#if badges.checkItems}}
-                    <img src="/addons/static/trello/checklist_16.png" title="Checklists: checked items / total items">
+                    <img src="/static/addons/trello/checklist_16.png" title="Checklists: checked items / total items">
                     {{badges.checkItemsChecked}} / {{badges.checkItems}}
                 {{/if}}
                 {{# if badges.comments}}
-                    <img src="/addons/static/trello/comment_icon_16.png" title="Number of Comments: {{badges.comments}}">
+                    <img src="/static/addons/trello/comment_icon_16.png" title="Number of Comments: {{badges.comments}}">
                         {{badges.comments}}
                 {{/if}}
                 {{#if badges.attachments}}
-                    <img src="/addons/static/trello/attachments_icon_16.png" title="Number of Attachments: {{badges.attachments}}">
+                    <img src="/static/addons/trello/attachments_icon_16.png" title="Number of Attachments: {{badges.attachments}}">
                     {{badges.attachments}}
                 {{/if}}
 
                 {{#if due_date_string}}
                     <span class = "card_summary_due_date">
-                         <img src="/addons/static/trello/due_date_icon_16.png" title="This card is due on {{due_date_string}}.">
+                         <img src="/static/addons/trello/due_date_icon_16.png" title="This card is due on {{due_date_string}}.">
                         {{due_date_string}}
                     </span>
                 {{/if}}
@@ -124,7 +124,7 @@
             </div>
             {{/if}}
             <a href="{{trello_card.url}}" target=":_blank">
-            <img src="/addons/static/trello/to_trello_24.png" title="Open {{trello_card.name}} on Trello"></a>
+            <img src="/static/addons/trello/to_trello_24.png" title="Open {{trello_card.name}} on Trello"></a>
             </div>
             {{#if user_can_edit}}
             <div class = "trello_card_detail_edit_name_group" id="tcdeng-{{trello_card.id}}">
@@ -297,7 +297,7 @@
 
 <script id="kanban-board-template" type="text/x-handlebars-template">
     <span class="TrelloBoardName"><a href="{{trello_board_url}}" target=":_blank">{{trello_board_name}}
-        <img src = "/addons/static/trello/to_trello_24.png" title="Open '{{trello_board_name}}' on Trello"></a></span>
+        <img src = "/static/addons/trello/to_trello_24.png" title="Open '{{trello_board_name}}' on Trello"></a></span>
 
     <div id="TrelloList">
         {{#each trello_lists}}

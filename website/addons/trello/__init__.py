@@ -27,19 +27,19 @@ CATEGORIES = ['other']
 
 INCLUDE_JS = {
     'page': [
-        '/addons/static/trello/showdown.js',
-        '/addons/static/trello/kanbanic.js',
-        '/addons/static/trello/jquery.kinetic.js' ,
-        '/addons/static/trello/handlebars-v1.3.0.js',
-        '/addons/static/trello/Autolinker.js',
-        '/addons/static/trello/alertify.js',
+        'showdown.js',
+        'kanbanic.js',
+        'jquery.kinetic.js' ,
+        'handlebars-v1.3.0.js',
+        'Autolinker.js',
+        'alertify.js',
     ]
 }
 
 INCLUDE_CSS = {
-    'page': ['/addons/static/trello/trelloboard.css',
-             '/addons/static/trello/alertify.default.css',
-             '/addons/static/trello/alertify.core.css',
+    'page': ['trelloboard.css',
+             'alertify.default.css',
+             'alertify.core.css',
              '//code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css'],
 }
 
