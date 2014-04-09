@@ -57,6 +57,7 @@ class User(GuidStoredObject, AddonModelMixin):
     fullname = fields.StringField(required=True)
     is_registered = fields.BooleanField()
     is_claimed = fields.BooleanField()  # TODO: Unused. Remove me?
+    private_links = fields.ForeignField('privatelink', list=True)
 
     # Per-project unclaimed user data:
     # Format: {
@@ -109,6 +110,10 @@ class User(GuidStoredObject, AddonModelMixin):
     def __repr__(self):
         return '<User {0!r}>'.format(self.username)
 
+    @property
+    def private_link_keys(self):
+        return [x.key for x in self.private_links]
+
     @classmethod
     def create_unregistered(cls, fullname, email=None):
         """Creates a new unregistered user.
@@ -127,18 +132,31 @@ class User(GuidStoredObject, AddonModelMixin):
         return user
 
     @classmethod
-    def create_unconfirmed(cls, username, password, fullname):
-        """Create a new user who has begun registration but needs to verify
-        their primary email address (username).
-        """
+    def create(cls, username, password, fullname):
         user = cls(
             username=username,
             fullname=fullname,
         )
         user.update_guessed_names()
         user.set_password(password)
+        return user
+
+    @classmethod
+    def create_unconfirmed(cls, username, password, fullname, do_confirm=True):
+        """Create a new user who has begun registration but needs to verify
+        their primary email address (username).
+        """
+        user = cls.create(username, password, fullname)
         user.add_email_verification(username)
         user.is_registered = False
+        return user
+
+    @classmethod
+    def create_confirmed(cls, username, password, fullname):
+        user = cls.create(username, password, fullname)
+        user.is_registered = True
+        user.is_claimed = True
+        user.date_confirmed = user.date_registered
         return user
 
     def update_guessed_names(self):

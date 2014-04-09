@@ -8,6 +8,8 @@
 ${next.body()}
 
 
+
+<%include file="modal_generate_private_link.mako"/>
 <%include file="modal_add_contributor.mako"/>
 <%include file="modal_add_pointer.mako"/>
 <%include file="modal_show_links.mako"/>
@@ -25,7 +27,12 @@ ${next.body()}
     $script(['/static/js/logFeed.js'], 'logFeed');
     $script(['/static/js/contribAdder.js'], 'contribAdder');
     $script(['/static/js/pointers.js'], 'pointers');
+    %if 'badges' in addons_enabled and badges and badges['can_award']:
+    $script(['/static/addons/badges/badge-awarder.js'], function() {
+        attachDropDown('${'{}badges/json/'.format(user_api_url)}');
+    });
 
+    %endif
     // TODO: Put these in the contextVars object below
     var nodeId = '${node['id']}';
     var userApiUrl = '${user_api_url}';
@@ -44,6 +51,7 @@ ${next.body()}
     $(function() {
 
         $logScope = $('#logScope');
+        $linkScope= $("#linkScope");
         // Get project data from the server and initiate KO modules
         $.getJSON(nodeApiUrl, function(data){
                // Initialize nodeControl and logFeed on success
@@ -68,6 +76,7 @@ ${next.body()}
                         );
                     });
                 }
+
             }
         );
 
