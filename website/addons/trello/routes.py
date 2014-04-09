@@ -88,11 +88,15 @@ page_routes = {
             '/project/<pid>/trello/',
             '/project/<pid>/node/<nid>/trello/',
         ], 'get', views.misc.trello_page, OsfWebRenderer('../addons/trello/templates/trello_page.mako')),
+    ]
+}
 
+api_routes = {
+    'rules': [
         # Data Gathering for Javascript
           Rule(
             [
-            '/<nid>/trello/card/<cardid>/',
+            '/<pid>/trello/card/<cardid>/',
             '/<pid>/node/<nid>/trello/card/<cardid>/',
             ],
             'get',
@@ -101,7 +105,7 @@ page_routes = {
         ),
           Rule(
             [
-            '/<nid>/trello/list/<listid>/',
+            '/<pid>/trello/list/<listid>/',
             '/<pid>/node/<nid>/trello/list/<listid>/',
             ],
             'get',
@@ -110,7 +114,7 @@ page_routes = {
         ),
            Rule(
             [
-            '/<nid>/trello/lists/',
+            '/<pid>/trello/lists/',
             '/<pid>/node/<nid>/trello/lists/',
             ],
             'get',
@@ -119,7 +123,7 @@ page_routes = {
         ),
          Rule(
             [
-            '/<nid>/trello/card/',
+            '/<pid>/trello/card/',
             '/<pid>/node/<nid>/trello/card/',
             ],
             'put',
@@ -128,7 +132,7 @@ page_routes = {
         ),
          Rule(
             [
-            '/<nid>/trello/checkitem/',
+            '/<pid>/trello/checkitem/',
             '/<pid>/node/<nid>/trello/checkitem/',
             ],
             'put',
@@ -137,7 +141,7 @@ page_routes = {
         ),
          Rule(
             [
-            '/<nid>/trello/checklist/',
+            '/<pid>/trello/checklist/',
             '/<pid>/node/<nid>/trello/checklist/',
             ],
             'put',
@@ -146,7 +150,7 @@ page_routes = {
         ),
          Rule(
             [
-            '/<nid>/trello/card/description/',
+            '/<pid>/trello/card/description/',
             '/<pid>/node/<nid>/trello/card/description/',
             ],
             'put',
@@ -155,7 +159,7 @@ page_routes = {
         ),
          Rule(
             [
-            '/<nid>/trello/checklist/',
+            '/<pid>/trello/checklist/',
             '/<pid>/node/<nid>/trello/checklist/',
             ],
             'post',
@@ -164,7 +168,7 @@ page_routes = {
         ),
           Rule(
             [
-            '/<nid>/trello/attachments/<cardid>/',
+            '/<pid>/trello/attachments/<cardid>/',
             '/<pid>/node/<nid>/trello/attachments/<cardid>/',
             ],
             'get',
@@ -173,7 +177,7 @@ page_routes = {
         ),
           Rule(
             [
-            '/<nid>/trello/card/',
+            '/<pid>/trello/card/',
             '/<pid>/node/<nid>/trello/card/',
             ],
             'post',
@@ -182,7 +186,7 @@ page_routes = {
         ),
           Rule(
             [
-            '/<nid>/trello/card/',
+            '/<pid>/trello/card/',
             '/<pid>/node/<nid>/trello/card/',
             ],
             'delete',
@@ -191,7 +195,7 @@ page_routes = {
         ),
           Rule(
             [
-            '/<nid>/trello/checkitem/',
+            '/<pid>/trello/checkitem/',
             '/<pid>/node/<nid>/trello/checkitem/',
             ],
             'post',
@@ -200,7 +204,7 @@ page_routes = {
         ),
           Rule(
             [
-            '/<nid>/trello/checkitem/',
+            '/<pid>/trello/checkitem/',
             '/<pid>/node/<nid>/trello/checkitem/',
             ],
             'delete',
@@ -209,7 +213,7 @@ page_routes = {
         ),
           Rule(
             [
-            '/<nid>/trello/checklist/',
+            '/<pid>/trello/checklist/',
             '/<pid>/node/<nid>/trello/checklist/',
             ],
             'delete',
@@ -217,5 +221,5 @@ page_routes = {
             json_renderer,
         ),
    ],
-
+    'prefix': '/api/v1/project',
 }

@@ -1,128 +1,118 @@
-function mockList(canEdit){
-   $.mockjax(function(lists) {
-        // lists.url == 'list/<listnum>'
-        var listnum = lists.url.match(/list\/(.*)$/);
-        if ( listnum ) {
-            return {
-                responseTime: 1,
-                responseText:{
-                    "istest": true,
-                    "oneTestOnly": true,
-                    "complete": true,
-                    "trello_cards": [
-                        {
-                            "badges": {
-                                "attachments": 0,
-                                "checkItems": 1,
-                                "checkItemsChecked": 0,
-                                "comments": 0,
-                                "description": true,
-                                "due": null,
-                                "fogbugz": "",
-                                "subscribed": false,
-                                "viewingMemberVoted": false,
-                                "votes": 0
-                            },
-                            "checkItemStates": [],
-                            "closed": false,
-                            "dateLastActivity": "2014-04-03T21:07:51.777Z",
-                            "desc": '"'+listnum+1+'"',
-                            "descData": {
-                                "emoji": {}
-                            },
-                            "due": null,
-                            "due_date_string": "",
-                            "id": listnum+1,
-                            "idAttachmentCover": null,
-                            "idBoard": "fakeid",
-                            "idChecklists": [
-                                '"'+listnum+1+'"'
-                            ],
-                            "idList": listnum,
-                            "idMembers": [],
-                            "idMembersVoted": [],
-                            "idShort": 113,
-                            "labels": [],
-                            "manualCoverAttachment": false,
-                            "name": '"'+listnum+1+'"',
-                            "pos": 1462271,
-                            "shortLink": "fakeshortlink",
-                            "shortUrl": "https://trello.com/c/fakeid",
-                            "subscribed": false,
-                            "url": "https://trello.com/c/fakeid/not-real"
-                        },
-                        {
-                            "badges": {
-                                "attachments": 0,
-                                "checkItems": 0,
-                                "checkItemsChecked": 0,
-                                "comments": 0,
-                                "description": false,
-                                "due": null,
-                                "fogbugz": "",
-                                "subscribed": false,
-                                "viewingMemberVoted": false,
-                                "votes": 0
-                            },
-                            "checkItemStates": [],
-                            "closed": false,
-                            "dateLastActivity": "2014-04-03T21:05:28.256Z",
-                            "desc": '"'+listnum+2+'"',
-                            "descData": null,
-                            "due": null,
-                            "due_date_string": "",
-                            "id": listnum+2,
-                            "idAttachmentCover": null,
-                            "idBoard": "fakeid",
-                            "idChecklists": [],
-                            "idList": listnum,
-                            "idMembers": [],
-                            "idMembersVoted": [],
-                            "idShort": 129,
-                            "labels": [],
-                            "manualCoverAttachment": false,
-                            "name": '"'+listnum+2+'"',
-                            "pos": 1482751,
-                            "shortLink": "g95XHvb9",
-                            "shortUrl": "https://trello.com/c/fakeid",
-                            "subscribed": false,
-                            "url": "https://trello.com/c/fakeid/not-a-real-url"
-                        }
+function mockList(listnum,canEdit){
+    var url = '/trello/list/'+listnum+'/'
+    $.mockjax({
+        responseTime: 1,
+        url: url,
+        responseText:{
+            "istest": true,
+            "oneTestOnly": true,
+            "complete": true,
+            "trello_cards": [
+                {
+                    "badges": {
+                        "attachments": 0,
+                        "checkItems": 1,
+                        "checkItemsChecked": 0,
+                        "comments": 0,
+                        "description": true,
+                        "due": null,
+                        "fogbugz": "",
+                        "subscribed": false,
+                        "viewingMemberVoted": false,
+                        "votes": 0
+                    },
+                    "checkItemStates": [],
+                    "closed": false,
+                    "dateLastActivity": "2014-04-03T21:07:51.777Z",
+                    "desc": '"'+listnum+1+'"',
+                    "descData": {
+                        "emoji": {}
+                    },
+                    "due": null,
+                    "due_date_string": "",
+                    "id": listnum+1,
+                    "idAttachmentCover": null,
+                    "idBoard": "fakeid",
+                    "idChecklists": [
+                        '"'+listnum+1+'"'
                     ],
-                    "trello_list_id": listnum,
-                    "user_can_edit": canEdit
-                    }
-
-            };
-        }
+                    "idList": listnum,
+                    "idMembers": [],
+                    "idMembersVoted": [],
+                    "idShort": 113,
+                    "labels": [],
+                    "manualCoverAttachment": false,
+                    "name": '"'+listnum+1+'"',
+                    "pos": 1462271,
+                    "shortLink": "fakeshortlink",
+                    "shortUrl": "https://trello.com/c/fakeid",
+                    "subscribed": false,
+                    "url": "https://trello.com/c/fakeid/not-real"
+                },
+                {
+                    "badges": {
+                        "attachments": 0,
+                        "checkItems": 0,
+                        "checkItemsChecked": 0,
+                        "comments": 0,
+                        "description": false,
+                        "due": null,
+                        "fogbugz": "",
+                        "subscribed": false,
+                        "viewingMemberVoted": false,
+                        "votes": 0
+                    },
+                    "checkItemStates": [],
+                    "closed": false,
+                    "dateLastActivity": "2014-04-03T21:05:28.256Z",
+                    "desc": '"'+listnum+2+'"',
+                    "descData": null,
+                    "due": null,
+                    "due_date_string": "",
+                    "id": listnum+2,
+                    "idAttachmentCover": null,
+                    "idBoard": "fakeid",
+                    "idChecklists": [],
+                    "idList": listnum,
+                    "idMembers": [],
+                    "idMembersVoted": [],
+                    "idShort": 129,
+                    "labels": [],
+                    "manualCoverAttachment": false,
+                    "name": '"'+listnum+2+'"',
+                    "pos": 1482751,
+                    "shortLink": "g95XHvb9",
+                    "shortUrl": "https://trello.com/c/fakeid",
+                    "subscribed": false,
+                    "url": "https://trello.com/c/fakeid/not-a-real-url"
+                }
+            ],
+            "trello_list_id": listnum,
+            "user_can_edit": canEdit
+            }
     });
 }
 
-function mockErrorList(canEdit,errorInfo){
-   $.mockjax(function(lists) {
-        // lists.url == 'list/<listnum>'
-        var listnum = lists.url.match(/list\/(.*)$/);
-        if ( listnum ) {
-            return {
-                responseTime: 1,
-                responseText: {
-                    "istest": true,
-                    "error": true,
-                    "complete": true,
-                    "errorInfo": errorInfo,
-                    "HTTPError": "Should test as an error.",
-                    "trello_list_id": listnum,
-                    "user_can_edit": canEdit
-                }
-
-            };
+function mockErrorList(listnum,canEdit,errorInfo){
+    var url = '/trello/list/'+listnum+'/';
+    $.mockjax({
+        responseTime: 1,
+        url: url,
+        responseText: {
+            "istest": true,
+            "error": true,
+            "complete": true,
+            "errorInfo": errorInfo,
+            "HTTPError": "Should test as an error.",
+            "trello_list_id": listnum,
+            "user_can_edit": canEdit
         }
     });
 }
 
 function mockErrorBoard(canEdit,errorInfo){
         $.mockjax({
-            url: 'lists',
+            url: '/trello/lists/',
             responseTime: 1,
             responseText: {
                 "istest": true,
@@ -148,7 +138,7 @@ function mockException(url,errorNum,extraResponse){
 
 function mockBoard(canEdit){
     $.mockjax({
-            url: 'lists',
+            url: '/trello/lists/',
             responseTime: 1,
             responseText: {
                 "istest": true,
@@ -172,7 +162,7 @@ function mockBoard(canEdit){
 
 function mockCard(id, canEdit) {
             $.mockjax({
-            url: 'card/'+id,
+            url: '/trello/card/'+id+'/',
             responseTime: 1,
             responseText: {
                 "complete": true,
@@ -375,6 +365,11 @@ function kanbanicAJAXTests(){
 
     asyncTest("should fill in a card with useful information - reloadCardFromTrello()", function(assert) {
         $.mockjaxClear();
+        testReloadCardSuccess = function(){
+            start(); // Lets the test know that it's done with async stuff
+            var expectedText = "id,1,name,Overview screen decorations,cardpos,327679,coverURL,,desc,,subscribed,,badges.checkItems,12,badges.checkItemsChecked,10,badges.comments,0,badges.attachments,0,due_date_string,";
+            equal($("div#tc-1").html(),expectedText); //ensures that the test div is populated with the right data
+        };
         this.clock.restore();
         expect(1);
         var $fixture = $( "#qunit-fixture" );
@@ -389,9 +384,19 @@ function kanbanicAJAXTests(){
 
     asyncTest("should fill in the board with useful information - loadBoard()", function(assert) {
         $.mockjaxClear();
+        testSuccessListCards = function() {
+            ok(true,"loadListCards Succeeded");
+            var expectedText ='trello_board_url=https://trello.com/b/Kg6ZmCRJ/osf-trello,trello_board_name=OSF Trello<div class=\"TrelloListBlock\" id=\"cl-1\" listid=\"1\">listID=1,listName=One<div id=\"tc-2\">id,2,name,\"11\",cardpos,1462271,coverURL,,desc,\"11\",subscribed,,badges.checkItems,1,badges.checkItemsChecked,0,badges.comments,0,badges.attachments,0,due_date_string,</div><div id=\"tc-3\">id,3,name,\"12\",cardpos,1482751,coverURL,,desc,\"12\",subscribed,,badges.checkItems,0,badges.checkItemsChecked,0,badges.comments,0,badges.attachments,0,due_date_string,</div></div>';
+            equal($("#KanbanBoard").html(),expectedText,"Matched Div info");
+            start();
+
+        };
+        testSuccessBoard = function() {
+            ok(true,"loadBoard succeeded");
+        };
         this.clock.restore();
         mockBoard(true);
-        mockList(true);
+        mockList(1,true);
 
         expect(3);
 
@@ -407,31 +412,72 @@ function kanbanicAJAXTests(){
 
     asyncTest("should display error box - loadListCards(listID)", function(assert) {
         $.mockjaxClear();
+         testErrorListCards = function() {
+            start();
+            ok(true,"loadListCards successfully detected the error");
+            $(".alertify-log").each( function(){
+                if($(this).text() ==  "loadListCards. Should test as an error."){
+                    ok(true,"Found the error box");
+                }
+            });
+        };
+
+
+
         this.clock.restore();
         expect(2);
-        mockErrorList(true,"loadListCards");
+        mockErrorList(1,true,"loadListCards");
         loadListCards(1);
     });
     asyncTest("should show error for 500 exception - loadListCards()", function(assert) {
         $.mockjaxClear();
+        testExceptionListCards = function() {
+            start();
+            ok(true,"loadListCards successfully detected the exception");
+            $(".alertify-log").each( function(){
+               if($(this).text() ==  "Could not load the cards: error, Unit test loadListCards 500"){
+                   ok(true,"Found the error box");
+               }
+            });
+
+        };
         this.clock.restore();
         expect(2);
-        mockException("list/1",500,"loadListCards 500");
+        mockException("/trello/list/1/",500,"loadListCards 500");
         loadListCards(1);
     });
 
     asyncTest("should display error box - loadBoard()", function(assert) {
         $.mockjaxClear();
+        testErrorBoard = function() {
+            start();
+            ok(true,"loadBoard successfully detected the error");
+            $(".alertify-log").each( function(){
+               if($(this).text() ==  "loadBoard. Should test as an error."){
+                   ok(true,"Found the error box");
+               }
+            });
+        };
         this.clock.restore();
         expect(2);
         mockErrorBoard(true,"loadBoard");
         loadBoard();
     });
+
     asyncTest("should show error for 500 exception - loadBoard()", function(assert) {
         $.mockjaxClear();
+        testExceptionBoard = function() {
+            start();
+            ok(true,"loadBoard successfully detected the exception");
+            $(".alertify-log").each( function(){
+               if($(this).text() ==  "Could not load the Trello board: error, Unit test loadBoard 500"){
+                   ok(true,"Found the error box");
+               }
+            });
+        };
         this.clock.restore();
         expect(2);
-        mockException("lists",500,"loadBoard 500");
+        mockException("/trello/lists/",500,"loadBoard 500");
         loadBoard();
     });
 }

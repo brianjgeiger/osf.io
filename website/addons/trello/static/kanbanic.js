@@ -1,5 +1,7 @@
 // Helper Functions
 
+
+
 function reportError(errorText){ // Light wrapper in case we need to change our error reporting mechanism
     alertify.error(errorText);
 }
@@ -17,10 +19,22 @@ $(document).click(function (e) {
 });
 
 
-function replaceURLWithHTMLLinks(text) {
-    var linkedText = Autolinker.link( text, {truncate: 50, newWindow: true } );
-  return linkedText;
+function replaceURLWithHTMLLinks(text) { // Light wrapper in case we need to change our html linking mechanism
+    return Autolinker.link( text, {truncate: 50, newWindow: true } );
 }
+
+//
+// Test function placeholders
+// Used by asynchronous unit tests to verify that callbacks do what they're supposed to.
+// See ajax_tests.js to see how they're used.
+
+var testErrorListCards = function() {};
+var testExceptionListCards = function() {};
+var testSuccessListCards = function() {};
+var testErrorBoard = function() {};
+var testExceptionBoard = function() {};
+var testSuccessBoard = function() {};
+var testReloadCardSuccess = function() {};
 
 //
 //  List loading
@@ -28,20 +42,12 @@ function replaceURLWithHTMLLinks(text) {
 
 function loadListCards(listID) {
     var cardTemplate = Handlebars.compile($("#kanban-card-template").html());
-    var the_url = "list/" + listID;
+    var the_url = nodeURL+"trello/list/" + listID +"/";
     $.getJSON( the_url, function(data){
         if(data.error) //Error reporting code for problems caught in the Model
         {
             reportError(data.errorInfo+". " +data.HTTPError );
-            if(data.istest){ // Unit test code
-                start();
-                ok(true,"loadListCards successfully detected the error");
-                $(".alertify-log").each( function(){
-                   if($(this).text() ==  "loadListCards. Should test as an error."){
-                       ok(true,"Found the error box");
-                   }
-                });
-            }
+            testErrorListCards();
 
         }else {
 
@@ -50,47 +56,24 @@ function loadListCards(listID) {
                  $("#cl-" + listID).append(newDiv);
             });
             makeCardListsSortable();
-
-            if(data.istest){ // Unit test code
-                ok(true,"loadListCards Succeeded");
-                if(data.oneTestOnly){ //Specific unit test (from the loadBoard test)
-                    var expectedText ='trello_board_url=https://trello.com/b/Kg6ZmCRJ/osf-trello,trello_board_name=OSF Trello<div class=\"TrelloListBlock\" id=\"cl-1\" listid=\"1\">listID=1,listName=One<div id=\"tc-list/1,11\">id,list/1,11,name,\"list/1,11\",cardpos,1462271,coverURL,,desc,\"list/1,11\",subscribed,,badges.checkItems,1,badges.checkItemsChecked,0,badges.comments,0,badges.attachments,0,due_date_string,</div><div id=\"tc-list/1,12\">id,list/1,12,name,\"list/1,12\",cardpos,1482751,coverURL,,desc,\"list/1,12\",subscribed,,badges.checkItems,0,badges.checkItemsChecked,0,badges.comments,0,badges.attachments,0,due_date_string,</div></div>';        // Create a card div
-                    equal($("#KanbanBoard").html(),expectedText,"Matched Div info");
-                    start();
-                }
-            }
+            testSuccessListCards();
         }
     }).fail(function( jqxhr, textStatus, error ) { //Report uncaught exception
         var err = textStatus + ", " + error;
         reportError( "Could not load the cards: " + err );
-        if(err="error, Unit test loadListCards 500"){ // Unit test code
-            start();
-            ok(true,"loadListCards successfully detected the exception");
-            $(".alertify-log").each( function(){
-               if($(this).text() ==  "Could not load the cards: error, Unit test loadListCards 500"){
-                   ok(true,"Found the error box");
-               }
-            });
-        }
+        testExceptionListCards();
     });
 }
 
+
 function loadBoard() {
     var cardTemplate = Handlebars.compile($("#kanban-board-template").html());
-    var the_url = "lists";
+    var the_url = nodeURL+"trello/lists/";
     var jqxhr = $.getJSON( the_url, function(data){
         if(data && data.error) //Caught an error in the model, so it needs to be reported
         {
             reportError(data.errorInfo+". " +data.HTTPError );
-            if(data.istest){ // Unit test code
-                start();
-                ok(true,"loadBoard successfully detected the error");
-                $(".alertify-log").each( function(){
-                   if($(this).text() ==  "loadBoard. Should test as an error."){
-                       ok(true,"Found the error box");
-                   }
-                });
-            }
+            testErrorBoard();
         }else {
             // Actual code. Updates the div with the card data.
             var newDiv = cardTemplate(data);
@@ -100,23 +83,13 @@ function loadBoard() {
                 loadListCards(listID);
                 activateAddThingLinks("atc",listID);
                 activateAddCardSubmit(listID);
-                if(data.istest){ // unit test code
-                    ok(true,"loadBoard succeeded");
-                }
+                testSuccessBoard();
             });
         }
     }).fail(function( jqxhr, textStatus, error ) { //uncaught exception needs reporting
         var err = textStatus + ", " + error;
         reportError( "Could not load the Trello board: " + err );
-        if(err="error, Unit test loadBoard 500"){ // Unit test code
-            start();
-            ok(true,"loadBoard successfully detected the exception");
-            $(".alertify-log").each( function(){
-               if($(this).text() ==  "Could not load the Trello board: error, Unit test loadBoard 500"){
-                   ok(true,"Found the error box");
-               }
-            });
-        }
+        testExceptionBoard();
     });
 }
 
@@ -126,7 +99,7 @@ function loadBoard() {
 
 function reloadCardFromTrello(cardID) {
     var cardTemplate = Handlebars.compile($("#kanban-card-template").html());
-    var the_url = "card/"+cardID;
+    var the_url = nodeURL+"trello/card/"+cardID+"/";
     var jqxhr = $.getJSON( the_url, function(data){
         if(data.error) //Caught an error in the model, so it needs to be reported
         {
@@ -135,13 +108,7 @@ function reloadCardFromTrello(cardID) {
             // Actual code. Updates the div with the card data.
             var newDiv = cardTemplate(data.trello_card);
             $("#tc-"+cardID).replaceWith(newDiv);
-
-            if(data.istest){ // Unit testing code.
-                start(); // Lets the test know that it's done with async stufff
-                var expectedText = "id,1,name,Overview screen decorations,cardpos,327679,coverURL,,desc,,subscribed,,badges.checkItems,12,badges.checkItemsChecked,10,badges.comments,0,badges.attachments,0,due_date_string,";
-                equal($("div#tc-1").html(),expectedText); //ensures that the test div is populated with the right data
-
-            }
+            testReloadCardSuccess();
         }
     })
         .fail(function( jqxhr, textStatus, error ) { //uncaught exception needs reporting
@@ -198,7 +165,7 @@ function makeCardListsSortable() {
         if(newCardPos != ""){
             $.ajax({
                 type: 'PUT',
-                url: 'card/',
+                url: nodeURL+'trello/card/',
                 contentType: 'application/json',
                 dataType: 'json',
                 data: JSON.stringify({
@@ -251,7 +218,7 @@ function displayCard(cardID) {
         var callerValue = domElement[0].attributes[0].value;
     //    This makes sure the detail card doesn't show when clicking on the "open in trello" link
         if(callerValue != "/addons/static/trello/to_trello_16.png"){
-            var the_url = "card/" + cardID;
+            var the_url = nodeURL+"trello/card/" + cardID +"/";
             var jqxhr = $.getJSON( the_url, function(data){
                 if(data && data.error) //Caught an error in the model, so it needs to be reported
                 {
@@ -338,7 +305,7 @@ function buildDetailCard(data) {
     }
 
     if(data.trello_card.badges.attachments>0){
-        var the_url = "attachments/" + data.trello_card_id;
+        var the_url = nodeURL+"trello/attachments/" + data.trello_card_id +"/";
         var jqxhr = $.getJSON( the_url, function(data){
             if(data && data.error) //Caught an error in the model, so it needs to be reported
             {
@@ -371,7 +338,7 @@ function activateAddCardSubmit(listID){
             // Send the card name and list id to trello
             $.ajax({
                     type: 'POST',
-                    url: 'card/',
+                    url: nodeURL+'trello/card/',
                     contentType: 'application/json',
                     dataType: 'json',
                     data: JSON.stringify({
@@ -411,7 +378,7 @@ function activateAddChecklistSubmit(cardID){
         if (checklistName.trim() != ""){
             $.ajax({
                     type: 'POST',
-                    url: 'checklist/',
+                    url: nodeURL+'trello/checklist/',
                     contentType: 'application/json',
                     dataType: 'json',
                     data: JSON.stringify({
@@ -462,7 +429,7 @@ function activateAddCheckItemSubmit(checklistID){
         //          Send the card name and list id to trello
             $.ajax({
                     type: 'POST',
-                    url: 'checkitem/',
+                    url: nodeURL+'trello/checkitem/',
                     contentType: 'application/json',
                     dataType: 'json',
                     data: JSON.stringify({
@@ -512,7 +479,7 @@ function activateEditCheckItemSubmit(checkitemID){
         if (checkItemName.trim() != ""){
             $.ajax({
                     type: 'PUT',
-                    url: 'checkitem/',
+                    url: nodeURL+'trello/checkitem/',
                     contentType: 'application/json',
                     dataType: 'json',
                     data: JSON.stringify({
@@ -556,7 +523,7 @@ function activateEditCardNameSubmit(cardID){
     if (checklistName.trim() != ""){
         $.ajax({
                 type: 'PUT',
-                url: 'card/',
+                url: nodeURL+'trello/card/',
                 contentType: 'application/json',
                 dataType: 'json',
                 data: JSON.stringify({
@@ -586,26 +553,23 @@ function activateEditCardNameSubmit(cardID){
     });
 }
 
-
+//TODO: Error Reporting
 //TODO: Unit tests for activateEditCardDescriptionSubmit()
 function activateEditCardDescriptionSubmit(cardID){
     $("#tcdedb-"+cardID).click(function() {
-    //        Make sure the box isn't empty, then send the contents and the list to the create new card method
+        // Make sure the box isn't empty, then send the contents and the list to the create new card method
         var theCardID = cardID;
         var cardDescription = $("#tcdedn-" + cardID).val();
-
-
-
-      $.ajax({
+        $.ajax({
                 type: 'PUT',
-                url: 'card/description/',
+                url: nodeURL+'trello/card/description/',
                 contentType: 'application/json',
                 dataType: 'json',
                 data: JSON.stringify({
                     desc: cardDescription,
                     cardid: theCardID
                 })
-            }).done(function(data) {
+        }).done(function(data) {
                 $("#tcdedo-"+theCardID).text(cardDescription);
                 var converter = new Showdown.converter();
                 if(cardDescription != "") {
@@ -616,11 +580,10 @@ function activateEditCardDescriptionSubmit(cardID){
                 $("#tcdedom-"+theCardID).html(converted);
                 $("#tcdedc-"+theCardID).click();
                 reloadCardFromTrello(theCardID);
-      }).fail(function(xhr) {
-                $("#tcdedc-"+theCardID).click();
-                console.log("Checkitem update failed.");
-            });
-
+        }).fail(function(xhr) {
+                    $("#tcdedc-"+theCardID).click();
+                    console.log("Checkitem update failed.");
+        });
     });
 }
 
@@ -636,7 +599,7 @@ function activateEditChecklistNameSubmit(checklistID){
         if (checklistName.trim() != ""){
             $.ajax({
                     type: 'PUT',
-                    url: 'checklist/',
+                    url: nodeURL+'trello/checklist/',
                     contentType: 'application/json',
                     dataType: 'json',
                     data: JSON.stringify({
@@ -678,7 +641,7 @@ function activateDeleteCheckItemSubmit(checkitemID){
 
         $.ajax({
                 type: 'DELETE',
-                url: 'checkitem/',
+                url: nodeURL+'trello/checkitem/',
                 contentType: 'application/json',
                 dataType: 'json',
                 data: JSON.stringify({
@@ -718,7 +681,7 @@ function activateDeleteChecklistSubmit(checklistID){
 
       $.ajax({
                 type: 'DELETE',
-                url: 'checklist/',
+                url: nodeURL+'trello/checklist/',
                 contentType: 'application/json',
                 dataType: 'json',
                 data: JSON.stringify({
@@ -757,7 +720,7 @@ function activateArchiveCardSubmit(cardID){
         var theCardID = cardID;
         $.ajax({
                 type: 'PUT',
-                url: 'card/',
+                url: nodeURL+'trello/card/',
                 contentType: 'application/json',
                 dataType: 'json',
                 data: JSON.stringify({
@@ -923,7 +886,7 @@ function checkCheckItem(cardID,checkListID,checkItemID){
     }
     $.ajax({
         type: 'PUT',
-        url: 'checkitem/',
+        url: nodeURL+'trello/checkitem/',
         contentType: 'application/json',
         dataType: 'json',
         data: JSON.stringify({

@@ -98,6 +98,7 @@ def trello_page(auth, project, node, **kwargs):
             'addon_page_js': trello.config.include_js['page'],
             'addon_page_css': trello.config.include_css['page'],
             'user_can_edit': user_can_edit,
+            'node_url': node.api_url,
         }
     else:
         data = _view_project(node, auth)
@@ -110,6 +111,7 @@ def trello_page(auth, project, node, **kwargs):
             'addon_page_js': trello.config.include_js['page'],
             'addon_page_css': trello.config.include_css['page'],
             'user_can_edit': user_can_edit,
+            'node_url': node.api_url,
         }
     return_value.update(data)
     return return_value

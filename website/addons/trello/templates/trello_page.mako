@@ -345,6 +345,15 @@
     });
 </script>
 
+<script>
+    %if node_url is not None:
+        var nodeURL = '${node_url}';
+    %else:
+        reportError("Cannot locate url.");
+    %endif
+
+</script>
+
 
 %if trello_board_name is not None:
     <div id="KanbanBoard">
