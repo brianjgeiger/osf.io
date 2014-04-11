@@ -418,9 +418,6 @@ function activateAddCardSubmit(listID){
     }
 }
 
-
-
-//TODO: Unit tests for activateAddChecklistSubmit()
 function activateAddChecklistSubmit(cardID){
     $("#tcdaclb-"+cardID).click(function() {
         var theCardID=cardID;
@@ -470,7 +467,7 @@ function activateAddChecklistSubmit(cardID){
     });
 }
 
-//TODO: Unit tests for activateAddCheckItemSubmit()
+
 function activateAddCheckItemSubmit(checklistID){
     $("#tcdacib-"+checklistID).click(function() {
     //        Make sure the box isn't empty, then send the contents and the list to the create new card method
@@ -494,6 +491,7 @@ function activateAddCheckItemSubmit(checklistID){
                 {
                     // if it fails, report the error
                     reportError(data.errorInfo+". " +data.HTTPError );
+                    testAddCheckitemError(data);
                 }else { // Actual code
                     //            Add a card div to the bottom of the list
                     //            Also, not at all happy about needing to re-write the contents. Really should be templated (or done all in JS rather than
@@ -510,11 +508,13 @@ function activateAddCheckItemSubmit(checklistID){
                     //          and show the add card div (i.e. click the cancel button)
                     $("#tcdacic-"+checklistID).click();
                       reloadCardFromTrello(cardID);
+                    testAddCheckitemSuccess(data);
                 }
             }).fail(function( jqxhr, textStatus, error ) {
                 // if it fails, report uncaught exception
                 var err = textStatus + ", " + error;
                 reportError( "Could not add the checklist item: " + err );
+                testAddCheckitemException(textStatus, error);
             });
         }
     });
@@ -606,7 +606,6 @@ function activateEditCardNameSubmit(cardID){
     });
 }
 
-//TODO: Error Reporting
 //TODO: Unit tests for activateEditCardDescriptionSubmit()
 function activateEditCardDescriptionSubmit(cardID){
     var cardDescription = "";

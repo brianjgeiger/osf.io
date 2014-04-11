@@ -381,6 +381,27 @@ function createAddCardTestSetup() {
     });
 }
 
+function createAddCheckitemTestSetup() {
+    $("#qunit-fixture").append('<div id="tcdccl-1"></div>');
+    $("#qunit-fixture").append('<div id="tcdacic-1")></div>');
+    $("#qunit-fixture").append('<div id="tcdacib-1")></div>');
+    $("#qunit-fixture").append('<textarea id="tcdacin-1" cardid="2")>Test List Name</textarea>');
+    $("#tcdacic-1").click(function(){
+        ok(true,"Clicked the cancel button");
+    });
+}
+
+function createAddChecklistTestSetup() {
+    $("#qunit-fixture").append('<div class="trello_card_detail_checklist_list"></div>');
+    $("#qunit-fixture").append('<div id="tcdaclc-1")></div>');
+    $("#qunit-fixture").append('<div id="tcdaclb-1")></div>');
+    $("#qunit-fixture").append('<textarea id="tcdacln-1" cardid="2")>Test List Name</textarea>');
+    $("#tcdaclc-1").click(function(){
+        ok(true,"Clicked the cancel button");
+    });
+
+}
+
 function kanbanicAJAXTests(){
     module("Fill out elements from AJAX calls");
 
@@ -503,8 +524,9 @@ function kanbanicAJAXTests(){
         loadBoard();
     });
 
-    module("Add/Edit callback tests");
+    module("Add Item Submit callback tests");
 
+    //Add card submit
     asyncTest("should add new card from user interaction", function() {
         expect(3);
         $.mockjaxClear();
@@ -529,20 +551,20 @@ function kanbanicAJAXTests(){
             start();
             ok(true,"Correctly called success function");
             equal(data.data,"{\"listid\":1,\"cardname\":\"Test List Name\"}",'Original "Add Card" POST sent the correct data');
-        }
+        };
 
         testAddCardError = function() {
             start();
             ok(false,"Incorrectly called Error");
-        }
+        };
 
         testAddCardException = function() {
             start();
             ok(false,"Incorrectly called Exception");
-        }
+        };
 
         $("#atcb-1").click();
-    })
+    });
 
     asyncTest("should NOT add new card from user interaction (Error)", function() {
         expect(3);
@@ -569,23 +591,23 @@ function kanbanicAJAXTests(){
         testAddCardSuccess = function(data) {
             start();
             ok(false,"Incorrectly called success function");
-        }
+        };
 
         testAddCardError = function(data) {
             start();
             var alertBoxError = "Unit test of error adding card from user interaction. Should test as an error.";
             ok(true,"Correctly called Error");
             equal(data.data,"{\"listid\":1,\"cardname\":\"Test List Name\"}",'Original "Add Card" POST sent the correct data');
-            checkForAlertBox(alertBoxError,true);
-        }
+            checkForAlertBox(alertBoxError,false);
+        };
 
         testAddCardException = function() {
             start();
             ok(false,"Incorrectly called Exception");
-        }
+        };
 
         $("#atcb-1").click();
-    })
+    });
 
     asyncTest("should NOT add new card from user interaction (Exception - 404 Not Found)", function() {
         expect(3);
@@ -598,12 +620,12 @@ function kanbanicAJAXTests(){
         testAddCardSuccess = function(data) {
             start();
             ok(false,"Incorrectly called success function");
-        }
+        };
 
         testAddCardError = function(data) {
             start();
             ok(false,"Incorrectly called Error");
-        }
+        };
 
         testAddCardException = function(textStatus, error) {
             start();
@@ -612,9 +634,235 @@ function kanbanicAJAXTests(){
             ok(true,"Correctly called Exception");
             equal(err,"error, Not Found", "404 Not Found");
             checkForAlertBox(alertBoxError,false);
-        }
+        };
 
         $("#atcb-1").click();
-    })
+    });
+
+    // Add checkitem submit
+    asyncTest("should add new checkitem from user interaction", function() {
+        expect(3);
+        $.mockjaxClear();
+
+        $.mockjax({
+            url: '/trello/checkitem/',
+            responseTime: 1,
+            type: 'POST',
+            response: function(settings) {
+                this.responseText=
+                {
+                    Error: false,
+                    data: settings.data
+                }
+            }
+        });
+
+        this.clock.restore();
+        createAddCheckitemTestSetup();
+        activateAddCheckItemSubmit(1);
+        testAddCheckitemSuccess = function(data) {
+            start();
+            ok(true,"Correctly called success function");
+            equal(data.data,"{\"checklistid\":1,\"checkitemname\":\"Test List Name\"}",'Original "Add Checkitem" POST sent the correct data');
+        };
+
+        testAddCheckitemError = function() {
+            start();
+            ok(false,"Incorrectly called Error");
+        };
+
+        testAddCheckitemException = function() {
+            start();
+            ok(false,"Incorrectly called Exception");
+        };
+
+        $("#tcdacib-1").click();
+    });
+
+    asyncTest("should NOT add new checkitem from user interaction (Error)", function() {
+        expect(3);
+        $.mockjaxClear();
+
+        $.mockjax({
+            url: '/trello/checkitem/',
+            responseTime: 1,
+            type: 'POST',
+            response: function(settings) {
+                this.responseText=
+                {
+                    error: true,
+                    data: settings.data,
+                    errorInfo: "Unit test of error adding checkitem from user interaction",
+                    HTTPError: "Should test as an error."
+                }
+            }
+        });
+
+        this.clock.restore();
+        createAddCheckitemTestSetup();
+        activateAddCheckItemSubmit(1);
+        testAddCheckitemSuccess = function(data) {
+            start();
+            ok(false,"Incorrectly called success function");
+        };
+
+        testAddCheckitemError = function(data) {
+            start();
+            var alertBoxError = "Unit test of error adding checkitem from user interaction. Should test as an error.";
+            ok(true,"Correctly called Error");
+            equal(data.data,"{\"checklistid\":1,\"checkitemname\":\"Test List Name\"}",'Original "Add Checkitem" POST sent the correct data');
+            checkForAlertBox(alertBoxError,false);
+        };
+
+        testAddCheckitemException = function() {
+            start();
+            ok(false,"Incorrectly called Exception");
+        };
+
+        $("#tcdacib-1").click();
+    });
+
+    asyncTest("should NOT add new checkitem from user interaction (Exception - 404 Not Found)", function() {
+        expect(3);
+        $.mockjaxClear();
+        // Did not add a mockjax to this so it will report a 404 error.
+
+        this.clock.restore();
+        createAddCheckitemTestSetup();
+        activateAddCheckItemSubmit(1);
+        testAddCheckitemSuccess = function(data) {
+            start();
+            ok(false,"Incorrectly called success function");
+        };
+
+        testAddCheckitemError = function(data) {
+            start();
+            ok(false,"Incorrectly called Error");
+        };
+
+        testAddCheckitemException = function(textStatus, error) {
+            start();
+            var err = textStatus + ", " + error;
+            var alertBoxError = "Could not add the checklist item: "+err;
+            ok(true,"Correctly called Exception");
+            equal(err,"error, Not Found", "404 Not Found");
+            checkForAlertBox(alertBoxError,false);
+        };
+
+        $("#tcdacib-1").click();
+    });
+
+    // Add Checklist Submit
+    asyncTest("should add new checklist from user interaction", function() {
+        expect(3);
+        $.mockjaxClear();
+
+        $.mockjax({
+            url: '/trello/checklist/',
+            responseTime: 1,
+            type: 'POST',
+            response: function(settings) {
+                this.responseText=
+                {
+                    Error: false,
+                    data: settings.data
+                }
+            }
+        });
+
+        this.clock.restore();
+        createAddChecklistTestSetup();
+        activateAddChecklistSubmit(1);
+        testAddChecklistSuccess = function(data) {
+            start();
+            ok(true,"Correctly called success function");
+            equal(data.data,"{\"cardid\":1,\"checklistname\":\"Test List Name\"}",'Original "Add Checklist" POST sent the correct data');
+        };
+
+        testAddChecklistError = function() {
+            start();
+            ok(false,"Incorrectly called Error");
+        };
+
+        testAddChecklistException = function() {
+            start();
+            ok(false,"Incorrectly called Exception");
+        };
+
+        $("#tcdaclb-1").click();
+    });
+
+    asyncTest("should NOT add new checklist from user interaction (Error)", function() {
+        expect(3);
+        $.mockjaxClear();
+
+        $.mockjax({
+            url: '/trello/checklist/',
+            responseTime: 1,
+            type: 'POST',
+            response: function(settings) {
+                this.responseText=
+                {
+                    error: true,
+                    data: settings.data,
+                    errorInfo: "Unit test of error adding checklist from user interaction",
+                    HTTPError: "Should test as an error."
+                }
+            }
+        });
+
+        this.clock.restore();
+        createAddChecklistTestSetup();
+        activateAddChecklistSubmit(1);
+        testAddChecklistSuccess = function(data) {
+            start();
+            ok(false,"Incorrectly called success function");
+        };
+
+        testAddChecklistError = function(data) {
+            start();
+            var alertBoxError = "Unit test of error adding checklist from user interaction. Should test as an error.";
+            ok(true,"Correctly called Error");
+            equal(data.data,"{\"cardid\":1,\"checklistname\":\"Test List Name\"}",'Original "Add Checklist" POST sent the correct data');
+            checkForAlertBox(alertBoxError,false);
+        };
+
+        testAddChecklistException = function() {
+            start();
+            ok(false,"Incorrectly called Exception");
+        };
+
+        $("#tcdaclb-1").click();
+    });
+
+    asyncTest("should NOT add new checklist from user interaction (Exception - 404 Not Found)", function() {
+        expect(3);
+        $.mockjaxClear();
+        // Did not add a mockjax to this so it will report a 404 error.
+
+        this.clock.restore();
+        createAddChecklistTestSetup();
+        activateAddChecklistSubmit(1);
+        testAddChecklistSuccess = function(data) {
+            start();
+            ok(false,"Incorrectly called success function");
+        };
+
+        testAddChecklistError = function(data) {
+            start();
+            ok(false,"Incorrectly called Error");
+        };
+
+        testAddChecklistException = function(textStatus, error) {
+            start();
+            var err = textStatus + ", " + error;
+            var alertBoxError = "Could not add the checklist: "+err;
+            ok(true,"Correctly called Exception");
+            equal(err,"error, Not Found", "404 Not Found");
+            checkForAlertBox(alertBoxError,false);
+        };
+
+        $("#tcdaclb-1").click();
+    });
 
 }
