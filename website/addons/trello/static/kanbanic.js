@@ -370,7 +370,6 @@ function addAttachmentInfo(data){
 // Add a card
 //
 
-//TODO: Unit tests for activateAddCardSubmit()
 function activateAddCardSubmit(listID){
     $("#atcb-"+listID).click(addCardSubmit);
 
