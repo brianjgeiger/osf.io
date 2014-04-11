@@ -26,7 +26,9 @@ function replaceURLWithHTMLLinks(text) { // Light wrapper in case we need to cha
 //
 // Test function placeholders
 // Used by asynchronous unit tests to verify that callbacks do what they're supposed to.
-// See ajax_tests.js to see how they're used.
+// See ajax_tests.js to see how they're used. The tests run concurrently, so I don't think
+// I can reduce these down to just a few reusable functions. Could be refactored to a class
+// to make tests have their own namespace, but for now, this will do.
 
 var testErrorListCards = function() {};
 var testExceptionListCards = function() {};
@@ -35,6 +37,43 @@ var testErrorBoard = function() {};
 var testExceptionBoard = function() {};
 var testSuccessBoard = function() {};
 var testReloadCardSuccess = function() {};
+var testAddCardError = function() {};
+var testAddCardException = function() {};
+var testAddCardSuccess= function() {};
+var testAddChecklistError = function() {};
+var testAddChecklistException = function() {};
+var testAddChecklistSuccess= function() {};
+var testAddCheckitemError = function() {};
+var testAddCheckitemException = function() {};
+var testAddCheckitemSuccess= function() {};
+var testEditCardNameError = function() {};
+var testEditCardNameException = function() {};
+var testEditCardNameSuccess= function() {};
+var testEditCardDescriptionError = function() {};
+var testEditCardDescriptionException = function() {};
+var testEditCardDescriptionSuccess= function() {};
+var testEditChecklistNameError = function() {};
+var testEditChecklistNameException = function() {};
+var testEditChecklistNameSuccess= function() {};
+var testEditCheckitemNameError = function() {};
+var testEditCheckitemNameException = function() {};
+var testEditCheckitemNameSuccess= function() {};
+var testDeleteCheckitemError = function() {};
+var testDeleteCheckitemException = function() {};
+var testDeleteCheckitemSuccess= function() {};
+var testDeleteChecklistError = function() {};
+var testDeleteChecklistException = function() {};
+var testDeleteChecklistSuccess= function() {};
+var testCheckCheckitemError = function() {};
+var testCheckCheckitemException = function() {};
+var testCheckCheckitemSuccess= function() {};
+var testArchiveCardError = function() {};
+var testArchiveCardException = function() {};
+var testArchiveCardSuccess= function() {};
+
+
+
+
 
 //
 //  List loading
@@ -132,10 +171,9 @@ function makeCardListsSortable() {
         var cardPos = event.item.attr('cardPos');
         var oldList = ui.target;
         var oldListDivID = oldList.getAttribute('id');
-        var oldListID =  oldList.getAttribute('listID');
         var newList = event.item[0].parentElement;
         var newListID = newList.getAttribute('listID');
-        var cardList = $("div#cl-"+newListID).find("div.TrelloCard");
+
         var movedCard = null;
         var prevCard = null;
         var nextCard = null;
@@ -209,6 +247,7 @@ function restoreCardPosition(oldListDivID,cardDivID,oldList) {
 //
 
 //TODO: Add Unit tests for displayCard() to verify div is being created/updated
+
 var cardBeingDisplayed = false;
 function displayCard(cardID) {
     if(!cardBeingDisplayed){
@@ -310,7 +349,9 @@ function buildDetailCard(data) {
             if(data && data.error) //Caught an error in the model, so it needs to be reported
             {
                 reportError(data.errorInfo+". " +data.HTTPError );
-            }else {
+            }
+            else
+            {
                 addAttachmentInfo(data);
             }
         }).fail(function( jqxhr, textStatus, error ) { //uncaught exception needs reporting
@@ -331,8 +372,10 @@ function addAttachmentInfo(data){
 
 //TODO: Unit tests for activateAddCardSubmit()
 function activateAddCardSubmit(listID){
-    $("#atcb-"+listID).click(function() {
-//        Make sure the box isn't empty, then send the contents and the list to the create new card method
+    $("#atcb-"+listID).click(addCardSubmit);
+
+    function addCardSubmit()
+    { // Make sure the box isn't empty, then send the contents and the list to the create new card method
         var checklistName = $("#atcn-" + listID).val();
         if (checklistName.trim() != ""){
             // Send the card name and list id to trello
@@ -345,35 +388,43 @@ function activateAddCardSubmit(listID){
                         listid: listID,
                         cardname: checklistName
                     })
-                }).done(function(data) {
-                    if(data && data.error) //Error reporting code for problems caught in the Model
-                    {
-                        // if it fails, report the error
-                        reportError(data.errorInfo+". " +data.HTTPError );
-                    }else { // Actual code
-                        // Add a card div to the bottom of the list
-                          var cardTemplate = Handlebars.compile($("#kanban-card-template").html());
-                          var newDiv = cardTemplate(data);
-                        $("#cl-" + listID).append(newDiv);
-                        // Clear out the contents of the textarea, hide the name input div,
-                        // and show the add card div (i.e. click the cancel button)
-                        $("#atcc-"+listID).click();
-                    }
-            }).fail(function( jqxhr, textStatus, error ) {
-                // if it fails, revert
-
-                //Report uncaught exception
-                var err = textStatus + ", " + error;
-                reportError( "Could not add the card: " + err );
-            });
+            })
+            .done(addedNewCard)
+            .fail(addedNewCardException);
         }
-    });
+    }
+
+    function addedNewCard(data){
+        if(data && data.error) //Error reporting code for problems caught in the Model
+        { // if it fails, report the error
+            reportError(data.errorInfo+". " +data.HTTPError );
+            testAddCardError(data);
+        }else { // Actual code
+            // Add a card div to the bottom of the list
+              var cardTemplate = Handlebars.compile($("#kanban-card-template").html());
+              var newDiv = cardTemplate(data);
+            $("#cl-" + listID).append(newDiv);
+            // Clear out the contents of the textarea, hide the name input div,
+            // and show the add card div (i.e. click the cancel button)
+            $("#atcc-"+listID).click();
+            testAddCardSuccess(data);
+        }
+    }
+
+    function addedNewCardException(jqxhr, textStatus, error)
+    { // if it fails, report uncaught exception
+        var err = textStatus + ", " + error;
+        reportError( "Could not add the card: " + err );
+        testAddCardException(textStatus, error);
+    }
 }
+
+
 
 //TODO: Unit tests for activateAddChecklistSubmit()
 function activateAddChecklistSubmit(cardID){
     $("#tcdaclb-"+cardID).click(function() {
-        var theCardID=cardID
+        var theCardID=cardID;
         var checklistName = $("#tcdacln-" + theCardID).val();
         if (checklistName.trim() != ""){
             $.ajax({
@@ -556,10 +607,11 @@ function activateEditCardNameSubmit(cardID){
 //TODO: Error Reporting
 //TODO: Unit tests for activateEditCardDescriptionSubmit()
 function activateEditCardDescriptionSubmit(cardID){
+    var cardDescription = "";
     $("#tcdedb-"+cardID).click(function() {
         // Make sure the box isn't empty, then send the contents and the list to the create new card method
         var theCardID = cardID;
-        var cardDescription = $("#tcdedn-" + cardID).val();
+        cardDescription = $("#tcdedn-" + cardID).val();
         $.ajax({
                 type: 'PUT',
                 url: nodeURL+'trello/card/description/',
@@ -569,21 +621,34 @@ function activateEditCardDescriptionSubmit(cardID){
                     desc: cardDescription,
                     cardid: theCardID
                 })
-        }).done(function(data) {
-                $("#tcdedo-"+theCardID).text(cardDescription);
-                var converter = new Showdown.converter();
-                if(cardDescription != "") {
-                    var converted = converter.makeHtml(replaceURLWithHTMLLinks(cardDescription));
-                } else {
-                    var converted = converter.makeHtml(replaceURLWithHTMLLinks("*Edit description…*"));
-                }
-                $("#tcdedom-"+theCardID).html(converted);
-                $("#tcdedc-"+theCardID).click();
-                reloadCardFromTrello(theCardID);
-        }).fail(function(xhr) {
+        })
+            .done(function(data){
+                if(data && data.error) //Error reporting code for problems caught in the Model
+                {
+                    // if it fails, revert
                     $("#tcdedc-"+theCardID).click();
-                    console.log("Checkitem update failed.");
-        });
+                    // report the error
+                    reportError(data.errorInfo+". " +data.HTTPError );
+                }else { // Actual code
+                    $("#tcdedo-"+theCardID).text(cardDescription);
+                    var converter = new Showdown.converter();
+                    if(cardDescription != "") {
+                        var converted = converter.makeHtml(replaceURLWithHTMLLinks(cardDescription));
+                    } else {
+                        var converted = converter.makeHtml(replaceURLWithHTMLLinks("*Edit description…*"));
+                    }
+                    $("#tcdedom-"+theCardID).html(converted);
+                    $("#tcdedc-"+theCardID).click();
+                    reloadCardFromTrello(theCardID);
+                }
+            })
+            .fail(function(jqxhr, textStatus, error){
+                // if it fails, revert
+                $("#tcdedc-"+theCardID).click();
+                //Report uncaught exception
+                var err = textStatus + ", " + error;
+                reportError( "Could not change the card name: " + err );
+            });
     });
 }
 

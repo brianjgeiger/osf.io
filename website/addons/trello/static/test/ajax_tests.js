@@ -360,6 +360,17 @@ function mockCard(id, canEdit) {
 
 }
 
+
+function createAddCardTestSetup() {
+    $("#qunit-fixture").append('<div id="cl-1"></div>');
+    $("#qunit-fixture").append('<div id="atcc-1")></div>');
+    $("#qunit-fixture").append('<div id="atcb-1")></div>');
+    $("#qunit-fixture").append('<textarea id="atcn-1")>Test List Name</textarea>');
+    $("#atcc-1").click(function(){
+        ok(true,"Clicked the cancel button");
+    });
+}
+
 function kanbanicAJAXTests(){
     module("Fill out elements from AJAX calls");
 
@@ -429,6 +440,7 @@ function kanbanicAJAXTests(){
         mockErrorList(1,true,"loadListCards");
         loadListCards(1);
     });
+
     asyncTest("should show error for 500 exception - loadListCards()", function(assert) {
         $.mockjaxClear();
         testExceptionListCards = function() {
@@ -480,4 +492,112 @@ function kanbanicAJAXTests(){
         mockException("/trello/lists/",500,"loadBoard 500");
         loadBoard();
     });
+
+    module("Add/Edit callback tests");
+
+    asyncTest("should add new card from user interaction", function() {
+        expect(3);
+        $.mockjaxClear();
+
+        $.mockjax({
+            url: '/trello/card/',
+            responseTime: 1,
+            type: 'POST',
+            response: function(settings) {
+                this.responseText=
+                {
+                    Error: false,
+                    data: settings.data
+                }
+            }
+        });
+
+        this.clock.restore();
+        createAddCardTestSetup();
+        activateAddCardSubmit(1);
+        testAddCardSuccess = function(data) {
+            start();
+            ok(true,"Correctly called success function");
+            equal(data.data,"{\"listid\":1,\"cardname\":\"Test List Name\"}",'Original "Add Card" POST sent the correct data');
+        }
+
+        testAddCardError = function() {
+            start();
+            ok(false,"Incorrectly called Error");
+        }
+
+        testAddCardException = function() {
+            start();
+            ok(false,"Incorrectly called Exception");
+        }
+
+        $("#atcb-1").click();
+    })
+
+    asyncTest("should NOT add new card from user interaction (Error)", function() {
+        expect(2); // One less than success test means that it did not cancel the input
+        $.mockjaxClear();
+
+        $.mockjax({
+            url: '/trello/card/',
+            responseTime: 1,
+            type: 'POST',
+            response: function(settings) {
+                this.responseText=
+                {
+                    error: true,
+                    data: settings.data
+                }
+            }
+        });
+
+        this.clock.restore();
+        createAddCardTestSetup();
+        activateAddCardSubmit(1);
+        testAddCardSuccess = function(data) {
+            start();
+            ok(false,"Incorrectly called success function");
+        }
+
+        testAddCardError = function(data) {
+            start();
+            ok(true,"Correctly called Error");
+            equal(data.data,"{\"listid\":1,\"cardname\":\"Test List Name\"}",'Original "Add Card" POST sent the correct data');
+        }
+
+        testAddCardException = function() {
+            start();
+            ok(false,"Incorrectly called Exception");
+        }
+
+        $("#atcb-1").click();
+    })
+
+    asyncTest("should NOT add new card from user interaction (Exception - 404 Not Found)", function() {
+        expect(2); // One less than success test means that it did not cancel the input
+        $.mockjaxClear();
+        // Did not add a mockjax to this so it will report a 404 error.
+
+        this.clock.restore();
+        createAddCardTestSetup();
+        activateAddCardSubmit(1);
+        testAddCardSuccess = function(data) {
+            start();
+            ok(false,"Incorrectly called success function");
+        }
+
+        testAddCardError = function(data) {
+            start();
+            ok(false,"Incorrectly called Error");
+        }
+
+        testAddCardException = function(textStatus, error) {
+            start();
+            ok(true,"Correctly called Exception");
+            equal(textStatus+" "+error,"error Not Found", "404 Not Found");
+        }
+
+        $("#atcb-1").click();
+    })
+
 }
