@@ -360,6 +360,16 @@ function mockCard(id, canEdit) {
 
 }
 
+function checkForAlertBox(alertBoxText,debug){
+    $(".alertify-log").each( function(){
+        if(debug) {
+            console.log($(this).text());
+        }
+        if($(this).text() ==  alertBoxText){
+            ok(true,"Found the error box");
+        }
+    });
+}
 
 function createAddCardTestSetup() {
     $("#qunit-fixture").append('<div id="cl-1"></div>');
@@ -535,7 +545,7 @@ function kanbanicAJAXTests(){
     })
 
     asyncTest("should NOT add new card from user interaction (Error)", function() {
-        expect(2); // One less than success test means that it did not cancel the input
+        expect(3);
         $.mockjaxClear();
 
         $.mockjax({
@@ -546,7 +556,9 @@ function kanbanicAJAXTests(){
                 this.responseText=
                 {
                     error: true,
-                    data: settings.data
+                    data: settings.data,
+                    errorInfo: "Unit test of error adding card from user interaction",
+                    HTTPError: "Should test as an error."
                 }
             }
         });
@@ -561,8 +573,10 @@ function kanbanicAJAXTests(){
 
         testAddCardError = function(data) {
             start();
+            var alertBoxError = "Unit test of error adding card from user interaction. Should test as an error.";
             ok(true,"Correctly called Error");
             equal(data.data,"{\"listid\":1,\"cardname\":\"Test List Name\"}",'Original "Add Card" POST sent the correct data');
+            checkForAlertBox(alertBoxError,true);
         }
 
         testAddCardException = function() {
@@ -574,7 +588,7 @@ function kanbanicAJAXTests(){
     })
 
     asyncTest("should NOT add new card from user interaction (Exception - 404 Not Found)", function() {
-        expect(2); // One less than success test means that it did not cancel the input
+        expect(3);
         $.mockjaxClear();
         // Did not add a mockjax to this so it will report a 404 error.
 
@@ -593,8 +607,11 @@ function kanbanicAJAXTests(){
 
         testAddCardException = function(textStatus, error) {
             start();
+            var err = textStatus + ", " + error;
+            var alertBoxError = "Could not add the card: "+err;
             ok(true,"Correctly called Exception");
-            equal(textStatus+" "+error,"error Not Found", "404 Not Found");
+            equal(err,"error, Not Found", "404 Not Found");
+            checkForAlertBox(alertBoxError,false);
         }
 
         $("#atcb-1").click();

@@ -440,6 +440,7 @@ function activateAddChecklistSubmit(cardID){
                 {
                     // if it fails, report the error
                     reportError(data.errorInfo+". " +data.HTTPError );
+                    testAddChecklistError(data);
                 }else { // Actual code
                     //            Add a checklist div to the bottom of the list
                     data.cardid=theCardID;
@@ -457,11 +458,13 @@ function activateAddChecklistSubmit(cardID){
                     //          and show the add card div (i.e. click the cancel button)
                     $("#tcdaclc-"+theCardID).click();
                     reloadCardFromTrello(theCardID);
+                    testAddChecklistSuccess(data);
                 }
             }).fail(function( jqxhr, textStatus, error ) {
                 // if it fails, report uncaught exception
                 var err = textStatus + ", " + error;
                 reportError( "Could not add the checklist: " + err );
+                testAddChecklistException(textStatus, error);
             });
         }
     });
