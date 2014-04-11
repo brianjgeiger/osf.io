@@ -412,7 +412,7 @@ function kanbanicAJAXTests(){
             var expectedText = "id,1,name,Overview screen decorations,cardpos,327679,coverURL,,desc,,subscribed,,badges.checkItems,12,badges.checkItemsChecked,10,badges.comments,0,badges.attachments,0,due_date_string,";
             equal($("div#tc-1").html(),expectedText); //ensures that the test div is populated with the right data
         };
-        this.clock.restore();
+        
         expect(1);
         var $fixture = $( "#qunit-fixture" );
         mockCard(1, true);
@@ -436,7 +436,7 @@ function kanbanicAJAXTests(){
         testSuccessBoard = function() {
             ok(true,"loadBoard succeeded");
         };
-        this.clock.restore();
+        
         mockBoard(true);
         mockList(1,true);
 
@@ -466,7 +466,7 @@ function kanbanicAJAXTests(){
 
 
 
-        this.clock.restore();
+        
         expect(2);
         mockErrorList(1,true,"loadListCards");
         loadListCards(1);
@@ -484,7 +484,7 @@ function kanbanicAJAXTests(){
             });
 
         };
-        this.clock.restore();
+        
         expect(2);
         mockException("/trello/list/1/",500,"loadListCards 500");
         loadListCards(1);
@@ -501,7 +501,7 @@ function kanbanicAJAXTests(){
                }
             });
         };
-        this.clock.restore();
+        
         expect(2);
         mockErrorBoard(true,"loadBoard");
         loadBoard();
@@ -518,7 +518,7 @@ function kanbanicAJAXTests(){
                }
             });
         };
-        this.clock.restore();
+        
         expect(2);
         mockException("/trello/lists/",500,"loadBoard 500");
         loadBoard();
@@ -544,7 +544,7 @@ function kanbanicAJAXTests(){
             }
         });
 
-        this.clock.restore();
+        
         createAddCardTestSetup();
         activateAddCardSubmit(1);
         testAddCardSuccess = function(data) {
@@ -585,7 +585,7 @@ function kanbanicAJAXTests(){
             }
         });
 
-        this.clock.restore();
+        
         createAddCardTestSetup();
         activateAddCardSubmit(1);
         testAddCardSuccess = function(data) {
@@ -614,7 +614,7 @@ function kanbanicAJAXTests(){
         $.mockjaxClear();
         // Did not add a mockjax to this so it will report a 404 error.
 
-        this.clock.restore();
+        
         createAddCardTestSetup();
         activateAddCardSubmit(1);
         testAddCardSuccess = function(data) {
@@ -657,7 +657,7 @@ function kanbanicAJAXTests(){
             }
         });
 
-        this.clock.restore();
+        
         createAddCheckitemTestSetup();
         activateAddCheckItemSubmit(1);
         testAddCheckitemSuccess = function(data) {
@@ -698,7 +698,7 @@ function kanbanicAJAXTests(){
             }
         });
 
-        this.clock.restore();
+        
         createAddCheckitemTestSetup();
         activateAddCheckItemSubmit(1);
         testAddCheckitemSuccess = function(data) {
@@ -727,7 +727,7 @@ function kanbanicAJAXTests(){
         $.mockjaxClear();
         // Did not add a mockjax to this so it will report a 404 error.
 
-        this.clock.restore();
+        
         createAddCheckitemTestSetup();
         activateAddCheckItemSubmit(1);
         testAddCheckitemSuccess = function(data) {
@@ -770,7 +770,7 @@ function kanbanicAJAXTests(){
             }
         });
 
-        this.clock.restore();
+        
         createAddChecklistTestSetup();
         activateAddChecklistSubmit(1);
         testAddChecklistSuccess = function(data) {
@@ -811,7 +811,7 @@ function kanbanicAJAXTests(){
             }
         });
 
-        this.clock.restore();
+        
         createAddChecklistTestSetup();
         activateAddChecklistSubmit(1);
         testAddChecklistSuccess = function(data) {
@@ -840,7 +840,7 @@ function kanbanicAJAXTests(){
         $.mockjaxClear();
         // Did not add a mockjax to this so it will report a 404 error.
 
-        this.clock.restore();
+        
         createAddChecklistTestSetup();
         activateAddChecklistSubmit(1);
         testAddChecklistSuccess = function(data) {

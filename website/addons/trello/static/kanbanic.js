@@ -499,15 +499,18 @@ function activateAddCheckItemSubmit(checklistID){
                     var cardTemplate = Handlebars.compile($("#kanban-card-detail-checkitem-template").html());
                     data.checklistid = checklistID;
                     data.cardid = cardID;
-                      var newDiv = cardTemplate(data);
+                    var newDiv = cardTemplate(data);
                     $("#tcdccl-" + checklistID).append(newDiv);
                     activateEditThingLinks("tcdeci",data.id);
                     activateEditCheckItemSubmit(data.id);
                     activateDeleteCheckItemSubmit(data.id);
+
                     //          Clear out the contents of the textarea, hide the name input div,
                     //          and show the add card div (i.e. click the cancel button)
+
                     $("#tcdacic-"+checklistID).click();
-                      reloadCardFromTrello(cardID);
+
+                    reloadCardFromTrello(cardID);
                     testAddCheckitemSuccess(data);
                 }
             }).fail(function( jqxhr, textStatus, error ) {
