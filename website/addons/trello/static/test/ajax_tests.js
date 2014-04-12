@@ -375,7 +375,7 @@ function createAddCardTestSetup() {
     $("#qunit-fixture").append('<div id="cl-1"></div>');
     $("#qunit-fixture").append('<div id="atcc-1")></div>');
     $("#qunit-fixture").append('<div id="atcb-1")></div>');
-    $("#qunit-fixture").append('<textarea id="atcn-1")>Test List Name</textarea>');
+    $("#qunit-fixture").append('<textarea id="atcn-1")>Test card name</textarea>');
     $("#atcc-1").click(function(){
         ok(true,"Clicked the cancel button");
     });
@@ -385,7 +385,7 @@ function createAddCheckitemTestSetup() {
     $("#qunit-fixture").append('<div id="tcdccl-1"></div>');
     $("#qunit-fixture").append('<div id="tcdacic-1")></div>');
     $("#qunit-fixture").append('<div id="tcdacib-1")></div>');
-    $("#qunit-fixture").append('<textarea id="tcdacin-1" cardid="2")>Test List Name</textarea>');
+    $("#qunit-fixture").append('<textarea id="tcdacin-1" cardid="2")>Test checkitem Name</textarea>');
     $("#tcdacic-1").click(function(){
         ok(true,"Clicked the cancel button");
     });
@@ -399,6 +399,19 @@ function createAddChecklistTestSetup() {
     $("#tcdaclc-1").click(function(){
         ok(true,"Clicked the cancel button");
     });
+
+}
+
+function createEditCheckitemTestSetup() {
+    $("#qunit-fixture").append('<div class="trello_card_detail_checklist_list"></div>');
+    $("#qunit-fixture").append('<div id="tcdecic-1")></div>');
+    $("#qunit-fixture").append('<div id="tcdecib-1")></div>');
+    $("#qunit-fixture").append('<div id="tcdecio-1")>Original checkitem name</div>');
+    $("#qunit-fixture").append('<textarea id="tcdecin-1" cardid="2" checklistid="3")>New Checkitem Name</textarea>');
+    $("#tcdecic-1").click(function(){
+        ok(true,"Clicked the cancel button");
+    });
+
 
 }
 
@@ -550,7 +563,7 @@ function kanbanicAJAXTests(){
         testAddCardSuccess = function(data) {
             start();
             ok(true,"Correctly called success function");
-            equal(data.data,"{\"listid\":1,\"cardname\":\"Test List Name\"}",'Original "Add Card" POST sent the correct data');
+            equal(data.data,"{\"listid\":1,\"cardname\":\"Test card name\"}",'Original "Add Card" POST sent the correct data');
         };
 
         testAddCardError = function() {
@@ -597,7 +610,7 @@ function kanbanicAJAXTests(){
             start();
             var alertBoxError = "Unit test of error adding card from user interaction. Should test as an error.";
             ok(true,"Correctly called Error");
-            equal(data.data,"{\"listid\":1,\"cardname\":\"Test List Name\"}",'Original "Add Card" POST sent the correct data');
+            equal(data.data,"{\"listid\":1,\"cardname\":\"Test card name\"}",'Original "Add Card" POST sent the correct data');
             checkForAlertBox(alertBoxError,false);
         };
 
@@ -663,7 +676,7 @@ function kanbanicAJAXTests(){
         testAddCheckitemSuccess = function(data) {
             start();
             ok(true,"Correctly called success function");
-            equal(data.data,"{\"checklistid\":1,\"checkitemname\":\"Test List Name\"}",'Original "Add Checkitem" POST sent the correct data');
+            equal(data.data,"{\"checklistid\":1,\"checkitemname\":\"Test checkitem Name\"}",'Original "Add Checkitem" POST sent the correct data');
         };
 
         testAddCheckitemError = function() {
@@ -710,7 +723,7 @@ function kanbanicAJAXTests(){
             start();
             var alertBoxError = "Unit test of error adding checkitem from user interaction. Should test as an error.";
             ok(true,"Correctly called Error");
-            equal(data.data,"{\"checklistid\":1,\"checkitemname\":\"Test List Name\"}",'Original "Add Checkitem" POST sent the correct data');
+            equal(data.data,"{\"checklistid\":1,\"checkitemname\":\"Test checkitem Name\"}",'Original "Add Checkitem" POST sent the correct data');
             checkForAlertBox(alertBoxError,false);
         };
 
@@ -864,5 +877,121 @@ function kanbanicAJAXTests(){
 
         $("#tcdaclb-1").click();
     });
+
+    module("Edit Item Submit callback tests");
+
+        // Edit Checkitem Submit
+    asyncTest("should edit checkitem from user interaction", function() {
+        expect(3);
+        $.mockjaxClear();
+
+        $.mockjax({
+            url: '/trello/checkitem/',
+            responseTime: 1,
+            type: 'PUT',
+            response: function(settings) {
+                this.responseText=
+                {
+                    Error: false,
+                    data: settings.data
+                }
+            }
+        });
+
+
+        createEditCheckitemTestSetup();
+        activateEditCheckItemSubmit(1);
+        testEditCheckitemSuccess = function(data) {
+            start();
+            ok(true,"Correctly called success function");
+            equal(data.data,"{\"checklistid\":\"3\",\"name\":\"New Checkitem Name\",\"cardid\":\"2\",\"checkitemid\":1}",'Original "Add Checkitem" PUT sent the correct data');
+        };
+
+        testEditCheckitemError = function() {
+            start();
+            ok(false,"Incorrectly called Error");
+        };
+
+        testEditCheckitemException = function() {
+            start();
+            ok(false,"Incorrectly called Exception");
+        };
+
+        $("#tcdecib-1").click();
+    });
+
+    asyncTest("should NOT edit checkitem from user interaction (Error)", function() {
+        expect(4);
+        $.mockjaxClear();
+
+        $.mockjax({
+            url: '/trello/checkitem/',
+            responseTime: 1,
+            type: 'PUT',
+            response: function(settings) {
+                this.responseText=
+                {
+                    error: true,
+                    data: settings.data,
+                    errorInfo: "Unit test of error editing checkitem from user interaction",
+                    HTTPError: "Should test as an error."
+                }
+            }
+        });
+
+
+        createEditCheckitemTestSetup();
+        activateEditCheckItemSubmit(1);
+        testEditCheckitemSuccess = function(data) {
+            start();
+            ok(false,"Incorrectly called success function");
+        };
+
+        testEditCheckitemError = function(data) {
+            start();
+            var alertBoxError = "Unit test of error editing checkitem from user interaction. Should test as an error.";
+            ok(true,"Correctly called Error");
+            equal(data.data,"{\"checklistid\":\"3\",\"name\":\"New Checkitem Name\",\"cardid\":\"2\",\"checkitemid\":1}",'Original "Add Checklist" POST sent the correct data');
+            checkForAlertBox(alertBoxError,false);
+        };
+
+        testEditCheckitemException = function() {
+            start();
+            ok(false,"Incorrectly called Exception");
+        };
+
+        $("#tcdecib-1").click();
+    });
+
+    asyncTest("should NOT edit checkitem from user interaction (Exception - 404 Not Found)", function() {
+        expect(4);
+        $.mockjaxClear();
+        // Did not add a mockjax to this so it will report a 404 error.
+
+        createEditCheckitemTestSetup();
+        activateEditCheckItemSubmit(1);
+        testEditCheckitemSuccess = function(data) {
+            start();
+            ok(false,"Incorrectly called success function");
+        };
+
+        testEditCheckitemError = function(data) {
+            start();
+            ok(false,"Incorrectly called Error");
+        };
+
+        testEditCheckitemException = function(textStatus, error) {
+            start();
+            var err = textStatus + ", " + error;
+            var alertBoxError = "Could not edit the checklist item: "+err;
+            ok(true,"Correctly called Exception");
+            equal(err,"error, Not Found", "404 Not Found");
+            checkForAlertBox(alertBoxError,false);
+        };
+
+        $("#tcdecib-1").click();
+    });
+
+
 
 }

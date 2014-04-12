@@ -55,9 +55,9 @@ var testEditCardDescriptionSuccess= function() {};
 var testEditChecklistNameError = function() {};
 var testEditChecklistNameException = function() {};
 var testEditChecklistNameSuccess= function() {};
-var testEditCheckitemNameError = function() {};
-var testEditCheckitemNameException = function() {};
-var testEditCheckitemNameSuccess= function() {};
+var testEditCheckitemError = function() {};
+var testEditCheckitemException = function() {};
+var testEditCheckitemSuccess= function() {};
 var testDeleteCheckitemError = function() {};
 var testDeleteCheckitemException = function() {};
 var testDeleteCheckitemSuccess= function() {};
@@ -523,7 +523,7 @@ function activateAddCheckItemSubmit(checklistID){
     });
 }
 
-//TODO: Unit tests for activateEditCheckItemSubmit()
+
 function activateEditCheckItemSubmit(checkitemID){
     $("#tcdecib-"+checkitemID).click(function() {
     //        Make sure the box isn't empty, then send the contents and the list to the create new card method
@@ -551,10 +551,12 @@ function activateEditCheckItemSubmit(checkitemID){
                     $("#tcdecic-"+theCheckItemID).click();
                     // report the error
                     reportError(data.errorInfo+". " +data.HTTPError );
+                    testEditCheckitemError(data);
                 }else { // Actual code
                     $("#tcdecio-"+theCheckItemID).text(checkItemName);
                     $("#tcdecic-"+theCheckItemID).click();
                     reloadCardFromTrello(cardID);
+                    testEditCheckitemSuccess(data);
                 }
             }).fail(function( jqxhr, textStatus, error ) {
                 // if it fails, revert
@@ -562,6 +564,7 @@ function activateEditCheckItemSubmit(checkitemID){
                 //Report uncaught exception
                 var err = textStatus + ", " + error;
                 reportError( "Could not edit the checklist item: " + err );
+                testEditCheckitemException(textStatus, error );
             });
         }
     });
