@@ -403,7 +403,6 @@ function createAddChecklistTestSetup() {
 }
 
 function createEditCheckitemTestSetup() {
-    $("#qunit-fixture").append('<div class="trello_card_detail_checklist_list"></div>');
     $("#qunit-fixture").append('<div id="tcdecic-1")></div>');
     $("#qunit-fixture").append('<div id="tcdecib-1")></div>');
     $("#qunit-fixture").append('<div id="tcdecio-1")>Original checkitem name</div>');
@@ -411,7 +410,16 @@ function createEditCheckitemTestSetup() {
     $("#tcdecic-1").click(function(){
         ok(true,"Clicked the cancel button");
     });
+}
 
+    function createEditCardNameTestSetup() {
+    $("#qunit-fixture").append('<div id="tcdenc-1")></div>');
+    $("#qunit-fixture").append('<div id="tcdenb-1")></div>');
+    $("#qunit-fixture").append('<div id="tcdeno-1")>Original card name</div>');
+    $("#qunit-fixture").append('<textarea id="tcdenn-1" cardid="2" checklistid="3")>New Card Name</textarea>');
+    $("#tcdenc-1").click(function(){
+        ok(true,"Clicked the cancel button");
+    });
 
 }
 
@@ -904,7 +912,7 @@ function kanbanicAJAXTests(){
         testEditCheckitemSuccess = function(data) {
             start();
             ok(true,"Correctly called success function");
-            equal(data.data,"{\"checklistid\":\"3\",\"name\":\"New Checkitem Name\",\"cardid\":\"2\",\"checkitemid\":1}",'Original "Add Checkitem" PUT sent the correct data');
+            equal(data.data,"{\"checklistid\":\"3\",\"name\":\"New Checkitem Name\",\"cardid\":\"2\",\"checkitemid\":1}",'Original "Edit Checkitem" PUT sent the correct data');
         };
 
         testEditCheckitemError = function() {
@@ -951,7 +959,7 @@ function kanbanicAJAXTests(){
             start();
             var alertBoxError = "Unit test of error editing checkitem from user interaction. Should test as an error.";
             ok(true,"Correctly called Error");
-            equal(data.data,"{\"checklistid\":\"3\",\"name\":\"New Checkitem Name\",\"cardid\":\"2\",\"checkitemid\":1}",'Original "Add Checklist" POST sent the correct data');
+            equal(data.data,"{\"checklistid\":\"3\",\"name\":\"New Checkitem Name\",\"cardid\":\"2\",\"checkitemid\":1}",'Original "Edit Checkitem" PUT sent the correct data');
             checkForAlertBox(alertBoxError,false);
         };
 
@@ -992,6 +1000,115 @@ function kanbanicAJAXTests(){
         $("#tcdecib-1").click();
     });
 
+  asyncTest("should edit card name from user interaction", function() {
+        expect(3);
+        $.mockjaxClear();
 
+        $.mockjax({
+            url: '/trello/card/',
+            responseTime: 1,
+            type: 'PUT',
+            response: function(settings) {
+                this.responseText=
+                {
+                    Error: false,
+                    data: settings.data
+                }
+            }
+        });
+
+
+        createEditCardNameTestSetup();
+        activateEditCardNameSubmit(1);
+        testEditCardNameSuccess = function(data) {
+            start();
+            ok(true,"Correctly called success function");
+            equal(data.data,"{\"cardname\":\"New Card Name\",\"cardid\":1}",'Original "Edit Card Name" PUT sent the correct data');
+        };
+
+        testEditCardNameError = function() {
+            start();
+            ok(false,"Incorrectly called Error");
+        };
+
+        testEditCardNameException = function() {
+            start();
+            ok(false,"Incorrectly called Exception");
+        };
+
+        $("#tcdenb-1").click();
+    });
+
+    asyncTest("should NOT edit name from user interaction (Error)", function() {
+        expect(4);
+        $.mockjaxClear();
+
+        $.mockjax({
+            url: '/trello/card/',
+            responseTime: 1,
+            type: 'PUT',
+            response: function(settings) {
+                this.responseText=
+                {
+                    error: true,
+                    data: settings.data,
+                    errorInfo: "Unit test of error editing name from user interaction",
+                    HTTPError: "Should test as an error."
+                }
+            }
+        });
+
+
+        createEditCardNameTestSetup();
+        activateEditCardNameSubmit(1);
+        testEditCardNameSuccess = function(data) {
+            start();
+            ok(false,"Incorrectly called success function");
+        };
+
+        testEditCardNameError = function(data) {
+            start();
+            var alertBoxError = "Unit test of error editing name from user interaction. Should test as an error.";
+            ok(true,"Correctly called Error");
+            equal(data.data,"{\"cardname\":\"New Card Name\",\"cardid\":1}",'Original "Edit name" PUT sent the correct data');
+            checkForAlertBox(alertBoxError,false);
+        };
+
+        testEditCardNameException = function() {
+            start();
+            ok(false,"Incorrectly called Exception");
+        };
+
+        $("#tcdenb-1").click();
+    });
+
+    asyncTest("should NOT edit card name from user interaction (Exception - 404 Not Found)", function() {
+        expect(4);
+        $.mockjaxClear();
+        // Did not add a mockjax to this so it will report a 404 error.
+
+        createEditCardNameTestSetup();
+        activateEditCardNameSubmit(1);
+        testEditCardNameSuccess = function(data) {
+            start();
+            ok(false,"Incorrectly called success function");
+        };
+
+        testEditCardNameError = function(data) {
+            start();
+            ok(false,"Incorrectly called Error");
+        };
+
+        testEditCardNameException = function(textStatus, error) {
+            start();
+            var err = textStatus + ", " + error;
+            var alertBoxError = "Could not change the card name: "+err;
+            ok(true,"Correctly called Exception");
+            equal(err,"error, Not Found", "404 Not Found");
+            checkForAlertBox(alertBoxError,true);
+        };
+
+        $("#tcdenb-1").click();
+    });
 
 }

@@ -571,7 +571,7 @@ function activateEditCheckItemSubmit(checkitemID){
 }
 
 
-//TODO: Unit tests for activateEditCardNameSubmit()
+
 function activateEditCardNameSubmit(cardID){
     $("#tcdenb-"+cardID).click(function() {
     //        Make sure the box isn't empty, then send the contents and the list to the create new card method
@@ -592,21 +592,26 @@ function activateEditCardNameSubmit(cardID){
             }).done(function(data) {
             if(data && data.error) //Error reporting code for problems caught in the Model
             {
+                console.log("error");
                 // if it fails, revert
                 $("#tcdenc-"+theCardID).click();
                 // report the error
                 reportError(data.errorInfo+". " +data.HTTPError );
+                testEditCardNameError(data);
             }else { // Actual code
                 $("#tcdeno-"+theCardID).text(checklistName);
                 $("#tcdenc-"+theCardID).click();
                 reloadCardFromTrello(theCardID);
+                testEditCardNameSuccess(data);
             }
         }).fail(function( jqxhr, textStatus, error ) {
             // if it fails, revert
             $("#tcdenc-"+theCardID).click();
             //Report uncaught exception
             var err = textStatus + ", " + error;
+            console.log(err);
             reportError( "Could not change the card name: " + err );
+            testEditCardNameException(textStatus, error);
         });
     }
     });
