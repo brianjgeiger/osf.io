@@ -692,11 +692,12 @@ function activateEditChecklistNameSubmit(checklistID){
                     $("#tcdecc-"+theCardID).click();
                     // report the error
                     reportError(data.errorInfo+". " +data.HTTPError );
-
+                    testEditChecklistNameError(data);
 
                 }else { // Actual code
                     $("#tcdeco-"+theCardID).text(checklistName);
                     $("#tcdecc-"+theCardID).click();
+                    testEditChecklistNameSuccess(data);
                 }
             }).fail(function( jqxhr, textStatus, error ) {
                 // if it fails, revert
@@ -704,6 +705,7 @@ function activateEditChecklistNameSubmit(checklistID){
                 //Report uncaught exception
                 var err = textStatus + ", " + error;
                 reportError( "Could not edit the checklist name: " + err );
+                testEditChecklistNameException(textStatus,error);
             });
         }
     });

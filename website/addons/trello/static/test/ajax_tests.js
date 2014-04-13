@@ -433,7 +433,15 @@ function createEditCardDescriptionTestSetup() {
     });
 }
 
-
+function createEditChecklistNameTestSetup() {
+    $("#qunit-fixture").append('<div id="tcdecc-1")></div>');
+    $("#qunit-fixture").append('<div id="tcdecb-1")></div>');
+    $("#qunit-fixture").append('<div id="tcdeco-1")>Original checklist name</div>');
+    $("#qunit-fixture").append('<textarea id="tcdecn-1" cardid="2" checklistid="3")>New checklist name</textarea>');
+    $("#tcdecc-1").click(function(){
+        ok(true,"Clicked the cancel button");
+    });
+}
 
 function kanbanicAJAXTests(){
     module("Fill out elements from AJAX calls");
@@ -1235,6 +1243,119 @@ function kanbanicAJAXTests(){
         };
 
         $("#tcdedb-1").click();
+    });
+
+
+    // Edit checklist name tests
+    asyncTest("should edit checklist name from user interaction", function() {
+        expect(3);
+        $.mockjaxClear();
+
+        $.mockjax({
+            url: '/trello/checklist/',
+            responseTime: 1,
+            type: 'PUT',
+            response: function(settings) {
+                this.responseText=
+                {
+                    Error: false,
+                    data: settings.data
+                }
+            }
+        });
+
+
+        createEditChecklistNameTestSetup();
+        activateEditChecklistNameSubmit(1);
+        testEditChecklistNameSuccess = function(data) {
+            start();
+            ok(true,"Correctly called success function");
+            equal(data.data,"{\"checklistname\":\"New checklist name\",\"checklistid\":1}",'Original "Edit checklist name" PUT sent the correct data');
+        };
+
+        testEditChecklistNameError = function() {
+            start();
+            ok(false,"Incorrectly called Error");
+        };
+
+        testEditChecklistNameException = function() {
+            start();
+            ok(false,"Incorrectly called Exception");
+        };
+
+        $("#tcdecb-1").click();
+    });
+
+    asyncTest("should NOT edit checklist name from user interaction (Error)", function() {
+        expect(4);
+        $.mockjaxClear();
+
+        $.mockjax({
+            url: '/trello/checklist/',
+            responseTime: 1,
+            type: 'PUT',
+            response: function(settings) {
+                this.responseText=
+                {
+                    error: true,
+                    data: settings.data,
+                    errorInfo: "Unit test of error editing checklist name from user interaction",
+                    HTTPError: "Should test as an error."
+                }
+            }
+        });
+
+
+        createEditChecklistNameTestSetup();
+        activateEditChecklistNameSubmit(1);
+        testEditChecklistNameSuccess = function(data) {
+            start();
+            ok(false,"Incorrectly called success function");
+        };
+
+        testEditChecklistNameError = function(data) {
+            start();
+            var alertBoxError = "Unit test of error editing checklist name from user interaction. Should test as an error.";
+            ok(true,"Correctly called Error");
+            equal(data.data,"{\"checklistname\":\"New checklist name\",\"checklistid\":1}",'Original "Edit checklist name" PUT sent the correct data');
+            checkForAlertBox(alertBoxError,false);
+        };
+
+        testEditChecklistNameException = function() {
+            start();
+            ok(false,"Incorrectly called Exception");
+        };
+
+        $("#tcdecb-1").click();
+    });
+
+    asyncTest("should NOT edit checklist name from user interaction (Exception - 404 Not Found)", function() {
+        expect(4);
+        $.mockjaxClear();
+        // Did not add a mockjax to this so it will report a 404 error.
+
+        createEditChecklistNameTestSetup();
+        activateEditChecklistNameSubmit(1);
+        testEditChecklistNameSuccess = function(data) {
+            start();
+            ok(false,"Incorrectly called success function");
+        };
+
+        testEditChecklistNameError = function(data) {
+            start();
+            ok(false,"Incorrectly called Error");
+        };
+
+        testEditChecklistNameException = function(textStatus, error) {
+            start();
+            var err = textStatus + ", " + error;
+            var alertBoxError = "Could not edit the checklist name: "+err;
+            ok(true,"Correctly called Exception");
+            equal(err,"error, Not Found", "404 Not Found");
+            checkForAlertBox(alertBoxError,false);
+        };
+
+        $("#tcdecb-1").click();
     });
 
 }
