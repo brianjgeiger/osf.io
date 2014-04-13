@@ -412,7 +412,7 @@ function createEditCheckitemTestSetup() {
     });
 }
 
-    function createEditCardNameTestSetup() {
+function createEditCardNameTestSetup() {
     $("#qunit-fixture").append('<div id="tcdenc-1")></div>');
     $("#qunit-fixture").append('<div id="tcdenb-1")></div>');
     $("#qunit-fixture").append('<div id="tcdeno-1")>Original card name</div>');
@@ -420,8 +420,20 @@ function createEditCheckitemTestSetup() {
     $("#tcdenc-1").click(function(){
         ok(true,"Clicked the cancel button");
     });
-
 }
+
+function createEditCardDescriptionTestSetup() {
+    $("#qunit-fixture").append('<div id="tcdedc-1")></div>');
+    $("#qunit-fixture").append('<div id="tcdedb-1")></div>');
+    $("#qunit-fixture").append('<div id="tcdedo-1")>Original *card* description</div>');
+    $("#qunit-fixture").append('<div id="tcdedom-1")></div>');
+    $("#qunit-fixture").append('<textarea id="tcdedn-1" cardid="2" checklistid="3")>New *Card* Description</textarea>');
+    $("#tcdedc-1").click(function(){
+        ok(true,"Clicked the cancel button");
+    });
+}
+
+
 
 function kanbanicAJAXTests(){
     module("Fill out elements from AJAX calls");
@@ -1000,7 +1012,9 @@ function kanbanicAJAXTests(){
         $("#tcdecib-1").click();
     });
 
-  asyncTest("should edit card name from user interaction", function() {
+    // Edit card name tests
+
+    asyncTest("should edit card name from user interaction", function() {
         expect(3);
         $.mockjaxClear();
 
@@ -1105,10 +1119,122 @@ function kanbanicAJAXTests(){
             var alertBoxError = "Could not change the card name: "+err;
             ok(true,"Correctly called Exception");
             equal(err,"error, Not Found", "404 Not Found");
-            checkForAlertBox(alertBoxError,true);
+            checkForAlertBox(alertBoxError,false);
         };
 
         $("#tcdenb-1").click();
+    });
+
+    // Edit card description tests
+    asyncTest("should edit card description from user interaction", function() {
+        expect(3);
+        $.mockjaxClear();
+
+        $.mockjax({
+            url: '/trello/card/description/',
+            responseTime: 1,
+            type: 'PUT',
+            response: function(settings) {
+                this.responseText=
+                {
+                    Error: false,
+                    data: settings.data
+                }
+            }
+        });
+
+
+        createEditCardDescriptionTestSetup();
+        activateEditCardDescriptionSubmit(1);
+        testEditCardDescriptionSuccess = function(data) {
+            start();
+            ok(true,"Correctly called success function");
+            equal(data.data,"{\"desc\":\"New *Card* Description\",\"cardid\":1}",'Original "Edit Card Description" PUT sent the correct data');
+        };
+
+        testEditCardDescriptionError = function() {
+            start();
+            ok(false,"Incorrectly called Error");
+        };
+
+        testEditCardDescriptionException = function() {
+            start();
+            ok(false,"Incorrectly called Exception");
+        };
+
+        $("#tcdedb-1").click();
+    });
+
+    asyncTest("should NOT edit card description from user interaction (Error)", function() {
+        expect(4);
+        $.mockjaxClear();
+
+        $.mockjax({
+            url: '/trello/card/description/',
+            responseTime: 1,
+            type: 'PUT',
+            response: function(settings) {
+                this.responseText=
+                {
+                    error: true,
+                    data: settings.data,
+                    errorInfo: "Unit test of error editing description from user interaction",
+                    HTTPError: "Should test as an error."
+                }
+            }
+        });
+
+
+        createEditCardDescriptionTestSetup();
+        activateEditCardDescriptionSubmit(1);
+        testEditCardDescriptionSuccess = function(data) {
+            start();
+            ok(false,"Incorrectly called success function");
+        };
+
+        testEditCardDescriptionError = function(data) {
+            start();
+            var alertBoxError = "Unit test of error editing description from user interaction. Should test as an error.";
+            ok(true,"Correctly called Error");
+            equal(data.data,"{\"desc\":\"New *Card* Description\",\"cardid\":1}",'Original "Edit description" PUT sent the correct data');
+            checkForAlertBox(alertBoxError,false);
+        };
+
+        testEditCardDescriptionException = function() {
+            start();
+            ok(false,"Incorrectly called Exception");
+        };
+
+        $("#tcdedb-1").click();
+    });
+
+    asyncTest("should NOT edit card description from user interaction (Exception - 404 Not Found)", function() {
+        expect(4);
+        $.mockjaxClear();
+        // Did not add a mockjax to this so it will report a 404 error.
+
+        createEditCardDescriptionTestSetup();
+        activateEditCardDescriptionSubmit(1);
+        testEditCardDescriptionSuccess = function(data) {
+            start();
+            ok(false,"Incorrectly called success function");
+        };
+
+        testEditCardDescriptionError = function(data) {
+            start();
+            ok(false,"Incorrectly called Error");
+        };
+
+        testEditCardDescriptionException = function(textStatus, error) {
+            start();
+            var err = textStatus + ", " + error;
+            var alertBoxError = "Could not change the card description: "+err;
+            ok(true,"Correctly called Exception");
+            equal(err,"error, Not Found", "404 Not Found");
+            checkForAlertBox(alertBoxError,false);
+        };
+
+        $("#tcdedb-1").click();
     });
 
 }

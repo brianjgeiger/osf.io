@@ -617,7 +617,6 @@ function activateEditCardNameSubmit(cardID){
     });
 }
 
-//TODO: Unit tests for activateEditCardDescriptionSubmit()
 function activateEditCardDescriptionSubmit(cardID){
     var cardDescription = "";
     $("#tcdedb-"+cardID).click(function() {
@@ -641,6 +640,7 @@ function activateEditCardDescriptionSubmit(cardID){
                     $("#tcdedc-"+theCardID).click();
                     // report the error
                     reportError(data.errorInfo+". " +data.HTTPError );
+                    testEditCardDescriptionError(data);
                 }else { // Actual code
                     $("#tcdedo-"+theCardID).text(cardDescription);
                     var converter = new Showdown.converter();
@@ -652,6 +652,7 @@ function activateEditCardDescriptionSubmit(cardID){
                     $("#tcdedom-"+theCardID).html(converted);
                     $("#tcdedc-"+theCardID).click();
                     reloadCardFromTrello(theCardID);
+                    testEditCardDescriptionSuccess(data);
                 }
             })
             .fail(function(jqxhr, textStatus, error){
@@ -659,7 +660,8 @@ function activateEditCardDescriptionSubmit(cardID){
                 $("#tcdedc-"+theCardID).click();
                 //Report uncaught exception
                 var err = textStatus + ", " + error;
-                reportError( "Could not change the card name: " + err );
+                reportError( "Could not change the card description: " + err );
+                testEditCardDescriptionException(textStatus,error);
             });
     });
 }
