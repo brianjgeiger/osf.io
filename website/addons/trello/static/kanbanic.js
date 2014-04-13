@@ -667,7 +667,7 @@ function activateEditCardDescriptionSubmit(cardID){
 }
 
 
-//TODO: Unit tests for activateEditChecklistNameSubmit()
+
 function activateEditChecklistNameSubmit(checklistID){
     $("#tcdecb-"+checklistID).click(function() {
     //        Make sure the box isn't empty, then send the contents and the list to the create new card method
