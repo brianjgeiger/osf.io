@@ -443,6 +443,11 @@ function createEditChecklistNameTestSetup() {
     });
 }
 
+function createEditCheckCheckitemTestSetup() {
+    $("#qunit-fixture").append('<input type="checkbox" unchecked id="tcdc-ci-1" value="1" onclick="checkCheckItem(\'21\',\'22\',\'1\');" /><span id="tcdecio-1">Checkitem One</span>')
+    $("#qunit-fixture").append('<input type="checkbox" checked id="tcdc-ci-2" value="2" onclick="checkCheckItem(\'21\',\'22\',\'2\');" /><span id="tcdecio-2">Checkitem Two</span>')
+}
+
 function kanbanicAJAXTests(){
     module("Fill out elements from AJAX calls");
 
@@ -1357,5 +1362,164 @@ function kanbanicAJAXTests(){
 
         $("#tcdecb-1").click();
     });
+
+    // Check Checkitem tests
+    asyncTest("should check checkitem from user interaction", function() {
+        expect(3);
+        $.mockjaxClear();
+
+        $.mockjax({
+            url: '/trello/checkitem/',
+            responseTime: 1,
+            type: 'PUT',
+            response: function(settings) {
+                this.responseText=
+                {
+                    Error: false,
+                    data: settings.data
+                }
+            }
+        });
+
+
+        createEditCheckCheckitemTestSetup();
+        testCheckCheckitemSuccess = function(data) {
+            start();
+            ok(true,"Correctly called success function");
+            equal(data.data,"{\"checklistid\":\"22\",\"cardid\":\"21\",\"checkitemid\":\"1\",\"state\":\"complete\"}",'Original "Check checkitem" PUT sent the correct data');
+            ok($("#tcdc-ci-1").is(':checked'),"Checkitem should be checked after this.")
+        };
+
+        testCheckCheckitemError = function() {
+            start();
+            ok(false,"Incorrectly called Error");
+        };
+
+        testCheckCheckitemException = function() {
+            start();
+            ok(false,"Incorrectly called Exception");
+        };
+
+        $("#tcdc-ci-1").click();
+    });
+
+    asyncTest("should uncheck checkitem from user interaction", function() {
+        expect(3);
+        $.mockjaxClear();
+
+        $.mockjax({
+            url: '/trello/checkitem/',
+            responseTime: 1,
+            type: 'PUT',
+            response: function(settings) {
+                this.responseText=
+                {
+                    Error: false,
+                    data: settings.data
+                }
+            }
+        });
+
+
+        createEditCheckCheckitemTestSetup();
+        testCheckCheckitemSuccess = function(data) {
+            start();
+            ok(true,"Correctly called success function");
+            equal(data.data,"{\"checklistid\":\"22\",\"cardid\":\"21\",\"checkitemid\":\"2\",\"state\":\"incomplete\"}",'Original "Check checkitem" PUT sent the correct data');
+            ok(!$("#tcdc-ci-2").is(':checked'),"Checkitem should not be checked after this.")
+        };
+
+        testCheckCheckitemError = function() {
+            start();
+            ok(false,"Incorrectly called Error");
+        };
+
+        testCheckCheckitemException = function() {
+            start();
+            ok(false,"Incorrectly called Exception");
+        };
+
+        $("#tcdc-ci-2").click();
+    });
+
+    asyncTest("should NOT check checkitem from user interaction (Error)", function() {
+        expect(4);
+        $.mockjaxClear();
+
+        $.mockjax({
+            url: '/trello/checkitem/',
+            responseTime: 1,
+            type: 'PUT',
+            response: function(settings) {
+                this.responseText=
+                {
+                    error: true,
+                    data: settings.data,
+                    errorInfo: "Unit test of error checking checkitem from user interaction",
+                    HTTPError: "Should test as an error."
+                }
+            }
+        });
+
+
+        createEditCheckCheckitemTestSetup();
+        testCheckCheckitemSuccess = function(data) {
+            start();
+            ok(false,"Incorrectly called success function");
+        };
+
+        testCheckCheckitemError = function(data) {
+            start();
+            var alertBoxError = "Unit test of error checking checkitem from user interaction. Should test as an error.";
+            ok(true,"Correctly called Error");
+            equal(data.data,"{\"checklistid\":\"22\",\"cardid\":\"21\",\"checkitemid\":\"1\",\"state\":\"complete\"}",'Original "Check Checkitem" PUT sent the correct data');
+            checkForAlertBox(alertBoxError,false);
+            ok(!$("#tcdc-ci-1").is(':checked'),"Checkitem should not be checked after this.")
+        };
+
+        testCheckCheckitemException = function() {
+            start();
+            ok(false,"Incorrectly called Exception");
+        };
+
+        $("#tcdc-ci-1").click();
+    });
+
+
+    asyncTest("should NOT check checkitem from user interaction (Exception - 404 Not Found)", function() {
+        expect(4);
+        $.mockjaxClear();
+        // Did not add a mockjax to this so it will report a 404 error.
+
+        createEditCheckCheckitemTestSetup();
+        testCheckCheckitemSuccess = function(data) {
+            start();
+            ok(false,"Incorrectly called success function");
+        };
+
+        testCheckCheckitemError = function(data) {
+            start();
+            ok(false,"Incorrectly called Error");
+        };
+
+        testCheckCheckitemException = function(textStatus, error) {
+            start();
+            var err = textStatus + ", " + error;
+            var alertBoxError = "Could not change the checkitem state: "+err;
+            ok(true,"Correctly called Exception");
+            equal(err,"error, Not Found", "404 Not Found");
+            checkForAlertBox(alertBoxError,false);
+            ok(!$("#tcdc-ci-1").is(':checked'),"Checkitem should not be checked after this.")
+        };
+
+        $("#tcdc-ci-1").click();
+    });
+
+
+
+    module("Archive/Delete Item Submit callback tests");
+
+
+    module("Interface element activation tests (add/edit items)")
 
 }

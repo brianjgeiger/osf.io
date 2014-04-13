@@ -711,6 +711,59 @@ function activateEditChecklistNameSubmit(checklistID){
     });
 }
 
+
+//
+//  Check/uncheck checkitem
+//
+
+
+function checkCheckItem(cardID,checkListID,checkItemID){
+    var state = "";
+    if($("#tcdc-ci-"+checkItemID).is(':checked')){
+        state = "complete"
+    } else {
+        state = "incomplete"
+    }
+    $.ajax({
+        type: 'PUT',
+        url: nodeURL+'trello/checkitem/',
+        contentType: 'application/json',
+        dataType: 'json',
+        data: JSON.stringify({
+            checklistid: checkListID,
+            cardid: cardID,
+            checkitemid: checkItemID,
+            state: state
+    })
+    }).done(function(data) {
+        if(data.error) //Error reporting code for problems caught in the Model
+        {
+            reportError(data.errorInfo+". " +data.HTTPError );
+            // if it fails, revert the check/uncheck
+            revertCheckitem(checkItemID);
+            testCheckCheckitemError(data);
+        }else { // Actual code
+            reloadCardFromTrello(cardID);
+            testCheckCheckitemSuccess(data);
+        }
+    }).fail(function( jqxhr, textStatus, error ) {
+        // if it fails, revert the check/uncheck
+        revertCheckitem(checkItemID);
+        //Report uncaught exception
+        var err = textStatus + ", " + error;
+        reportError( "Could not change the checkitem state: " + err );
+        testCheckCheckitemException(textStatus,error);
+        });
+}
+
+function revertCheckitem(checkItemID){
+    if($("#tcdc-ci-"+checkItemID).is(':checked')){
+        $("#tcdc-ci-"+checkItemID).prop('checked', false);
+    }else {
+        $("#tcdc-ci-"+checkItemID).prop('checked', true);
+    }
+}
+
 //TODO: Unit tests for activateDeleteCheckItemSubmit()
 function activateDeleteCheckItemSubmit(checkitemID){
     $("#tcdecid-"+checkitemID).click(function() {
@@ -951,55 +1004,3 @@ function activateEditThingLinks(prefix,identifier) {
 }
 
 
-
-//
-//  Check/uncheck checkitem
-//
-
-
-//TODO: Unit tests for checkCheckItem()
-function checkCheckItem(cardID,checkListID,checkItemID){
-    var state = "";
-    if($("#tcdc-ci-"+checkItemID).is(':checked')){
-        state = "complete"
-    } else {
-        state = "incomplete"
-    }
-    $.ajax({
-        type: 'PUT',
-        url: nodeURL+'trello/checkitem/',
-        contentType: 'application/json',
-        dataType: 'json',
-        data: JSON.stringify({
-            checklistid: checkListID,
-            cardid: cardID,
-            checkitemid: checkItemID,
-            state: state
-    })
-    }).done(function(data) {
-        if(data.error) //Error reporting code for problems caught in the Model
-        {
-            reportError(data.errorInfo+". " +data.HTTPError );
-            // if it fails, revert the check/uncheck
-            revertCheckitem(checkItemID);
-        }else { // Actual code
-            reloadCardFromTrello(cardID);
-        }
-    }).fail(function(xhr) {
-
-    }).fail(function( jqxhr, textStatus, error ) {
-        // if it fails, revert the check/uncheck
-        revertCheckitem(checkItemID);
-        //Report uncaught exception
-        var err = textStatus + ", " + error;
-        reportError( "Request Failed: " + err );
-        });
-}
-
-function revertCheckitem(checkItemID){
-    if($("#tcdc-ci-"+checkItemID).is(':checked')){
-        $("#tcdc-ci-"+checkItemID).prop('checked', false);
-    }else {
-        $("#tcdc-ci-"+checkItemID).prop('checked', true);
-    }
-}
