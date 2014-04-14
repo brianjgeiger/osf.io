@@ -160,6 +160,180 @@ function mockBoard(canEdit){
         });
 }
 
+function mockFilledCard(id,canEdit){
+    var cardResponse = {
+    "complete": true,
+    "trello_card": {
+        "badges": {
+            "attachments": 2,
+            "checkItems": 2,
+            "checkItemsChecked": 1,
+            "comments": 3,
+            "description": true,
+            "due": "2014-04-30T16:00:00.000Z",
+            "fogbugz": "",
+            "subscribed": false,
+            "viewingMemberVoted": false,
+            "votes": 0
+        },
+        "checkItemStates": [
+            {
+                "idCheckItem": "53454a6654a3bb6e0892f562",
+                "state": "complete"
+            }
+        ],
+        "checklists": [
+            {
+                "checkItems": [
+                    {
+                        "checked": "",
+                        "id": "534483a6209470670812e6b4",
+                        "name": "Do stuff",
+                        "nameData": null,
+                        "pos": 16384,
+                        "state": "incomplete"
+                    },
+                    {
+                        "checked": "checked",
+                        "id": "53454a6654a3bb6e0892f562",
+                        "name": "And other stuff",
+                        "nameData": null,
+                        "pos": 32768,
+                        "state": "complete"
+                    }
+                ],
+                "id": "5344839fbd40b02509901234",
+                "idBoard": "53189b693b58e0d16ac26e51",
+                "idCard": "53189c6e69a91aea3e37b12d",
+                "name": "Things",
+                "pos": 16384
+            }
+        ],
+        "closed": false,
+        "comments": [
+            {
+                "data": {
+                    "board": {
+                        "id": "53189b693b58e0d16ac26e51",
+                        "name": "OSF Trello",
+                        "shortLink": "Kg6ZmCRJ"
+                    },
+                    "card": {
+                        "id": "53189c6e69a91aea3e37b12d",
+                        "idShort": 5,
+                        "name": "Integrate with log",
+                        "shortLink": "d4aEsbWn"
+                    },
+                    "text": "The big concern with this at the moment is we might want to note which things happened through the OSF interface (and if so, by whom) and which happened from outside. This is a class of problems that will be entirely avoided by having the users only be able to modify things if they use their IDs."
+                },
+                "date": "2014-04-02T17:52:35.440Z",
+                "id": "533c4e631708d0df2fd5c491",
+                "idMemberCreator": "4f073cdebf2f1e200c05564d",
+                "memberCreator": {
+                    "avatarHash": "b7c3f75c538cb95554da01027c6c8d5f",
+                    "fullName": "Brian J. Geiger",
+                    "id": "4f073cdebf2f1e200c05564d",
+                    "initials": "BG",
+                    "username": "thefoodgeek"
+                },
+                "type": "commentCard"
+            },
+            {
+                "data": {
+                    "board": {
+                        "id": "53189b693b58e0d16ac26e51",
+                        "name": "OSF Trello",
+                        "shortLink": "Kg6ZmCRJ"
+                    },
+                    "card": {
+                        "id": "53189c6e69a91aea3e37b12d",
+                        "idShort": 5,
+                        "name": "Integrate with log",
+                        "shortLink": "d4aEsbWn"
+                    },
+                    "text": "Current plan is to grab the activities from Trello, find out what the last one logged (or, if nothing logged, what all the activities from after the board was linked to the OSF project), and turn those into log messages."
+                },
+                "date": "2014-03-25T20:05:06.458Z",
+                "id": "5331e172c1ee2a9066c9f686",
+                "idMemberCreator": "4f073cdebf2f1e200c05564d",
+                "memberCreator": {
+                    "avatarHash": "b7c3f75c538cb95554da01027c6c8d5f",
+                    "fullName": "Brian J. Geiger",
+                    "id": "4f073cdebf2f1e200c05564d",
+                    "initials": "BG",
+                    "username": "thefoodgeek"
+                },
+                "type": "commentCard"
+            },
+            {
+                "data": {
+                    "board": {
+                        "id": "53189b693b58e0d16ac26e51",
+                        "name": "OSF Trello",
+                        "shortLink": "Kg6ZmCRJ"
+                    },
+                    "card": {
+                        "id": "53189c6e69a91aea3e37b12d",
+                        "idShort": 5,
+                        "name": "Integrate with log",
+                        "shortLink": "d4aEsbWn"
+                    },
+                    "text": "There's a philosophical question of whether to use notifications for the log, as the notifications can be cleared from the Trello and might not make it to the logs. \n\nI am reasonably certain that the logs are stored in an internal database and not pulled from each of the data stores each time, so it it's mostly a question of whether it's okay to miss data.\n\nMy impression is that the logs are an interesting feature and not a philosophical standing stone, so it will probably be okay, but good to ask."
+                },
+                "date": "2014-03-06T19:26:14.349Z",
+                "id": "5318cbd6e3365dcb3ed43221",
+                "idMemberCreator": "4f073cdebf2f1e200c05564d",
+                "memberCreator": {
+                    "avatarHash": "b7c3f75c538cb95554da01027c6c8d5f",
+                    "fullName": "Brian J. Geiger",
+                    "id": "4f073cdebf2f1e200c05564d",
+                    "initials": "BG",
+                    "username": "thefoodgeek"
+                },
+                "type": "commentCard"
+            }
+        ],
+        "coverURL": "https://trello-attachments.s3.amazonaws.com/53189b693b58e0d16ac26e51/53189c6e69a91aea3e37b12d/b22a1999e111e6bf28baa40f6010b89d/4636162605_9ac8e91b56_b.jpg_280x200.png",
+        "dateLastActivity": "2014-04-14T15:53:26.049Z",
+        "desc": "There is a logging mechanism. We should integrate with it.",
+        "descData": {
+            "emoji": {}
+        },
+        "due": "2014-04-30T16:00:00.000Z",
+        "id": '"'+id+'"',
+        "idAttachmentCover": "5318e2e8271141b345ea3a71",
+        "idBoard": "53189b693b58e0d16ac26e51",
+        "idChecklists": [
+            "5344839fbd40b02509901234"
+        ],
+        "idList": "5329b9925ada884a59088461",
+        "idMembers": [
+            "4f073cdebf2f1e200c05564d"
+        ],
+        "idShort": 5,
+        "labels": [
+            {
+                "color": "blue",
+                "name": ""
+            }
+        ],
+        "manualCoverAttachment": false,
+        "name": "Integrate with log",
+        "pos": 827391,
+        "shortUrl": "https://trello.com/c/d4aEsbWn",
+        "url": "https://trello.com/c/d4aEsbWn/5-integrate-with-log"
+    },
+    "trello_card_id": id,
+    "user_can_edit": canEdit
+}
+    $.mockjax({
+        url: '/trello/card/'+id+'/',
+        responseTime: 1,
+        responseText: cardResponse
+    });
+    return cardResponse;
+}
+
 function mockCard(id, canEdit) {
     var cardResponse = {
                 "complete": true,
@@ -349,7 +523,7 @@ function mockCard(id, canEdit) {
                     "shortUrl": "https://trello.com/c/tvx9lxBO",
                     "url": "https://trello.com/c/tvx9lxBO/22-overview-screen-decorations"
                 },
-                "trello_card_id": '"'+id+'"',
+                "trello_card_id": id,
                 "user_can_edit": canEdit,
                 "istest": true
             };
@@ -468,7 +642,12 @@ function createEditCheckCheckitemTestSetup() {
 
 function createDisplayCardTestSetup(){
     $("#qunit-fixture").append('<div id="cl-1"></div>');
-    $("#cl-1").append('<div class = "TrelloCard" id="tc-1" onclick="displayCard(\'1\');"><div class = "TrelloCardName">Card one</div></div>');
+    $("#cl-10").append('<div class = "TrelloCard" id="tc-10" onclick="displayCard(\'10\');"><div class = "TrelloCardName">Card ten</div></div>');
+}
+
+function createBoardTestSetup(){
+    var $fixture = $( "#qunit-fixture" );
+    $fixture.append('<div id="KanbanBoard"></div>');
 }
 
 function kanbanicAJAXTests(){
@@ -540,24 +719,23 @@ function kanbanicAJAXTests(){
 
         expect(3);
 
-        var $fixture = $( "#qunit-fixture" );
-        $fixture.append('<div id="KanbanBoard"></div>');
+        createBoardTestSetup();
 
         //Perform ajax call, fill out Mustache template, modify div
         loadBoard();
 
     });
 
-    asyncTest("should load the JSON for card 1 - getCardDetailInformation()", function(assert) {
+    asyncTest("should load the JSON for card 10 - getCardDetailInformation()", function(assert) {
         $.mockjaxClear();
-        var cardData = "{\"complete\":true,\"trello_card\":{\"badges\":{\"attachments\":0,\"checkItems\":12,\"checkItemsChecked\":10,\"comments\":0,\"description\":false,\"due\":null,\"fogbugz\":\"\",\"subscribed\":false,\"viewingMemberVoted\":false,\"votes\":0},\"checkItemStates\":[{\"idCheckItem\":\"53285af3b932a1f138a5ae3a\",\"state\":\"complete\"},{\"idCheckItem\":\"53285af75034afbb45da0b5e\",\"state\":\"complete\"},{\"idCheckItem\":\"53285afef6bffd6f7209b825\",\"state\":\"complete\"},{\"idCheckItem\":\"53285b0fa0c86ea4276b97fa\",\"state\":\"complete\"},{\"idCheckItem\":\"53285b179563125c6f460d52\",\"state\":\"complete\"},{\"idCheckItem\":\"53285b3eab35992f72fe76a4\",\"state\":\"complete\"},{\"idCheckItem\":\"53285b4da0c86ea4276b9856\",\"state\":\"complete\"},{\"idCheckItem\":\"53285b6aaf9daa640fa8197b\",\"state\":\"complete\"},{\"idCheckItem\":\"5339b708b7e5284137278e9a\",\"state\":\"complete\"},{\"idCheckItem\":\"5339b7713063ab02463ee3ad\",\"state\":\"complete\"}],\"checklists\":[{\"checkItems\":[{\"checked\":\"checked\",\"id\":\"53285af3b932a1f138a5ae3a\",\"name\":\"Number of comments\",\"nameData\":null,\"pos\":16516,\"state\":\"complete\"},{\"checked\":\"checked\",\"id\":\"53285af75034afbb45da0b5e\",\"name\":\"Number of attachments\",\"nameData\":null,\"pos\":33220,\"state\":\"complete\"},{\"checked\":\"checked\",\"id\":\"53285afef6bffd6f7209b825\",\"name\":\"Image view\",\"nameData\":null,\"pos\":49871,\"state\":\"complete\"},{\"checked\":\"checked\",\"id\":\"53285b0fa0c86ea4276b97fa\",\"name\":\"Number of checklist items (complete/total)\",\"nameData\":null,\"pos\":66656,\"state\":\"complete\"},{\"checked\":\"checked\",\"id\":\"53285b179563125c6f460d52\",\"name\":\"Are you a watcher\",\"nameData\":null,\"pos\":83970,\"state\":\"complete\"},{\"checked\":\"\",\"id\":\"53285b2e9a1e8e7772f5de42\",\"name\":\"Who it's assigned to\",\"nameData\":null,\"pos\":101130,\"state\":\"incomplete\"},{\"checked\":\"checked\",\"id\":\"53285b3eab35992f72fe76a4\",\"name\":\"If it has a description\",\"nameData\":null,\"pos\":118337,\"state\":\"complete\"},{\"checked\":\"checked\",\"id\":\"53285b4da0c86ea4276b9856\",\"name\":\"Due date\",\"nameData\":{\"emoji\":{}},\"pos\":134989,\"state\":\"complete\"},{\"checked\":\"checked\",\"id\":\"53285b6aaf9daa640fa8197b\",\"name\":\"Card link to trello\",\"nameData\":null,\"pos\":151569,\"state\":\"complete\"},{\"checked\":\"checked\",\"id\":\"5339b708b7e5284137278e9a\",\"name\":\"Cool stuff?\",\"nameData\":null,\"pos\":167953,\"state\":\"complete\"},{\"checked\":\"checked\",\"id\":\"5339b7713063ab02463ee3ad\",\"name\":\"new\",\"nameData\":null,\"pos\":184337,\"state\":\"complete\"},{\"checked\":\"\",\"id\":\"5339b7db4c5bdb5f37b59d97\",\"name\":\"aaaaaaaa\",\"nameData\":null,\"pos\":200721,\"state\":\"incomplete\"}],\"id\":\"53285aec349bf6b732b24c4f\",\"idBoard\":\"53189b693b58e0d16ac26e51\",\"idCard\":\"1\",\"name\":\"Decorations\",\"pos\":16384}],\"closed\":false,\"comments\":[],\"dateLastActivity\":\"2014-04-01T15:54:30.502Z\",\"desc\":\"\",\"descData\":null,\"due\":null,\"id\":1,\"idAttachmentCover\":null,\"idBoard\":\"53189b693b58e0d16ac26e51\",\"idChecklists\":[\"53285aec349bf6b732b24c4f\"],\"idList\":\"5329b9925ada884a59088461\",\"idMembers\":[],\"idShort\":22,\"labels\":[],\"manualCoverAttachment\":false,\"name\":\"Overview screen decorations\",\"pos\":327679,\"shortUrl\":\"https://trello.com/c/tvx9lxBO\",\"url\":\"https://trello.com/c/tvx9lxBO/22-overview-screen-decorations\"},\"trello_card_id\":\"\\\"1\\\"\",\"user_can_edit\":false,\"istest\":true}";
-        mockCard(1,false);
+        var cardData = "{\"complete\":true,\"trello_card\":{\"badges\":{\"attachments\":0,\"checkItems\":12,\"checkItemsChecked\":10,\"comments\":0,\"description\":false,\"due\":null,\"fogbugz\":\"\",\"subscribed\":false,\"viewingMemberVoted\":false,\"votes\":0},\"checkItemStates\":[{\"idCheckItem\":\"53285af3b932a1f138a5ae3a\",\"state\":\"complete\"},{\"idCheckItem\":\"53285af75034afbb45da0b5e\",\"state\":\"complete\"},{\"idCheckItem\":\"53285afef6bffd6f7209b825\",\"state\":\"complete\"},{\"idCheckItem\":\"53285b0fa0c86ea4276b97fa\",\"state\":\"complete\"},{\"idCheckItem\":\"53285b179563125c6f460d52\",\"state\":\"complete\"},{\"idCheckItem\":\"53285b3eab35992f72fe76a4\",\"state\":\"complete\"},{\"idCheckItem\":\"53285b4da0c86ea4276b9856\",\"state\":\"complete\"},{\"idCheckItem\":\"53285b6aaf9daa640fa8197b\",\"state\":\"complete\"},{\"idCheckItem\":\"5339b708b7e5284137278e9a\",\"state\":\"complete\"},{\"idCheckItem\":\"5339b7713063ab02463ee3ad\",\"state\":\"complete\"}],\"checklists\":[{\"checkItems\":[{\"checked\":\"checked\",\"id\":\"53285af3b932a1f138a5ae3a\",\"name\":\"Number of comments\",\"nameData\":null,\"pos\":16516,\"state\":\"complete\"},{\"checked\":\"checked\",\"id\":\"53285af75034afbb45da0b5e\",\"name\":\"Number of attachments\",\"nameData\":null,\"pos\":33220,\"state\":\"complete\"},{\"checked\":\"checked\",\"id\":\"53285afef6bffd6f7209b825\",\"name\":\"Image view\",\"nameData\":null,\"pos\":49871,\"state\":\"complete\"},{\"checked\":\"checked\",\"id\":\"53285b0fa0c86ea4276b97fa\",\"name\":\"Number of checklist items (complete/total)\",\"nameData\":null,\"pos\":66656,\"state\":\"complete\"},{\"checked\":\"checked\",\"id\":\"53285b179563125c6f460d52\",\"name\":\"Are you a watcher\",\"nameData\":null,\"pos\":83970,\"state\":\"complete\"},{\"checked\":\"\",\"id\":\"53285b2e9a1e8e7772f5de42\",\"name\":\"Who it's assigned to\",\"nameData\":null,\"pos\":101130,\"state\":\"incomplete\"},{\"checked\":\"checked\",\"id\":\"53285b3eab35992f72fe76a4\",\"name\":\"If it has a description\",\"nameData\":null,\"pos\":118337,\"state\":\"complete\"},{\"checked\":\"checked\",\"id\":\"53285b4da0c86ea4276b9856\",\"name\":\"Due date\",\"nameData\":{\"emoji\":{}},\"pos\":134989,\"state\":\"complete\"},{\"checked\":\"checked\",\"id\":\"53285b6aaf9daa640fa8197b\",\"name\":\"Card link to trello\",\"nameData\":null,\"pos\":151569,\"state\":\"complete\"},{\"checked\":\"checked\",\"id\":\"5339b708b7e5284137278e9a\",\"name\":\"Cool stuff?\",\"nameData\":null,\"pos\":167953,\"state\":\"complete\"},{\"checked\":\"checked\",\"id\":\"5339b7713063ab02463ee3ad\",\"name\":\"new\",\"nameData\":null,\"pos\":184337,\"state\":\"complete\"},{\"checked\":\"\",\"id\":\"5339b7db4c5bdb5f37b59d97\",\"name\":\"aaaaaaaa\",\"nameData\":null,\"pos\":200721,\"state\":\"incomplete\"}],\"id\":\"53285aec349bf6b732b24c4f\",\"idBoard\":\"53189b693b58e0d16ac26e51\",\"idCard\":\"1\",\"name\":\"Decorations\",\"pos\":16384}],\"closed\":false,\"comments\":[],\"dateLastActivity\":\"2014-04-01T15:54:30.502Z\",\"desc\":\"\",\"descData\":null,\"due\":null,\"id\":10,\"idAttachmentCover\":null,\"idBoard\":\"53189b693b58e0d16ac26e51\",\"idChecklists\":[\"53285aec349bf6b732b24c4f\"],\"idList\":\"5329b9925ada884a59088461\",\"idMembers\":[],\"idShort\":22,\"labels\":[],\"manualCoverAttachment\":false,\"name\":\"Overview screen decorations\",\"pos\":327679,\"shortUrl\":\"https://trello.com/c/tvx9lxBO\",\"url\":\"https://trello.com/c/tvx9lxBO/22-overview-screen-decorations\"},\"trello_card_id\":10,\"user_can_edit\":false,\"istest\":true}";
+        mockCard(10,false);
         createDisplayCardTestSetup();
 
 
         testDetailCardSuccess = function(data){
-            start();
             ok(true, "Successfully loaded card AJAX");
+            start();
             equal(JSON.stringify(data),cardData,"JSON matches what we passed in.");
         };
 
@@ -570,8 +748,9 @@ function kanbanicAJAXTests(){
             start();
             ok(false,"Incorrectly called exception on detail card creation.");
         };
-        getCardDetailInformation(1);
+        getCardDetailInformation(10);
     });
+
 
 
     module("Return error conditions from AJAX calls");

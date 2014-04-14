@@ -66,6 +66,10 @@ var testEditCheckitemSuccess= function() {};
 var testCheckCheckitemError = function() {};
 var testCheckCheckitemException = function() {};
 var testCheckCheckitemSuccess= function() {};
+var testCardDetailsWithoutAttachment = function() {};
+var testGetAttachmentSuccess = function() {};
+var testGetAttachmentError = function() {};
+var testGetAttachmentException = function() {};
 var testDeleteCheckitemError = function() {};
 var testDeleteCheckitemException = function() {};
 var testDeleteCheckitemSuccess= function() {};
@@ -252,8 +256,6 @@ function restoreCardPosition(oldListDivID,cardDivID,oldList) {
 //  Card details
 //
 
-//TODO: Add Unit tests for displayCard() to verify div is being created/updated
-
 var cardBeingDisplayed = false;
 function displayCard(cardID) {
     if(!cardBeingDisplayed){
@@ -313,7 +315,7 @@ function buildDetailCard(data) {
     });
 
     Handlebars.registerHelper('localTime', function(date) {
-        theDate = new Date(date);
+        var theDate = new Date(date);
         var dateString = theDate.toLocaleDateString() + " " + theDate.toLocaleTimeString();
         return dateString;
     });
@@ -357,26 +359,35 @@ function buildDetailCard(data) {
     }
 
     if(data.trello_card.badges.attachments>0){
-        var the_url = nodeURL+"trello/attachments/" + data.trello_card_id +"/";
-        var jqxhr = $.getJSON( the_url, function(data){
-            if(data && data.error) //Caught an error in the model, so it needs to be reported
-            {
-                reportError(data.errorInfo+". " +data.HTTPError );
-            }
-            else
-            {
-                addAttachmentInfo(data);
-            }
-        }).fail(function( jqxhr, textStatus, error ) { //uncaught exception needs reporting
-            var err = textStatus + ", " + error;
-            reportError( "Could not load the attachments: " + err );
-        });
+        getAttachmentJSON(data.trello_card_id);
+    } else {
+        testCardDetailsWithoutAttachment(data);
     }
+}
+
+function getAttachmentJSON(cardID){
+    var the_url = nodeURL+"trello/attachments/" + data.trello_card_id +"/";
+    var jqxhr = $.getJSON( the_url, function(data){
+        if(data && data.error) //Caught an error in the model, so it needs to be reported
+        {
+            reportError(data.errorInfo+". " +data.HTTPError );
+            testGetAttachmentError(data);
+        }
+        else
+        {
+            addAttachmentInfo(data);
+        }
+    }).fail(function( jqxhr, textStatus, error ) { //uncaught exception needs reporting
+        var err = textStatus + ", " + error;
+        reportError( "Could not load the attachments: " + err );
+        testGetAttachmentException(error);
+    });
 }
 
 function addAttachmentInfo(data){
     var cardTemplate = Handlebars.compile($("#kanban-card-detail-attachments-template").html());
     $(".trello_card_detail_card").append(cardTemplate(data));
+    testGetAttachmentSuccess(data);
 }
 
 //
