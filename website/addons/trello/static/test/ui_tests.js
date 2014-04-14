@@ -19,6 +19,7 @@ function cardsInOrder(cards){
     return (parseInt(cards[0].getAttribute("cardpos")) < parseInt(cards[0].getAttribute("cardpos")) < parseInt(cards[0].getAttribute("cardpos")));
 }
 
+
 function kanbanicUITests(){
     module("Testing user interactions that do not connect with AJAX");
     test("should restore the card to the beginning of the list", function(){
@@ -127,5 +128,79 @@ function kanbanicUITests(){
         notEqual(typeof $(".trello_card_detail").html(),"undefined","Did not remove the div");
     });
 
+    module("Interface element activation tests (add/edit items)");
 
+    test("should activate UI components for adding elements", function() {
+        expect(30);
+        var prefix="unittest";
+        var identifier = 1;
+        var otherIdentifier = identifier+1;
+        var ldiv = prefix+"l-"+identifier;
+        var gdiv = prefix+"g-"+identifier;
+        var ndiv = prefix+"n-"+identifier;
+        var bdiv = prefix+"b-"+identifier;
+        var cdiv = prefix+"c-"+identifier;
+        var otherGdiv = prefix+"g-"+otherIdentifier;
+
+        $("#qunit-fixture").append('<div id="'+ldiv+'"></div>');
+        $("#qunit-fixture").append('<div id="'+gdiv+'"></div>');
+        $("#qunit-fixture").append('<div id="'+otherGdiv+'"></div>');
+        $("#"+gdiv).append('<div id="'+ndiv+'"></div>');
+        $("#"+gdiv).append('<div id="'+bdiv+'"></div>');
+        $("#"+gdiv).append('<div id="'+cdiv+'"></div>');
+        $("#"+ldiv).show();
+        $("#"+gdiv).hide();
+        $("#"+otherGdiv).show();
+
+
+        ok($("#"+ldiv).is(":visible"),"Seeing the ldiv at setup");
+        ok($("#"+otherGdiv).is(":visible"),"Seeing the other gdiv at setup");
+        ok($("#"+gdiv).is(":hidden"),"Not seeing the gdiv at setup");
+        ok($("#"+ndiv).is(":hidden"),"Not seeing the ndiv at setup");
+        ok($("#"+bdiv).is(":hidden"),"Not seeing the bdiv at setup");
+        ok($("#"+cdiv).is(":hidden"),"Not seeing the cdiv at setup");
+        // Activate the links
+        activateAddThingLinks(prefix,identifier);
+        activateAddThingLinks(prefix,otherIdentifier);
+
+        // Click the "Add a thing" link
+        $("#"+ldiv).click();
+        ok($("#"+ldiv).is(":hidden"),"Not seeing the ldiv after clicking  add thing link");
+        ok($("#"+otherGdiv).is(":hidden"),"Not seeing the other gdiv after clicking add thing link");
+        ok($("#"+gdiv).is(":visible"),"Seeing the gdiv after clicking add thing link");
+        ok($("#"+ndiv).is(":visible"),"Seeing the ndiv after clicking add thing link");
+        ok($("#"+bdiv).is(":visible"),"Seeing the bdiv after clicking add thing link");
+        ok($("#"+cdiv).is(":visible"),"Seeing the cdiv after clicking add thing link");
+
+        // Click the cancel link
+        $("#"+cdiv).click();
+        ok($("#"+ldiv).is(":visible"),"Seeing the ldiv after clicking cancel");
+        ok($("#"+otherGdiv).is(":hidden"),"Not seeing the other gdiv after clicking cancel");
+        ok($("#"+gdiv).is(":hidden"),"Not seeing the gdiv after clicking cancel");
+        ok($("#"+ndiv).is(":hidden"),"Not seeing the ndiv after clicking cancel");
+        ok($("#"+bdiv).is(":hidden"),"Not seeing the bdiv after clicking cancel");
+        ok($("#"+cdiv).is(":hidden"),"Not seeing the cdiv after clicking cancel");
+
+        // Click the "Add a thing" link again
+        $("#"+ldiv).click();
+        ok($("#"+ldiv).is(":hidden"),"Not seeing the ldiv after clicking  add thing link again");
+        ok($("#"+otherGdiv).is(":hidden"),"Not seeing the other gdiv after clicking add thing link again");
+        ok($("#"+gdiv).is(":visible"),"Seeing the gdiv after clicking add thing link again");
+        ok($("#"+ndiv).is(":visible"),"Seeing the ndiv after clicking add thing link again");
+        ok($("#"+bdiv).is(":visible"),"Seeing the bdiv after clicking add thing link again");
+        ok($("#"+cdiv).is(":visible"),"Seeing the cdiv after clicking add thing link again");
+
+        //hit escape in the name entry field should act like cancel
+        var event = $.Event( "keyup" );
+        event.keyCode = 27;
+        $("#"+ndiv).trigger(event);
+
+        ok($("#"+ldiv).is(":visible"),"Seeing the ldiv after hitting escape");
+        ok($("#"+otherGdiv).is(":hidden"),"Not seeing the other gdiv after hitting escape");
+        ok($("#"+gdiv).is(":hidden"),"Not seeing the gdiv after hitting escape");
+        ok($("#"+ndiv).is(":hidden"),"Not seeing the ndiv after hitting escape");
+        ok($("#"+bdiv).is(":hidden"),"Not seeing the bdiv after hitting escape");
+        ok($("#"+cdiv).is(":hidden"),"Not seeing the cdiv after hitting escape");
+
+    });
 }

@@ -700,7 +700,6 @@ function createArchiveCardTestSetup(cardID){
     $("#tcdc-"+cardID).append('<div id="tcdend-'+cardID+'"></div>');
 }
 
-
 function kanbanicAJAXTests(){
     module("Fill out elements from AJAX calls");
 
@@ -2258,6 +2257,5 @@ function kanbanicAJAXTests(){
         $("#tcdend-"+idToUse).click();
     });
 
-    module("Interface element activation tests (add/edit items)")
 
 }

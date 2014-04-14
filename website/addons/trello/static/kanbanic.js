@@ -913,7 +913,6 @@ function activateArchiveCardSubmit(cardID){
 // Add a <thing>
 //
 
-//TODO: Unit tests for activateAddThingLinks()
 function activateAddThingLinks(prefix,identifier) {
         $("#"+prefix+"l-"+identifier).click(function() {
     //        Show the div with the editing controls, hide the div with the add a link button
