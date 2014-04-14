@@ -971,7 +971,6 @@ function activateAddThingLinks(prefix,identifier) {
 //
 
 
-//TODO: Unit tests for activateEditThingLinks()
 function activateEditThingLinks(prefix,identifier) {
         $("#"+prefix+"o-"+identifier).click(function() {
     //        Show the div with the editing controls, hide the div with the original version

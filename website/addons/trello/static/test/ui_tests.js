@@ -132,7 +132,7 @@ function kanbanicUITests(){
 
     test("should activate UI components for adding elements", function() {
         expect(30);
-        var prefix="unittest";
+        var prefix="addtest";
         var identifier = 1;
         var otherIdentifier = identifier+1;
         var ldiv = prefix+"l-"+identifier;
@@ -203,4 +203,108 @@ function kanbanicUITests(){
         ok($("#"+cdiv).is(":hidden"),"Not seeing the cdiv after hitting escape");
 
     });
+    
+    test("should activate UI components for editing elements", function() {
+        expect(48);
+        var prefix="edittest";
+        var identifier = 10;
+        var otherIdentifier = identifier+1;
+        var odiv = prefix+"o-"+identifier;
+        var omdiv = prefix+"om-"+identifier;
+        var ogdiv = prefix+"og-"+identifier;
+        var gdiv = prefix+"g-"+identifier;
+        var ndiv = prefix+"n-"+identifier;
+        var bdiv = prefix+"b-"+identifier;
+        var cdiv = prefix+"c-"+identifier;
+        var otherGdiv = prefix+"g-"+otherIdentifier;
+
+        $("#qunit-fixture").append('<div id="'+ogdiv+'"></div>');
+        $("#"+ogdiv).append('<div id="'+odiv+'">Original Text</div>');
+        $("#"+ogdiv).append('<div id="'+omdiv+'"></div>');
+        $("#qunit-fixture").append('<div id="'+gdiv+'"></div>');
+        $("#qunit-fixture").append('<div id="'+otherGdiv+'"></div>');
+
+        $("#"+gdiv).append('<textarea id="'+ndiv+'" name="'+ndiv+'">Original Text</textarea>');
+        $("#"+gdiv).append('<div id="'+bdiv+'"></div>');
+        $("#"+gdiv).append('<div id="'+cdiv+'"></div>');
+        $("#"+ogdiv).show();
+        $("#"+omdiv).show();
+        $("#"+odiv).show();
+        $("#"+gdiv).hide();
+        $("#"+otherGdiv).show();
+
+
+        ok($("#"+ogdiv).is(":visible"),"Seeing the ogdiv at setup");
+        ok($("#"+omdiv).is(":visible"),"Seeing the omdiv at setup");
+        ok($("#"+odiv).is(":visible"),"Seeing the odiv at setup");
+        ok($("#"+otherGdiv).is(":visible"),"Seeing the other gdiv at setup");
+        ok($("#"+gdiv).is(":hidden"),"Not seeing the gdiv at setup");
+        ok($("#"+ndiv).is(":hidden"),"Not seeing the ndiv at setup");
+        ok($("#"+bdiv).is(":hidden"),"Not seeing the bdiv at setup");
+        ok($("#"+cdiv).is(":hidden"),"Not seeing the cdiv at setup");
+        equal($("#"+odiv).text(),"Original Text","Original text is in the odiv at setup");
+        equal($("#"+ndiv).val(),"Original Text","Original text is in the ndiv at setup");
+        // Activate the links
+        activateEditThingLinks(prefix,identifier);
+        activateEditThingLinks(prefix,otherIdentifier);
+
+        // Click the div of the thing to be edited
+        $("#"+odiv).click();
+        ok($("#"+odiv).is(":hidden"),"Not seeing the odiv after clicking  thing to be edited");
+        ok($("#"+omdiv).is(":hidden"),"Not seeing the omdiv after clicking  thing to be edited");
+        ok($("#"+otherGdiv).is(":hidden"),"Not seeing the other gdiv after clicking thing to be edited");
+        ok($("#"+gdiv).is(":visible"),"Seeing the gdiv after clicking thing to be edited");
+        ok($("#"+ndiv).is(":visible"),"Seeing the ndiv after clicking thing to be edited");
+        ok($("#"+bdiv).is(":visible"),"Seeing the bdiv after clicking thing to be edited");
+        ok($("#"+cdiv).is(":visible"),"Seeing the cdiv after clicking thing to be edited");
+        equal($("#"+odiv).text(),"Original Text","Original text is in the odiv after clicking thing to be edited");
+        equal($("#"+ndiv).val(),"Original Text","Original text is in the ndiv after clicking thing to be edited");
+
+        $("#"+ndiv).val("New Text");
+        equal($("#"+ndiv).val(),"New Text","New text is in the ndiv after changing the value");
+
+        // Click the cancel link
+        $("#"+cdiv).click();
+        ok($("#"+odiv).is(":visible"),"Seeing the odiv after clicking cancel");
+        ok($("#"+otherGdiv).is(":hidden"),"Not seeing the other gdiv after clicking cancel");
+        ok($("#"+gdiv).is(":hidden"),"Not seeing the gdiv after clicking cancel");
+        ok($("#"+ndiv).is(":hidden"),"Not seeing the ndiv after clicking cancel");
+        ok($("#"+bdiv).is(":hidden"),"Not seeing the bdiv after clicking cancel");
+        ok($("#"+cdiv).is(":hidden"),"Not seeing the cdiv after clicking cancel");
+        equal($("#"+odiv).text(),"Original Text","Original text is in the odiv after clicking cancel");
+        equal($("#"+ndiv).val(),"Original Text","Original text is in the ndiv after clicking cancel");
+
+        // Click the markdown visible container of the thing to be edited
+        $("#"+omdiv).click();
+        ok($("#"+odiv).is(":hidden"),"Not seeing the odiv after clicking markdown version of the thing to be edited");
+        ok($("#"+omdiv).is(":hidden"),"Not seeing the odiv after clicking markdown version of the thing to be edited");
+        ok($("#"+otherGdiv).is(":hidden"),"Not seeing the other gdiv after clicking markdown version of the thing to be edited");
+        ok($("#"+gdiv).is(":visible"),"Seeing the gdiv after clicking markdown version of the thing to be edited");
+        ok($("#"+ndiv).is(":visible"),"Seeing the ndiv after clicking markdown version of the thing to be edited");
+        ok($("#"+bdiv).is(":visible"),"Seeing the bdiv after clicking markdown version of the thing to be edited");
+        ok($("#"+cdiv).is(":visible"),"Seeing the cdiv after clicking markdown version of the thing to be edited");
+        equal($("#"+odiv).text(),"Original Text","Original text is in the odiv after clicking markdown version of the thing to be edited");
+        equal($("#"+ndiv).val(),"Original Text","Original text is in the ndiv after clicking markdown version of the thing to be edited");
+
+        $("#"+ndiv).val("Newer Text");
+        equal($("#"+ndiv).val(),"Newer Text","Newer text is in the ndiv after changing the value");
+
+        //hit escape in the name entry field should act like cancel
+        var event = $.Event( "keyup" );
+        event.keyCode = 27;
+        $("#"+ndiv).trigger(event);
+
+        ok($("#"+ogdiv).is(":visible"),"Seeing the odiv after hitting escape");
+        ok($("#"+omdiv).is(":visible"),"Seeing the omdiv after hitting escape");
+        ok($("#"+odiv).is(":visible"),"Seeing the odiv after hitting escape");
+        ok($("#"+otherGdiv).is(":hidden"),"Not seeing the other gdiv after hitting escape");
+        ok($("#"+gdiv).is(":hidden"),"Not seeing the gdiv after hitting escape");
+        ok($("#"+ndiv).is(":hidden"),"Not seeing the ndiv after hitting escape");
+        ok($("#"+bdiv).is(":hidden"),"Not seeing the bdiv after hitting escape");
+        ok($("#"+cdiv).is(":hidden"),"Not seeing the cdiv after hitting escape");
+        equal($("#"+odiv).text(),"Original Text","Original text is in the odiv after hitting escape");
+        equal($("#"+ndiv).val(),"Original Text","Original text is in the ndiv after hitting escape");
+
+    });
+    
 }
