@@ -114,7 +114,7 @@
 </script>
 
 <script id="kanban-card-detail-template" type="text/x-handlebars-template">
-    <div class="trello_card_detail">
+    <div class="trello_card_detail" id="tcd-{{trello_card.id}}">
         <div class="trello_card_detail_card" id="tcdc-{{trello_card.id}}">
         <div class = "trello_card_detail_edit_name_original_group" cardid="{{trello_card.id}}" id="tcdenog-{{trello_card.id}}" >
         <div class="trello_card_detail_name"> <span id="tcdeno-{{trello_card.id}}">{{trello_card.name}}</span></div>

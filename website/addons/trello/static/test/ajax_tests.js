@@ -1,3 +1,20 @@
+function shouldBeDeleted(elementID, should){
+    var deleteState = "not ";
+    var properness = "im";
+    var wasDeleted = (document.getElementById(elementID) == null);
+    var okayness = false;
+    if (wasDeleted) {
+        deleteState = "";
+    }
+
+    if (wasDeleted === should){
+        properness = "";
+        okayness = true;
+    }
+
+    ok(okayness,"Element "+elementID+" was "+properness+"properly "+deleteState+"deleted.");
+}
+
 function mockList(listnum,canEdit){
     var url = '/trello/list/'+listnum+'/'
     $.mockjax({
@@ -640,6 +657,17 @@ function createEditCheckCheckitemTestSetup() {
     $("#qunit-fixture").append('<input type="checkbox" checked id="tcdc-ci-2" value="2" onclick="checkCheckItem(\'21\',\'22\',\'2\');" /><span id="tcdecio-2">Checkitem Two</span>')
 }
 
+function createDeleteCheckitemTestSetup(checkItemID){
+    $("#qunit-fixture").append('<div id="tcdecic-'+checkItemID+'"></div>');
+    $("#qunit-fixture").append('<div id="tcdecin-'+checkItemID+'" cardID="'+checkItemID+'" checklistid="'+checkItemID+'"></div>');
+    $("#qunit-fixture").append('<div id="tcdecig-'+checkItemID+'"></div>');
+    $("#qunit-fixture").append('<div id="tcdeciog-'+checkItemID+'"></div>');
+    $("#qunit-fixture").append('<div id="tcdecid-'+checkItemID+'"></div>');
+    $("#tcdecic-"+checkItemID).click(function(){
+        ok(true,"Clicked the cancel button");
+    });
+}
+
 function createDisplayCardTestSetup(){
     $("#qunit-fixture").append('<div id="cl-1"></div>');
     $("#cl-10").append('<div class = "TrelloCard" id="tc-10" onclick="displayCard(\'10\');"><div class = "TrelloCardName">Card ten</div></div>');
@@ -649,6 +677,29 @@ function createBoardTestSetup(){
     var $fixture = $( "#qunit-fixture" );
     $fixture.append('<div id="KanbanBoard"></div>');
 }
+
+function createDeleteChecklistTestSetup(checkListID){
+    $("#qunit-fixture").append('<div id="tcdecc-'+checkListID+'"></div>');
+    $("#qunit-fixture").append('<div id="tcdecn-'+checkListID+'" cardID="'+checkListID+'"></div>');
+    $("#qunit-fixture").append('<div id="tcdecg-'+checkListID+'"></div>');
+    $("#qunit-fixture").append('<div id="tcdecog-'+checkListID+'"></div>');
+    $("#qunit-fixture").append('<div id="tcdecd-'+checkListID+'"></div>');
+    $("#qunit-fixture").append('<div id="tcdacig-'+checkListID+'"></div>');
+    $("#qunit-fixture").append('<div id="tcdacil-'+checkListID+'"></div>');
+    $("#tcdecc-"+checkListID).click(function(){
+        ok(true,"Clicked the cancel button");
+    });
+}
+
+function createArchiveCardTestSetup(cardID){
+    $("#qunit-fixture").append('<div id="tc-'+cardID+'"></div>');
+    var tcdDiv = '<div class="trello_card_detail" id="tcd-'+cardID+'"></div>';
+
+    $("#qunit-fixture").append(tcdDiv);
+    $("#tcd-"+cardID).append('<div class="trello_card_detail_card" id="tcdc-'+cardID+'"></div>');
+    $("#tcdc-"+cardID).append('<div id="tcdend-'+cardID+'"></div>');
+}
+
 
 function kanbanicAJAXTests(){
     module("Fill out elements from AJAX calls");
@@ -1807,6 +1858,405 @@ function kanbanicAJAXTests(){
 
     module("Archive/Delete Item Submit callback tests");
 
+    asyncTest("should delete checkitem from user interaction", function() {
+        expect(4);
+        $.mockjaxClear();
+        var idToUse = 1;
+        $.mockjax({
+            url: '/trello/checkitem/',
+            responseTime: 1,
+            type: 'DELETE',
+            response: function(settings) {
+                this.responseText=
+                {
+                    error: false,
+                    data: settings.data
+                }
+            }
+        });
+        mockCard(idToUse);
+
+        testDeleteCheckitemSuccess = function(){
+            start();
+            ok(true,"Called Delete Checkitem Success function properly.");
+            shouldBeDeleted("tcdecig-"+idToUse, true);
+            shouldBeDeleted("#tcdeciog-"+idToUse, true);
+        };
+
+        testDeleteCheckitemError = function(){
+            start();
+            ok(false,"Incorrectly called the error function.");
+        };
+
+        testDeleteCheckitemException = function(){
+            start();
+            ok(false,"Incorrectly called the exception function.");
+        };
+
+        testReloadCardSuccess = function(){
+            ok(true,"Called reload card");
+        };
+
+        createDeleteCheckitemTestSetup(idToUse);
+        activateDeleteCheckItemSubmit(idToUse);
+
+        $("#tcdecid-"+idToUse).click();
+    });
+
+    asyncTest("should NOT delete checkitem from user interaction (Error)", function() {
+        expect(5);
+        $.mockjaxClear();
+        var idToUse = 2;
+        $.mockjax({
+            url: '/trello/checkitem/',
+            responseTime: 1,
+            type: 'DELETE',
+            response: function(settings) {
+                this.responseText=
+                {
+                    error: true,
+                    data: settings.data,
+                    errorInfo: "Unit test of error deleting checkitem from user interaction",
+                    HTTPError: "Should test as an error."
+
+                }
+            }
+        });
+        mockCard(idToUse);
+
+        testDeleteCheckitemSuccess = function(){
+            start();
+            ok(false,"Incorrectly called Delete Checkitem Success function.");
+
+        };
+
+        testDeleteCheckitemError = function(){
+            start();
+            ok(true,"Correctly called the error function.");
+            shouldBeDeleted("tcdecig-"+idToUse, false);
+            shouldBeDeleted("tcdeciog-"+idToUse, false);
+
+            var alertBoxError = "Unit test of error deleting checkitem from user interaction. Should test as an error.";
+            checkForAlertBox(alertBoxError,false);
+        };
+
+        testDeleteCheckitemException = function(){
+            start();
+            ok(false,"Incorrectly called the exception function.");
+        };
+
+        testReloadCardSuccess = function(){
+            ok(false,"Incorrectly called reload card");
+        };
+
+        createDeleteCheckitemTestSetup(idToUse);
+        activateDeleteCheckItemSubmit(idToUse);
+
+        $("#tcdecid-"+idToUse).click();
+    });
+
+    asyncTest("should NOT delete checkitem from user interaction (Exception)", function() {
+        expect(5);
+        $.mockjaxClear();
+        var idToUse = 3;
+
+        testDeleteCheckitemSuccess = function(){
+            start();
+            ok(false,"Incorrectly called Delete Checkitem Success function.");
+
+        };
+
+        testDeleteCheckitemException = function(){
+            start();
+            ok(true,"Correctly called the exception function.");
+            shouldBeDeleted("tcdecig-"+idToUse, false);
+            shouldBeDeleted("tcdeciog-"+idToUse, false);
+
+            var alertBoxError = "Could not delete the checklist item: error, Not Found";
+            checkForAlertBox(alertBoxError,false);
+        };
+
+        testDeleteCheckitemError = function(){
+            start();
+            ok(false,"Incorrectly called the error function.");
+        };
+
+        testReloadCardSuccess = function(){
+            ok(false,"Incorrectly called reload card");
+        };
+
+        createDeleteCheckitemTestSetup(idToUse);
+        activateDeleteCheckItemSubmit(idToUse);
+
+        $("#tcdecid-"+idToUse).click();
+    });
+
+    asyncTest("should delete checklist from user interaction", function() {
+        expect(6);
+        $.mockjaxClear();
+        var idToUse = 4;
+        $.mockjax({
+            url: '/trello/checklist/',
+            responseTime: 1,
+            type: 'DELETE',
+            response: function(settings) {
+                this.responseText=
+                {
+                    error: false,
+                    data: settings.data
+                }
+            }
+        });
+        mockCard(idToUse);
+
+        testDeleteChecklistSuccess = function(){
+            start();
+            ok(true,"Called Delete Checklist Success function properly.");
+            shouldBeDeleted("tcdecg-"+idToUse, true);
+            shouldBeDeleted("tcdecog-"+idToUse, true);
+            shouldBeDeleted("tcdacig-"+idToUse, true);
+            shouldBeDeleted("tcdacil-"+idToUse, true);
+        };
+
+        testDeleteChecklistError = function(){
+            start();
+            ok(false,"Incorrectly called the error function.");
+        };
+
+        testDeleteChecklistException = function(){
+            start();
+            ok(false,"Incorrectly called the exception function.");
+        };
+
+        testReloadCardSuccess = function(){
+            ok(true,"Called reload card");
+        };
+
+        createDeleteChecklistTestSetup(idToUse);
+        activateDeleteChecklistSubmit(idToUse);
+
+        $("#tcdecd-"+idToUse).click();
+    });
+
+    asyncTest("should NOT delete checklist from user interaction (Error)", function() {
+        expect(7);
+        $.mockjaxClear();
+        var idToUse = 5;
+        $.mockjax({
+            url: '/trello/checklist/',
+            responseTime: 1,
+            type: 'DELETE',
+            response: function(settings) {
+                this.responseText=
+                {
+                    error: true,
+                    data: settings.data,
+                    errorInfo: "Unit test of error deleting checklist from user interaction",
+                    HTTPError: "Should test as an error."
+
+                }
+            }
+        });
+        mockCard(idToUse);
+
+        testDeleteChecklistSuccess = function(){
+            start();
+            ok(false,"Incorrectly called Delete Checklist Success function.");
+
+        };
+
+        testDeleteChecklistError = function(){
+            start();
+            ok(true,"Correctly called the error function.");
+            shouldBeDeleted("tcdecg-"+idToUse, false);
+            shouldBeDeleted("tcdecog-"+idToUse, false);
+            shouldBeDeleted("tcdacig-"+idToUse, false);
+            shouldBeDeleted("tcdacil-"+idToUse, false);
+
+            var alertBoxError = "Unit test of error deleting checklist from user interaction. Should test as an error.";
+            checkForAlertBox(alertBoxError,false);
+        };
+
+        testDeleteChecklistException = function(){
+            start();
+            ok(false,"Incorrectly called the exception function.");
+        };
+
+        testReloadCardSuccess = function(){
+            ok(false,"Incorrectly called reload card");
+        };
+
+        createDeleteChecklistTestSetup(idToUse);
+        activateDeleteChecklistSubmit(idToUse);
+
+        $("#tcdecd-"+idToUse).click();
+    });
+
+    asyncTest("should NOT delete checklist from user interaction (Exception)", function() {
+        expect(7);
+        $.mockjaxClear();
+        var idToUse = 6;
+
+        testDeleteChecklistSuccess = function(){
+            start();
+            ok(false,"Incorrectly called Delete Checklist Success function.");
+
+        };
+
+        testDeleteChecklistException = function(){
+            start();
+            ok(true,"Correctly called the exception function.");
+            shouldBeDeleted("tcdecg-"+idToUse, false);
+            shouldBeDeleted("tcdecog-"+idToUse, false);
+            shouldBeDeleted("tcdacig-"+idToUse, false);
+            shouldBeDeleted("tcdacil-"+idToUse, false);
+
+            var alertBoxError = "Could not delete the checklist: error, Not Found";
+            checkForAlertBox(alertBoxError,false);
+        };
+
+        testDeleteChecklistError = function(){
+            start();
+            ok(false,"Incorrectly called the error function.");
+        };
+
+        testReloadCardSuccess = function(){
+            ok(false,"Incorrectly called reload card");
+        };
+
+        createDeleteChecklistTestSetup(idToUse);
+        activateDeleteChecklistSubmit(idToUse);
+
+        $("#tcdecd-"+idToUse).click();
+    });
+
+    asyncTest("should archive card from user interaction", function() {
+        expect(5);
+        $.mockjaxClear();
+        var idToUse = 7;
+        $.mockjax({
+            url: '/trello/card/',
+            responseTime: 1,
+            type: 'PUT',
+            response: function(settings) {
+                this.responseText=
+                {
+                    error: false,
+                    data: settings.data
+                }
+            }
+        });
+
+        testArchiveCardSuccess = function(){
+            start();
+            ok(true,"Called Delete Checklist Success function properly.");
+            shouldBeDeleted("tcd-"+idToUse, true);
+            shouldBeDeleted("tc-"+idToUse, true);
+        };
+
+        testArchiveCardError = function(){
+            start();
+            ok(false,"Incorrectly called the error function.");
+        };
+
+        testArchiveCardException = function(){
+            start();
+            ok(false,"Incorrectly called the exception function.");
+        };
+
+        createArchiveCardTestSetup(idToUse);
+        activateArchiveCardSubmit(idToUse);
+        shouldBeDeleted("tcd-"+idToUse, false);
+        shouldBeDeleted("tc-"+idToUse, false);
+
+
+        $("#tcdend-"+idToUse).click();
+    });
+
+    asyncTest("should NOT archive card from user interaction (Error)", function() {
+        expect(6);
+        $.mockjaxClear();
+        var idToUse = 8;
+        $.mockjax({
+            url: '/trello/card/',
+            responseTime: 1,
+            type: 'PUT',
+            response: function(settings) {
+                this.responseText=
+                {
+                    error: true,
+                    data: settings.data,
+                    errorInfo: "Unit test of error archiving card from user interaction",
+                    HTTPError: "Should test as an error."
+
+                }
+            }
+        });
+
+        testArchiveCardSuccess = function(){
+            start();
+            ok(false,"Incorrectly called Delete Checklist Success function.");
+
+        };
+
+        testArchiveCardError = function(){
+            start();
+            ok(true,"Correctly called the error function.");
+            shouldBeDeleted("tcd-"+idToUse, false);
+            shouldBeDeleted("tc-"+idToUse, false);
+
+
+            var alertBoxError = "Unit test of error archiving card from user interaction. Should test as an error.";
+            checkForAlertBox(alertBoxError,false);
+        };
+
+        testArchiveCardException = function(){
+            start();
+            ok(false,"Incorrectly called the exception function.");
+        };
+
+
+        createArchiveCardTestSetup(idToUse);
+        activateArchiveCardSubmit(idToUse);
+        shouldBeDeleted("tcd-"+idToUse, false);
+        shouldBeDeleted("tc-"+idToUse, false);
+
+        $("#tcdend-"+idToUse).click();
+    });
+
+    asyncTest("should NOT archive card from user interaction (Exception)", function() {
+        expect(6);
+        $.mockjaxClear();
+        var idToUse = 9;
+
+        testArchiveCardSuccess = function(){
+            start();
+            ok(false,"Incorrectly called archive card Success function.");
+
+        };
+
+        testArchiveCardException = function(){
+            start();
+            ok(true,"Correctly called the exception function.");
+            shouldBeDeleted("tc-"+idToUse, false);
+            shouldBeDeleted("tcd-"+idToUse, false);
+
+            var alertBoxError = "Could not archive the card: error, Not Found";
+            checkForAlertBox(alertBoxError,false);
+        };
+
+        testArchiveCardError = function(){
+            start();
+            ok(false,"Incorrectly called the error function.");
+        };
+
+        createArchiveCardTestSetup(idToUse);
+        activateArchiveCardSubmit(idToUse);
+        shouldBeDeleted("tcd-"+idToUse, false);
+        shouldBeDeleted("tc-"+idToUse, false);
+
+        $("#tcdend-"+idToUse).click();
+    });
 
     module("Interface element activation tests (add/edit items)")
 

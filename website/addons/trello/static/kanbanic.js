@@ -170,7 +170,6 @@ function reloadCardFromTrello(cardID) {
 // Card Sorting
 //
 
-//TODO: Unit test the adding of sortable events on makeCardListsSortable().
 function makeCardListsSortable() {
     $( ".CardList" ).sortable({
       connectWith: ".CardList",
@@ -786,7 +785,6 @@ function revertCheckitem(checkItemID){
     }
 }
 
-//TODO: Unit tests for activateDeleteCheckItemSubmit()
 function activateDeleteCheckItemSubmit(checkitemID){
     $("#tcdecid-"+checkitemID).click(function() {
 
@@ -811,10 +809,12 @@ function activateDeleteCheckItemSubmit(checkitemID){
         	        $("#tcdecic-"+theCheckListID).click();
         	        // report the error
                     reportError(data.errorInfo+". " +data.HTTPError );
+                    testDeleteCheckitemError(data);
                 }else { // Actual code
                     $("#tcdecig-"+theCheckListID).remove();
                     $("#tcdeciog-"+theCheckListID).remove();
                     reloadCardFromTrello(cardID);
+                    testDeleteCheckitemSuccess(data);
                 }
         }).fail(function( jqxhr, textStatus, error ) {
             // if it fails, revert
@@ -822,12 +822,13 @@ function activateDeleteCheckItemSubmit(checkitemID){
             //Report uncaught exception
             var err = textStatus + ", " + error;
             reportError( "Could not delete the checklist item: " + err );
+            testDeleteCheckitemException(textStatus,error);
+
         });
 
     });
 }
 
-//TODO: Unit tests for activateDeleteChecklistSubmit()
 function activateDeleteChecklistSubmit(checklistID){
     $("#tcdecd-"+checklistID).click(function() {
 
@@ -844,33 +845,37 @@ function activateDeleteChecklistSubmit(checklistID){
                     checklistid: checklistID,
                     cardid: cardID
                 })
-            }).done(function(data) {
+            })
+          .done(function(data) {
                 if(data.error) //Error reporting code for problems caught in the Model
                 {
                     // if it fails, revert
                     $("#tcdecc-"+theCheckListID).click();
                     //Report the error
                     reportError(data.errorInfo+". " +data.HTTPError );
+                    testDeleteChecklistError(data);
                 }else { // Actual code
                     $("#tcdecg-"+theCheckListID).remove();
                     $("#tcdecog-"+theCheckListID).remove();
                     $("#tcdacig-"+theCheckListID).remove();
                     $("#tcdacil-"+theCheckListID).remove();
                     reloadCardFromTrello(cardID);
+                    testDeleteChecklistSuccess(data);
                 }
-        }).fail(function( jqxhr, textStatus, error ) {
+            })
+          .fail(function( jqxhr, textStatus, error ) {
             // if it fails, revert
             $("#tcdecc-"+theCheckListID).click();
 
             //Report uncaught exception
             var err = textStatus + ", " + error;
             reportError( "Could not delete the checklist: " + err );
+            testDeleteChecklistException(textStatus,error);
         });
 
     });
 }
 
-//TODO: Unit tests for activateArchiveCardSubmit()
 function activateArchiveCardSubmit(cardID){
     $("#tcdend-"+cardID).click(function() {
         var theCardID = cardID;
@@ -888,15 +893,18 @@ function activateArchiveCardSubmit(cardID){
                 {
                     // if it fails, report the error
                     reportError(data.errorInfo+". " +data.HTTPError );
+                    testArchiveCardError(data);
                 } else { // Actual code
                         // Remove the detail view and, from the summary view, the card archived
-                        $(".trello_card_detail").remove();
-                        $("#tc-"+theCardID).remove();
+                    $("#tcd-"+theCardID).remove();
+                    $("#tc-"+theCardID).remove();
+                    testArchiveCardSuccess(data);
                 }
         }).fail(function( jqxhr, textStatus, error ) {
             // if it fails, report uncaught exception
             var err = textStatus + ", " + error;
             reportError( "Could not archive the card: " + err );
+            testArchiveCardException(textStatus,error);
         });
     });
 }
