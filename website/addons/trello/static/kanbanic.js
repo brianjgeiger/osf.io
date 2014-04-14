@@ -30,6 +30,9 @@ function replaceURLWithHTMLLinks(text) { // Light wrapper in case we need to cha
 // I can reduce these down to just a few reusable functions. Could be refactored to a class
 // to make tests have their own namespace, but for now, this will do.
 
+var testDetailCardSuccess = function() {};
+var testDetailCardError = function() {};
+var testDetailCardException = function() {};
 var testErrorListCards = function() {};
 var testExceptionListCards = function() {};
 var testSuccessListCards = function() {};
@@ -37,6 +40,8 @@ var testErrorBoard = function() {};
 var testExceptionBoard = function() {};
 var testSuccessBoard = function() {};
 var testReloadCardSuccess = function() {};
+var testReloadCardError = function() {};
+var testReloadCardException = function() {};
 var testAddCardError = function() {};
 var testAddCardException = function() {};
 var testAddCardSuccess= function() {};
@@ -153,6 +158,7 @@ function reloadCardFromTrello(cardID) {
         .fail(function( jqxhr, textStatus, error ) { //uncaught exception needs reporting
             var err = textStatus + ", " + error;
             reportError( "Request Failed: " + err );
+
         });
 }
 
@@ -257,23 +263,30 @@ function displayCard(cardID) {
         var callerValue = domElement[0].attributes[0].value;
     //    This makes sure the detail card doesn't show when clicking on the "open in trello" link
         if(callerValue != "/addons/static/trello/to_trello_16.png"){
-            var the_url = nodeURL+"trello/card/" + cardID +"/";
-            var jqxhr = $.getJSON( the_url, function(data){
+            var jqxhr = getCardDetailInformation(cardID);
+        }
+    }
+}
+
+function getCardDetailInformation(cardID){
+    var the_url = nodeURL+"trello/card/" + cardID +"/";
+    $.getJSON( the_url, function(data){
                 if(data && data.error) //Caught an error in the model, so it needs to be reported
                 {
                     cardBeingDisplayed = false;
                     reportError(data.errorInfo+". " +data.HTTPError );
+                    testDetailCardError(data);
                 }else {
                     // Actual code. Updates the div with the card data.
                     buildDetailCard(data);
+                    testDetailCardSuccess(data);
                 }
             }).fail(function( jqxhr, textStatus, error ) { //uncaught exception needs reporting
                 cardBeingDisplayed = false;
                 var err = textStatus + ", " + error;
                 reportError( "Could not display the card details: " + err );
+                testDetailCardException(textStatus,error);
             });
-        }
-    }
 }
 
 var box_contents = "";
@@ -592,7 +605,6 @@ function activateEditCardNameSubmit(cardID){
             }).done(function(data) {
             if(data && data.error) //Error reporting code for problems caught in the Model
             {
-                console.log("error");
                 // if it fails, revert
                 $("#tcdenc-"+theCardID).click();
                 // report the error
@@ -609,7 +621,6 @@ function activateEditCardNameSubmit(cardID){
             $("#tcdenc-"+theCardID).click();
             //Report uncaught exception
             var err = textStatus + ", " + error;
-            console.log(err);
             reportError( "Could not change the card name: " + err );
             testEditCardNameException(textStatus, error);
         });

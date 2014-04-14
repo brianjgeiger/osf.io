@@ -45,6 +45,7 @@ function kanbanicUITests(){
         ok(cardsInOrder($("#cl-2 > div")),"Cards are in order");
 
    });
+
     test("should restore the card to the middle of the list",function(){
         expect(5);
         // Setup card 1 in list 1, cards 2 and 3 in list 2
@@ -68,6 +69,7 @@ function kanbanicUITests(){
         // Order of cards in list two should be 1, 2, and 3
         ok(cardsInOrder($("#cl-2 > div")),"Cards are in order");
     });
+
     test("should restore the card to the end of the list",function(){
         expect(5);
         // Setup card 1 in list 1, cards 2 and 3 in list 2

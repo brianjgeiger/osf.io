@@ -161,10 +161,7 @@ function mockBoard(canEdit){
 }
 
 function mockCard(id, canEdit) {
-            $.mockjax({
-            url: '/trello/card/'+id+'/',
-            responseTime: 1,
-            responseText: {
+    var cardResponse = {
                 "complete": true,
                 "trello_card": {
                     "badges": {
@@ -355,10 +352,31 @@ function mockCard(id, canEdit) {
                 "trello_card_id": '"'+id+'"',
                 "user_can_edit": canEdit,
                 "istest": true
-            }
-        });
-
+            };
+    $.mockjax({
+        url: '/trello/card/'+id+'/',
+        responseTime: 1,
+        responseText: cardResponse
+    });
+    return cardResponse;
 }
+
+function mockErrorCard(id, canEdit, errorInfo) {
+    var cardResponse = {
+        "error": true,
+        "complete": true,
+        "errorInfo": errorInfo,
+        "HTTPError": "Should test as an error.",
+        "user_can_edit": canEdit
+    };
+    $.mockjax({
+        url: '/trello/card/'+id+'/',
+        responseTime: 1,
+        responseText: cardResponse
+    });
+    return cardResponse;
+}
+
 
 function checkForAlertBox(alertBoxText,debug){
     $(".alertify-log").each( function(){
@@ -448,6 +466,11 @@ function createEditCheckCheckitemTestSetup() {
     $("#qunit-fixture").append('<input type="checkbox" checked id="tcdc-ci-2" value="2" onclick="checkCheckItem(\'21\',\'22\',\'2\');" /><span id="tcdecio-2">Checkitem Two</span>')
 }
 
+function createDisplayCardTestSetup(){
+    $("#qunit-fixture").append('<div id="cl-1"></div>');
+    $("#cl-1").append('<div class = "TrelloCard" id="tc-1" onclick="displayCard(\'1\');"><div class = "TrelloCardName">Card one</div></div>');
+}
+
 function kanbanicAJAXTests(){
     module("Fill out elements from AJAX calls");
 
@@ -457,6 +480,14 @@ function kanbanicAJAXTests(){
             start(); // Lets the test know that it's done with async stuff
             var expectedText = "id,1,name,Overview screen decorations,cardpos,327679,coverURL,,desc,,subscribed,,badges.checkItems,12,badges.checkItemsChecked,10,badges.comments,0,badges.attachments,0,due_date_string,";
             equal($("div#tc-1").html(),expectedText); //ensures that the test div is populated with the right data
+        };
+        testReloadCardError = function() {
+            start();
+            ok(false,"Incorrectly called reload card error.");
+        };
+        testReloadCardException = function() {
+            start();
+            ok(false,"Incorrectly called reload card exception.");
         };
         
         expect(1);
@@ -479,8 +510,29 @@ function kanbanicAJAXTests(){
             start();
 
         };
+
+        testErrorListCards = function(){
+            start();
+            ok(false,"Incorrectly called list card error.");
+        };
+
+        testExceptionListCards = function(){
+            start();
+            ok(false,"Incorrectly called list card exception.");
+        };
+
         testSuccessBoard = function() {
             ok(true,"loadBoard succeeded");
+        };
+
+        testErrorBoard = function(){
+            start();
+            ok(false,"Incorrectly called board load error.");
+        };
+
+        testExceptionBoard = function() {
+            start();
+            ok(false,"Incorrect called board load exception.");
         };
         
         mockBoard(true);
@@ -496,6 +548,32 @@ function kanbanicAJAXTests(){
 
     });
 
+    asyncTest("should load the JSON for card 1 - getCardDetailInformation()", function(assert) {
+        $.mockjaxClear();
+        var cardData = "{\"complete\":true,\"trello_card\":{\"badges\":{\"attachments\":0,\"checkItems\":12,\"checkItemsChecked\":10,\"comments\":0,\"description\":false,\"due\":null,\"fogbugz\":\"\",\"subscribed\":false,\"viewingMemberVoted\":false,\"votes\":0},\"checkItemStates\":[{\"idCheckItem\":\"53285af3b932a1f138a5ae3a\",\"state\":\"complete\"},{\"idCheckItem\":\"53285af75034afbb45da0b5e\",\"state\":\"complete\"},{\"idCheckItem\":\"53285afef6bffd6f7209b825\",\"state\":\"complete\"},{\"idCheckItem\":\"53285b0fa0c86ea4276b97fa\",\"state\":\"complete\"},{\"idCheckItem\":\"53285b179563125c6f460d52\",\"state\":\"complete\"},{\"idCheckItem\":\"53285b3eab35992f72fe76a4\",\"state\":\"complete\"},{\"idCheckItem\":\"53285b4da0c86ea4276b9856\",\"state\":\"complete\"},{\"idCheckItem\":\"53285b6aaf9daa640fa8197b\",\"state\":\"complete\"},{\"idCheckItem\":\"5339b708b7e5284137278e9a\",\"state\":\"complete\"},{\"idCheckItem\":\"5339b7713063ab02463ee3ad\",\"state\":\"complete\"}],\"checklists\":[{\"checkItems\":[{\"checked\":\"checked\",\"id\":\"53285af3b932a1f138a5ae3a\",\"name\":\"Number of comments\",\"nameData\":null,\"pos\":16516,\"state\":\"complete\"},{\"checked\":\"checked\",\"id\":\"53285af75034afbb45da0b5e\",\"name\":\"Number of attachments\",\"nameData\":null,\"pos\":33220,\"state\":\"complete\"},{\"checked\":\"checked\",\"id\":\"53285afef6bffd6f7209b825\",\"name\":\"Image view\",\"nameData\":null,\"pos\":49871,\"state\":\"complete\"},{\"checked\":\"checked\",\"id\":\"53285b0fa0c86ea4276b97fa\",\"name\":\"Number of checklist items (complete/total)\",\"nameData\":null,\"pos\":66656,\"state\":\"complete\"},{\"checked\":\"checked\",\"id\":\"53285b179563125c6f460d52\",\"name\":\"Are you a watcher\",\"nameData\":null,\"pos\":83970,\"state\":\"complete\"},{\"checked\":\"\",\"id\":\"53285b2e9a1e8e7772f5de42\",\"name\":\"Who it's assigned to\",\"nameData\":null,\"pos\":101130,\"state\":\"incomplete\"},{\"checked\":\"checked\",\"id\":\"53285b3eab35992f72fe76a4\",\"name\":\"If it has a description\",\"nameData\":null,\"pos\":118337,\"state\":\"complete\"},{\"checked\":\"checked\",\"id\":\"53285b4da0c86ea4276b9856\",\"name\":\"Due date\",\"nameData\":{\"emoji\":{}},\"pos\":134989,\"state\":\"complete\"},{\"checked\":\"checked\",\"id\":\"53285b6aaf9daa640fa8197b\",\"name\":\"Card link to trello\",\"nameData\":null,\"pos\":151569,\"state\":\"complete\"},{\"checked\":\"checked\",\"id\":\"5339b708b7e5284137278e9a\",\"name\":\"Cool stuff?\",\"nameData\":null,\"pos\":167953,\"state\":\"complete\"},{\"checked\":\"checked\",\"id\":\"5339b7713063ab02463ee3ad\",\"name\":\"new\",\"nameData\":null,\"pos\":184337,\"state\":\"complete\"},{\"checked\":\"\",\"id\":\"5339b7db4c5bdb5f37b59d97\",\"name\":\"aaaaaaaa\",\"nameData\":null,\"pos\":200721,\"state\":\"incomplete\"}],\"id\":\"53285aec349bf6b732b24c4f\",\"idBoard\":\"53189b693b58e0d16ac26e51\",\"idCard\":\"1\",\"name\":\"Decorations\",\"pos\":16384}],\"closed\":false,\"comments\":[],\"dateLastActivity\":\"2014-04-01T15:54:30.502Z\",\"desc\":\"\",\"descData\":null,\"due\":null,\"id\":1,\"idAttachmentCover\":null,\"idBoard\":\"53189b693b58e0d16ac26e51\",\"idChecklists\":[\"53285aec349bf6b732b24c4f\"],\"idList\":\"5329b9925ada884a59088461\",\"idMembers\":[],\"idShort\":22,\"labels\":[],\"manualCoverAttachment\":false,\"name\":\"Overview screen decorations\",\"pos\":327679,\"shortUrl\":\"https://trello.com/c/tvx9lxBO\",\"url\":\"https://trello.com/c/tvx9lxBO/22-overview-screen-decorations\"},\"trello_card_id\":\"\\\"1\\\"\",\"user_can_edit\":false,\"istest\":true}";
+        mockCard(1,false);
+        createDisplayCardTestSetup();
+
+
+        testDetailCardSuccess = function(data){
+            start();
+            ok(true, "Successfully loaded card AJAX");
+            equal(JSON.stringify(data),cardData,"JSON matches what we passed in.");
+        };
+
+        testDetailCardError = function(data){
+            start();
+            ok(false,"Incorrectly called error on detail card creation.");
+        };
+
+        testDetailCardException = function(data) {
+            start();
+            ok(false,"Incorrectly called exception on detail card creation.");
+        };
+        getCardDetailInformation(1);
+    });
+
+
     module("Return error conditions from AJAX calls");
 
     asyncTest("should display error box - loadListCards(listID)", function(assert) {
@@ -503,16 +581,11 @@ function kanbanicAJAXTests(){
          testErrorListCards = function() {
             start();
             ok(true,"loadListCards successfully detected the error");
-            $(".alertify-log").each( function(){
-                if($(this).text() ==  "loadListCards. Should test as an error."){
-                    ok(true,"Found the error box");
-                }
-            });
+
+            var alertBoxError = "loadListCards. Should test as an error.";
+            checkForAlertBox(alertBoxError,false);
         };
 
-
-
-        
         expect(2);
         mockErrorList(1,true,"loadListCards");
         loadListCards(1);
@@ -523,12 +596,9 @@ function kanbanicAJAXTests(){
         testExceptionListCards = function() {
             start();
             ok(true,"loadListCards successfully detected the exception");
-            $(".alertify-log").each( function(){
-               if($(this).text() ==  "Could not load the cards: error, Unit test loadListCards 500"){
-                   ok(true,"Found the error box");
-               }
-            });
 
+            var alertBoxError = "Could not load the cards: error, Unit test loadListCards 500";
+            checkForAlertBox(alertBoxError,false);
         };
         
         expect(2);
@@ -541,11 +611,8 @@ function kanbanicAJAXTests(){
         testErrorBoard = function() {
             start();
             ok(true,"loadBoard successfully detected the error");
-            $(".alertify-log").each( function(){
-               if($(this).text() ==  "loadBoard. Should test as an error."){
-                   ok(true,"Found the error box");
-               }
-            });
+            var alertBoxError = "loadBoard. Should test as an error.";
+            checkForAlertBox(alertBoxError,false);
         };
         
         expect(2);
@@ -558,16 +625,59 @@ function kanbanicAJAXTests(){
         testExceptionBoard = function() {
             start();
             ok(true,"loadBoard successfully detected the exception");
-            $(".alertify-log").each( function(){
-               if($(this).text() ==  "Could not load the Trello board: error, Unit test loadBoard 500"){
-                   ok(true,"Found the error box");
-               }
-            });
+            var alertBoxError = "Could not load the Trello board: error, Unit test loadBoard 500";
+            checkForAlertBox(alertBoxError,false);
         };
         
         expect(2);
         mockException("/trello/lists/",500,"loadBoard 500");
         loadBoard();
+    });
+
+    asyncTest("should display error box - getCardDetailInformation()", function(assert) {
+        $.mockjaxClear();
+        testDetailCardError = function() {
+            start();
+            ok(true,"getCardDetailInformation successfully detected the error");
+            var alertBoxError = "getCardDetailInformation. Should test as an error.";
+            checkForAlertBox(alertBoxError,false);
+        };
+
+        testDetailCardSuccess = function(){
+            start();
+            ok(false,"Incorrectly called success function.");
+        };
+
+        testDetailCardException = function() {
+            start();
+            ok(false,"Incorrectly called exception function.");
+        };
+
+        expect(2);
+        mockErrorCard(1,true,"getCardDetailInformation");
+        getCardDetailInformation(1);
+    });
+
+    asyncTest("should show error for 404 exception - getCardDetailInformation()", function(assert) {
+        $.mockjaxClear();
+        testDetailCardException = function() {
+            start();
+            ok(true,"getCardDetailInformation successfully detected the exception");
+            var alertBoxError = "Could not display the card details: error, Not Found";
+            checkForAlertBox(alertBoxError,true);
+        };
+
+        testDetailCardSuccess = function() {
+            start();
+            ok(false,"Incorrectly called success function.");
+        };
+
+        testDetailCardError = function() {
+            ok(false,"Incorrectly called error function.");
+        };
+
+        expect(2);
+        getCardDetailInformation(3);
     });
 
     module("Add Item Submit callback tests");
@@ -1484,7 +1594,6 @@ function kanbanicAJAXTests(){
 
         $("#tcdc-ci-1").click();
     });
-
 
     asyncTest("should NOT check checkitem from user interaction (Exception - 404 Not Found)", function() {
         expect(4);
