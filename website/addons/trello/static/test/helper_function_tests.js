@@ -3,7 +3,7 @@ function numberOfLinks(text) {
     }
 
 function kanbanicHelperTests(){
-pavlov.specify("Kanbanic Helper Functions", function(){
+pavlov.specify("Trello Addon", function(){
     describe("Turning text URLs into HTML Links", function(){
         describe("Basic linking", function() {
 //           These are all essentially taken from https://github.com/gregjacobs/Autolinker.js/blob/master/tests/AutolinkerSpec.js
