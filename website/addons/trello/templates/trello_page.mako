@@ -15,7 +15,7 @@
     onmouseover="document.getElementById('tcli-{{id}}').style.display = 'inline';"
     onmouseout="document.getElementById('tcli-{{id}}').style.display = 'none';"
     cardpos="{{pos}}" cardID="{{id}}">
-        <div class="TrelloCardLinkIcon" id="tcli-{{id}}"><a href="{{id}}" target=":_blank">
+        <div class="TrelloCardLinkIcon" id="tcli-{{id}}"><a href="{{url}}" target=":_blank">
             <img src = "/static/addons/trello/to_trello_16.png" title="Open '{{id}}' on Trello"></a></div>
 
             {{#if coverURL}}
