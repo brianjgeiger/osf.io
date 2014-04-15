@@ -263,7 +263,7 @@ function displayCard(cardID) {
         var domElement =$(event.target);
         var callerValue = domElement[0].attributes[0].value;
     //    This makes sure the detail card doesn't show when clicking on the "open in trello" link
-        if(callerValue != "/addons/static/trello/to_trello_16.png"){
+        if(callerValue != "/static/addons/trello/to_trello_16.png"){
             var jqxhr = getCardDetailInformation(cardID);
         }
     }
