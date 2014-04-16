@@ -68,7 +68,7 @@ class AddonTrelloNodeSettings(AddonNodeSettingsBase):
         return_value = super(AddonTrelloNodeSettings, self).to_json(user)
 
         trello_user = user.get_addon('trello')
-
+        trello_boards = []
         if self.has_auth:
             trello_boards = Trello.from_settings(self.user_settings).get_boards()
 
@@ -83,7 +83,7 @@ class AddonTrelloNodeSettings(AddonNodeSettingsBase):
             'node_has_auth': self.user_settings and self.user_settings.has_auth,
             'user_has_auth': trello_user and trello_user.has_auth,
             'is_registration': self.owner.is_registration,
-            'trello_boards': [],
+            'trello_boards': trello_boards,
         })
 
 
