@@ -97,7 +97,7 @@ class AddonTrelloNodeSettings(AddonNodeSettingsBase):
 
         return return_value
 
-    # This never gets called. Pulled from dropbox.
+    # FIXME This never gets called. Pulled from dropbox.
     def before_remove_contributor_message(self, node, removed):
         """Return warning text to display if removed contributor is the user
         who authorized the Trello addon
