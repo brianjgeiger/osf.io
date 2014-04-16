@@ -21,7 +21,6 @@
                 <select id="trelloSelectBoard" class="form-control" ${'' if is_owner and not is_registration else 'disabled'}>
                     <option>-----</option>
                     %if is_owner:
-
                         % for trello_board in trello_boards:
                             <option value="${trello_board[u'id']}" ${'selected' if trello_board[u'id'] == trello_board_id else ''}>
                             ${trello_board[u'name'] or 'Unnamed'}
@@ -30,8 +29,8 @@
                         % endfor
                     %else:
                         <option value="${trello_board_name}" selected>
-                            ${trello_board[u'name'] or 'Unnamed'}
-                            </option>>
+                            ${trello_board_name}
+                        </option>>
                     %endif
                 </select>
             </div>
