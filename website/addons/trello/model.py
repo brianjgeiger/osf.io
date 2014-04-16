@@ -96,3 +96,35 @@ class AddonTrelloNodeSettings(AddonNodeSettingsBase):
             })
 
         return return_value
+
+    # This never gets called. Pulled from dropbox.
+    def before_remove_contributor_message(self, node, removed):
+        """Return warning text to display if removed contributor is the user
+        who authorized the Trello addon
+        """
+        if self.user_settings and self.user_settings.owner == removed:
+            category = node.project_or_component
+            name = removed.fullname
+            return ('The Trello add-on for this {category} is authenticated by {name}. '
+                    'Removing this user will also remove write access to Trello '
+                    'unless another contributor re-authenticates the add-on.'
+                    ).format(**locals())
+
+    # backwards compatibility
+    before_remove_contributor = before_remove_contributor_message
+
+
+    def after_remove_contributor(self, node, removed):
+        """If the removed contributor was the user who authorized the Trello
+        addon, remove the auth credentials from this node.
+        Return the message text that will be displayed to the user.
+        """
+        if self.user_settings and self.user_settings.owner == removed:
+            self.user_settings = None
+            self.save()
+            name = removed.fullname
+            url = node.web_url_for('node_setting')
+            return ('Because the Trello add-on for this project was authenticated'
+                    'by {name}, authentication information has been deleted. You '
+                    'can re-authenticate on the <a href="{url}">Settings</a> page'
+                    ).format(**locals())
