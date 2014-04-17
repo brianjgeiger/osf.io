@@ -15,6 +15,7 @@ OAUTH_ACCESS_TOKEN_URL = 'https://trello.com/1/OAuthGetAccessToken'
 
 logger = logging.getLogger(__name__)
 
+
 def oauth_start_url(user, node=None):
     """Get authorization URL for OAuth.
 
@@ -52,7 +53,7 @@ def oauth_start_url(user, node=None):
 def oauth_get_token(owner_key, owner_secret, verifier):
     """Get OAuth access token.
 
-    :param str code: Authorization code from provider
+    :param str owner_key: Authorization code from provider
     :return str: OAuth access token
 
     """
@@ -67,7 +68,7 @@ def oauth_get_token(owner_key, owner_secret, verifier):
     try:
         access_tokens = session.fetch_access_token(OAUTH_ACCESS_TOKEN_URL)
     except:
-        return (None, None)
+        return None, None
     access_token = access_tokens.get('oauth_token')
     access_token_secret = access_tokens.get('oauth_token_secret')
 

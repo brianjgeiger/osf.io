@@ -8,11 +8,11 @@ from website.addons.base import AddonUserSettingsBase, AddonNodeSettingsBase
 
 from framework.status import push_status_message
 from .api import Trello
-from . import settings as trello_settings
 from . import messages
 import logging
 
 logger = logging.getLogger(__name__)
+
 
 class AddonTrelloUserSettings(AddonUserSettingsBase):
 
@@ -41,7 +41,6 @@ class AddonTrelloNodeSettings(AddonNodeSettingsBase):
     trello_user_id = fields.StringField()
     trello_board_id = fields.StringField()
     trello_board_name = fields.StringField()
-
 
     user_settings = fields.ForeignField(
         'AddonTrelloUserSettings', backref='authorized'
@@ -86,7 +85,6 @@ class AddonTrelloNodeSettings(AddonNodeSettingsBase):
             'trello_boards': trello_boards,
         })
 
-
         if self.user_settings and self.user_settings.has_auth:
             return_value.update({
                 'authorized_user': self.user_settings.owner.fullname,
@@ -112,7 +110,6 @@ class AddonTrelloNodeSettings(AddonNodeSettingsBase):
 
     # backwards compatibility
     before_remove_contributor = before_remove_contributor_message
-
 
     def after_remove_contributor(self, node, removed):
         """If the removed contributor was the user who authorized the Trello

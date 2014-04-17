@@ -16,7 +16,6 @@ from ..auth import oauth_start_url, oauth_get_token
 @must_have_permission('write')
 @must_have_addon('trello', 'node')
 def trello_add_user_auth(**kwargs):
-
     user = kwargs['auth'].user
 
     user_settings = user.get_addon('trello')
@@ -33,7 +32,6 @@ def trello_add_user_auth(**kwargs):
 
 @must_be_logged_in
 def trello_oauth_start(**kwargs):
-
     user = get_current_user()
 
     nid = kwargs.get('nid') or kwargs.get('pid')
@@ -53,7 +51,6 @@ def trello_oauth_start(**kwargs):
 
     request_token, request_token_secret, authorization_url = oauth_start_url(user, node)
 
-
     user_settings.oauth_request_token = request_token
     user_settings.oauth_request_token_secret = request_token_secret
     user_settings.save()
@@ -63,8 +60,7 @@ def trello_oauth_start(**kwargs):
 
 #TODO: Revoke authorization through Trello
 @must_have_addon('trello', 'user')
-def trello_oauth_delete_user(*args, **kwargs):
-
+def trello_oauth_delete_user(**kwargs):
     trello_user = kwargs['user_addon']
 
     trello_user.oauth_access_token = None
@@ -74,11 +70,9 @@ def trello_oauth_delete_user(*args, **kwargs):
     return {}
 
 
-
 @must_have_permission('write')
 @must_have_addon('trello', 'node')
-def trello_oauth_delete_node(*args, **kwargs):
-
+def trello_oauth_delete_node(**kwargs):
     auth = kwargs['auth']
     node = kwargs['node'] or kwargs['project']
     node_settings = node.get_addon('trello')
@@ -106,9 +100,7 @@ def trello_oauth_delete_node(*args, **kwargs):
     return {}
 
 
-
 def trello_oauth_callback(**kwargs):
-
     user = get_current_user()
 
     nid = kwargs.get('nid') or kwargs.get('pid')

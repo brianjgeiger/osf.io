@@ -1,6 +1,7 @@
 from requests.exceptions import HTTPError as reqError
 import sys
 
+
 class TrelloError(Exception):
     pass
 
