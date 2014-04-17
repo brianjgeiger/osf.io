@@ -207,7 +207,7 @@ def trello_cards_from_lists(**kwargs):
                 else:
                     card['due_date_string'] = ""
                 if card[u'badges'][u'attachments'] > 0:
-                    attachments = trello_api.get_attachments_from_card(card[u'id'],filter="cover")
+                    attachments = trello_api.get_attachments_from_card(card[u'id'], attachment_filter="cover")
                     for attachment in attachments:
                         if "previews" in attachment:
                             previews = attachment[u'previews']
@@ -262,7 +262,7 @@ def trello_card_details(**kwargs):
         try:
             card = trello_api.get_card(card_id)
             if card[u'badges'][u'attachments'] > 0:
-                attachments = trello_api.get_attachments_from_card(card[u'id'],filter="cover")
+                attachments = trello_api.get_attachments_from_card(card[u'id'], attachment_filter="cover")
                 for attachment in attachments:
                     if "previews" in attachment:
                         previews = attachment[u'previews']
@@ -414,7 +414,7 @@ def trello_card_update(**kwargs):
             }
             return return_value
         try:
-            trello_api.update_card(card_id=card_id,idList=new_list_id,pos=new_card_pos,name=new_card_name,closed=card_closed)
+            trello_api.update_card(card_id=card_id, id_list=new_list_id,pos=new_card_pos,name=new_card_name,closed=card_closed)
         except TrelloError as e:
             return_value = {
                 'error': True,
@@ -610,7 +610,7 @@ def trello_checklist_delete(**kwargs):
             }
             return return_value
         try:
-            return_value = trello_api.delete_checklist_from_card(card_id=card_id,checklistID=checklist_id)
+            return_value = trello_api.delete_checklist_from_card(card_id=card_id, checklist_id=checklist_id)
         except TrelloError as e:
             return_value = {
                 'error': True,

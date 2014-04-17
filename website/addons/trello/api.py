@@ -39,12 +39,9 @@ class Trello(object):
                                                   client_secret=client_secret,
                                                   resource_owner_key=user_token,
                                                   resource_owner_secret=owner_secret,
-                                                  signature_type='auth_header'
-                )
+                                                  signature_type='auth_header')
 
         self.last_error = None
-
-
 
     @classmethod
     def from_settings(cls, settings):
@@ -103,7 +100,7 @@ class Trello(object):
         return self.get_trello().boards.get_list(board_id)
 
     @trello_except
-    def get_card(self,card_id):
+    def get_card(self, card_id):
         return self.get_trello().cards.get(card_id)
 
     @trello_except
@@ -123,19 +120,22 @@ class Trello(object):
         return self.get_trello().checklists.get_checkItem(checklist_id)
 
     @trello_except
-    def get_attachments_from_card(self, card_id, fields=None, filter="true"):
-        resp = requests.get("https://trello.com/1/cards/%s/attachments" % (card_id),
-                            params=dict(key=self.client_token, token=self.owner_token, fields=fields, filter=filter),
+    def get_attachments_from_card(self, card_id, fields=None, attachment_filter="true"):
+        resp = requests.get("https://trello.com/1/cards/%s/attachments" % card_id,
+                            params=dict(key=self.client_token,
+                                        token=self.owner_token,
+                                        fields=fields,
+                                        filter=attachment_filter),
                             data=None)
         resp.raise_for_status()
         return json.loads(resp.content)
 
     @trello_except
-    def get_board_user_prefs(self,board_id):
+    def get_board_user_prefs(self, board_id):
         return self.get_user_trello().boards.get_myPref(board_id)
 
     @trello_except
-    def can_user_write_to_board(self,board_id):
+    def can_user_write_to_board(self, board_id):
         return_val = False
         board_prefs = self.get_board_prefs_from_user_perspective(board_id)
         if board_prefs is not None:
@@ -143,7 +143,7 @@ class Trello(object):
         return return_val
 
     @trello_except
-    def get_board_prefs_from_user_perspective(self,board_id):
+    def get_board_prefs_from_user_perspective(self, board_id):
         if self.user_token is not None:
             resp = requests.put("https://api.trello.com/1/boards/%s" % board_id,
                                 params=dict(key=self.client_token, token=self.user_token),
@@ -167,7 +167,7 @@ class Trello(object):
     @trello_except
     def update_card(self, card_id, name=None, desc=None, closed=None, id_list=None, due=None, pos=None):
         if self.user_token is not None:
-            resp = requests.put("https://trello.com/1/cards/%s" % (card_id),
+            resp = requests.put("https://trello.com/1/cards/%s" % card_id,
                                 params=dict(key=self.client_token, token=self.user_token),
                                 data=dict(name=name, desc=desc, closed=closed, idList=id_list, due=due, pos=pos))
             resp.raise_for_status()
@@ -182,9 +182,16 @@ class Trello(object):
     @trello_except
     def update_checkitem(self, card_id, checklist_id, checkitem_id, state=None, name=None, pos=None, closed=None):
         if self.user_token is not None:
-            resp = requests.put("https://trello.com/1/cards/%s/checklist/%s/checkItem/%s" % (card_id, checklist_id, checkitem_id),
+            resp = requests.put("https://trello.com/1/cards/%s/checklist/%s/checkItem/%s" %
+                                (card_id, checklist_id, checkitem_id),
                                 params=dict(key=self.client_token, token=self.user_token),
-                                data=dict(idChecklist=checklist_id, idCheckItem=checkitem_id, value=state, state=state, pos=pos, name=name, closed=closed))
+                                data=dict(idChecklist=checklist_id,
+                                          idCheckItem=checkitem_id,
+                                          value=state,
+                                          state=state,
+                                          pos=pos,
+                                          name=name,
+                                          closed=closed))
             resp.raise_for_status()
             content = json.loads(resp.content)
             return content
@@ -193,11 +200,11 @@ class Trello(object):
 
     @trello_except
     def create_checkitem_in_checklist(self, checklist_id, checkitem_name):
-        return self.get_user_trello().checklists.new_checkItem(checklist_id,checkitem_name)
+        return self.get_user_trello().checklists.new_checkItem(checklist_id, checkitem_name)
 
     @trello_except
     def delete_checkitem(self, checkitem_id, checklist_id):
-        return self.get_user_trello().checklists.delete_checkItem_idCheckItem(checkitem_id,checklist_id)
+        return self.get_user_trello().checklists.delete_checkItem_idCheckItem(checkitem_id, checklist_id)
 
     @trello_except
     def delete_card(self, card_id):
@@ -205,19 +212,19 @@ class Trello(object):
 
     @trello_except
     def update_checklist(self, checklist_id, name):
-        return self.get_user_trello().checklists.update(checklist_id,name)
+        return self.get_user_trello().checklists.update(checklist_id, name)
 
     @trello_except
-    def create_checklist_in_card(self, card_id, name=None, value=None, idChecklistSource=None):
-        resp = requests.post("https://trello.com/1/cards/%s/checklists" % (card_id),
+    def create_checklist_in_card(self, card_id, name=None, value=None, source=None):
+        resp = requests.post("https://trello.com/1/cards/%s/checklists" % card_id,
                              params=dict(key=self.client_token, token=self.user_token),
-                             data=dict(name=name, value=value, idChecklistSource=idChecklistSource))
+                             data=dict(name=name, value=value, idChecklistSource=source))
         resp.raise_for_status()
         return json.loads(resp.content)
 
     @trello_except
-    def delete_checklist_from_card(self, card_id, checklistID):
-        return self.get_user_trello().cards.delete_checklist_idChecklist(idChecklist=checklistID, card_id=card_id)
+    def delete_checklist_from_card(self, card_id, checklist_id):
+        return self.get_user_trello().cards.delete_checklist_idChecklist(idChecklist=checklist_id, card_id=card_id)
 
     @trello_except
     def update_card_description(self, card_id, desc):
