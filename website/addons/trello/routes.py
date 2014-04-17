@@ -7,16 +7,6 @@ from . import views
 from website.routes import OsfWebRenderer
 
 
-widget_routes = {
-    'rules': [
-        Rule([
-            '/project/<pid>/trello/widget/',
-            '/project/<pid>/node/<nid>/trello/widget/',
-        ], 'get', views.misc.trello_widget, json_renderer),
-    ],
-    'prefix': '/api/v1',
-}
-
 settings_routes = {
     'rules': [
         Rule([

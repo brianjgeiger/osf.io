@@ -18,7 +18,7 @@ from framework.auth import get_current_user
 from website import models
 from ..api import Trello
 import logging
-import dateutil
+from dateutil import parser
 from ..exceptions import TrelloError
 from requests import HTTPError as requestsHTTPError
 
@@ -28,12 +28,11 @@ logger = logging.getLogger(__name__)
 @must_have_permission('write')
 @must_not_be_registration
 @must_have_addon('trello', 'node')
-def trello_set_config(*args, **kwargs):
+def trello_set_config(**kwargs):
     auth = kwargs['auth']
     node_settings = kwargs['node_addon']
     node = node_settings.owner
 
-    trello = node.get_addon('trello')
     try:
         trello_board_id = request.json.get('trello_board_id', '')
         trello_board_name = request.json.get('trello_board_name', '')
@@ -64,20 +63,6 @@ def trello_set_config(*args, **kwargs):
         },
         auth=auth,
     )
-
-
-@must_be_contributor_or_public
-@must_have_addon('trello', 'node')
-def trello_widget(*args, **kwargs):
-    node = kwargs['node'] or kwargs['project']
-    trello = node.get_addon('trello')
-    summary = trello._summarize_references()
-    return_value = {
-        'complete': bool(summary),
-        'summary': summary,
-    }
-    return_value.update(trello.config.to_json())
-    return return_value
 
 
 @must_be_contributor_or_public
@@ -121,8 +106,7 @@ def trello_page(auth, project, node, **kwargs):
 
 @must_be_contributor_or_public
 @must_have_addon('trello', 'node')
-def trello_lists(auth, project, node, **kwargs):
-    node = node or project
+def trello_lists(**kwargs):
     node_settings = kwargs['node_addon']
     trello_board_name = node_settings.trello_board_name.strip()
     trello_board_id = node_settings.trello_board_id
@@ -162,7 +146,6 @@ def trello_lists(auth, project, node, **kwargs):
             'user_can_edit': user_can_edit,
         }
     else:
-        data = _view_project(node, auth)
         return_value = {
             'complete': False,
             'error': True,
@@ -205,7 +188,7 @@ def trello_cards_from_lists(**kwargs):
             cards = trello_api.get_cards_from_list(list_id)
             for card in cards:
                 if card['badges']['due'] is not None:
-                    due_date = dateutil.parser.parse(card['badges']['due'])
+                    due_date = parser.parse(card['badges']['due'])
                     card['due_date_string'] = due_date.strftime('%b %d')
                 else:
                     card['due_date_string'] = ""
@@ -323,8 +306,8 @@ def trello_card_attachments(**kwargs):
                 attachment['previewURL'] = ""
                 number_of_previews = len(attachment['previews'])
                 if number_of_previews > 0:
-                    previewItem = min(1, number_of_previews)
-                    attachment['previewURL'] = attachment['previews'][previewItem]['url']
+                    preview_item = min(1, number_of_previews)
+                    attachment['previewURL'] = attachment['previews'][preview_item]['url']
                 else:
                     name_split = attachment['name'].split('.')
                     if len(name_split) > 1:
@@ -351,7 +334,6 @@ def trello_card_attachments(**kwargs):
 @must_have_addon('trello', 'node')
 def trello_card_add(**kwargs):
     node_settings = kwargs['node_addon']
-    node = node_settings.owner
     return_value = None
     try:
         list_id = request.json.get('listid', '')
@@ -393,7 +375,6 @@ def trello_card_add(**kwargs):
 @must_have_addon('trello', 'node')
 def trello_card_update(**kwargs):
     node_settings = kwargs['node_addon']
-    node = node_settings.owner
     try:
         new_list_id = request.json.get('listid', None)
         new_card_pos = request.json.get('cardpos', None)
@@ -435,7 +416,6 @@ def trello_card_update(**kwargs):
 @must_have_addon('trello', 'node')
 def trello_card_delete(**kwargs):
     node_settings = kwargs['node_addon']
-    node = node_settings.owner
     return_value = None
     try:
         card_id = request.json.get('cardid', '')
@@ -468,14 +448,13 @@ def trello_card_delete(**kwargs):
                 'card_id': card_id,
             }
             return return_value
-        return return_value
+    return return_value
 
 
 @must_have_permission('write')
 @must_have_addon('trello', 'node')
 def trello_card_description_update(**kwargs):
     node_settings = kwargs['node_addon']
-    node = node_settings.owner
     try:
         card_id = request.json.get('cardid', '')
         new_desc = request.json.get('desc', None)
@@ -512,7 +491,6 @@ def trello_card_description_update(**kwargs):
 @must_have_addon('trello', 'node')
 def trello_checklist_add(**kwargs):
     node_settings = kwargs['node_addon']
-    node = node_settings.owner
     return_value = None
     try:
         card_id = request.json.get('cardid', '')
@@ -553,7 +531,6 @@ def trello_checklist_add(**kwargs):
 @must_have_addon('trello', 'node')
 def trello_checklist_update(**kwargs):
     node_settings = kwargs['node_addon']
-    node = node_settings.owner
 
     try:
         checklist_id = request.json.get('checklistid', '')
@@ -564,7 +541,6 @@ def trello_checklist_update(**kwargs):
     if not checklist_id:
         raise OSFHTTPError(http.BAD_REQUEST)
 
-    trello_board_name = node_settings.trello_board_name.strip()
     trello_board_name = node_settings.trello_board_name.strip()
     if trello_board_name is not None:
         try:
@@ -593,7 +569,6 @@ def trello_checklist_update(**kwargs):
 @must_have_addon('trello', 'node')
 def trello_checklist_delete(**kwargs):
     node_settings = kwargs['node_addon']
-    node = node_settings.owner
     return_value = None
     try:
         card_id = request.json.get('cardid', '')
@@ -626,14 +601,13 @@ def trello_checklist_delete(**kwargs):
                 'checklist_id': checklist_id,
             }
             return return_value
-        return return_value
+    return return_value
 
 
 @must_have_permission('write')
 @must_have_addon('trello', 'node')
 def trello_checkitem_add(**kwargs):
     node_settings = kwargs['node_addon']
-    node = node_settings.owner
     return_value = None
     try:
         checklist_id = request.json.get('checklistid', '')
@@ -675,7 +649,6 @@ def trello_checkitem_add(**kwargs):
 @must_have_addon('trello', 'node')
 def trello_checkitem_update(**kwargs):
     node_settings = kwargs['node_addon']
-    node = node_settings.owner
     return_value = None
     try:
         card_id = request.json.get('cardid', '')
@@ -730,7 +703,6 @@ def trello_checkitem_update(**kwargs):
 @must_have_addon('trello', 'node')
 def trello_checkitem_delete(**kwargs):
     node_settings = kwargs['node_addon']
-    node = node_settings.owner
     return_value = None
     try:
         checkitem_id = request.json.get('checkitemid', '')
@@ -766,7 +738,7 @@ def trello_checkitem_delete(**kwargs):
                 'checkitem_id': checkitem_id,
             }
             return return_value
-        return return_value
+    return return_value
 
 
 #TODO: Implement users having their own tokens. When that happens, update the following method with these rules:
@@ -786,4 +758,3 @@ def can_user_write_to_project_board(**kwargs):
         user_can_edit = True
 
     return user_can_edit
-
