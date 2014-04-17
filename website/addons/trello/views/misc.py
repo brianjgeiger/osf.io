@@ -24,19 +24,19 @@ from requests import HTTPError as requestsHTTPError
 
 logger = logging.getLogger(__name__)
 
+
 @must_have_permission('write')
 @must_not_be_registration
 @must_have_addon('trello', 'node')
 def trello_set_config(*args, **kwargs):
-
     auth = kwargs['auth']
     node_settings = kwargs['node_addon']
     node = node_settings.owner
 
     trello = node.get_addon('trello')
     try:
-        trello_board_id = request.json.get('trello_board_id','')
-        trello_board_name = request.json.get('trello_board_name','')
+        trello_board_id = request.json.get('trello_board_id', '')
+        trello_board_name = request.json.get('trello_board_name', '')
     except:
         raise OSFHTTPError(http.BAD_REQUEST)
 
@@ -53,17 +53,18 @@ def trello_set_config(*args, **kwargs):
         node_settings.save()
 
     node.add_log(
-            action='trello_content_linked',
-            params={
-                'project': node.parent_id,
-                'node': node._id,
-                'trello': {
-                    'id': trello_board_id,
-                    'trello_board_name': trello_board_name,
-                }
-            },
-            auth=auth,
-            )
+        action='trello_content_linked',
+        params={
+            'project': node.parent_id,
+            'node': node._id,
+            'trello': {
+                'id': trello_board_id,
+                'trello_board_name': trello_board_name,
+            }
+        },
+        auth=auth,
+    )
+
 
 @must_be_contributor_or_public
 @must_have_addon('trello', 'node')
@@ -77,6 +78,7 @@ def trello_widget(*args, **kwargs):
     }
     return_value.update(trello.config.to_json())
     return return_value
+
 
 @must_be_contributor_or_public
 @must_have_addon('trello', 'node')
@@ -115,6 +117,7 @@ def trello_page(auth, project, node, **kwargs):
         }
     return_value.update(data)
     return return_value
+
 
 @must_be_contributor_or_public
 @must_have_addon('trello', 'node')
@@ -180,10 +183,10 @@ def trello_cards_from_lists(**kwargs):
 
     list_id = kwargs['listid']
     return_value = {
-            'complete': True,
-            'trello_cards': {},
-            'trello_list_id': list_id,
-        }
+        'complete': True,
+        'trello_cards': {},
+        'trello_list_id': list_id,
+    }
     trello_board_name = node_settings.trello_board_name.strip()
 
     if trello_board_name is not None:
@@ -241,10 +244,10 @@ def trello_card_details(**kwargs):
 
     card_id = kwargs['cardid']
     return_value = {
-            'complete': True,
-            'trello_card': {},
-            'trello_card_id': card_id,
-        }
+        'complete': True,
+        'trello_card': {},
+        'trello_card_id': card_id,
+    }
     trello_board_name = node_settings.trello_board_name.strip()
 
     if trello_board_name is not None:
@@ -274,7 +277,7 @@ def trello_card_details(**kwargs):
             for checklist in card[u'checklists']:
                 checklist[u'checkItems'] = trello_api.get_checkitems(checklist[u'id'])
                 for checkItem in checklist[u'checkItems']:
-                    if checkItem['state']=='complete':
+                    if checkItem['state'] == 'complete':
                         checkItem['checked'] = 'checked'
                     else:
                         checkItem['checked'] = ''
@@ -297,6 +300,7 @@ def trello_card_details(**kwargs):
 
     return return_value
 
+
 @must_be_contributor_or_public
 @must_have_addon('trello', 'node')
 def trello_card_attachments(**kwargs):
@@ -304,10 +308,10 @@ def trello_card_attachments(**kwargs):
 
     card_id = kwargs['cardid']
     return_value = {
-            'complete': True,
-            'attachments': {},
-            'trello_card_id': card_id,
-        }
+        'complete': True,
+        'attachments': {},
+        'trello_card_id': card_id,
+    }
     trello_board_name = node_settings.trello_board_name.strip()
 
     if trello_board_name is not None:
@@ -315,16 +319,16 @@ def trello_card_attachments(**kwargs):
         try:
             attachments = trello_api.get_attachments_from_card(card_id)
             for attachment in attachments:
-                attachment['previewType']=""
-                attachment['previewURL']=""
+                attachment['previewType'] = ""
+                attachment['previewURL'] = ""
                 number_of_previews = len(attachment['previews'])
                 if number_of_previews > 0:
-                    previewItem = min(1,number_of_previews)
+                    previewItem = min(1, number_of_previews)
                     attachment['previewURL'] = attachment['previews'][previewItem]['url']
                 else:
                     name_split = attachment['name'].split('.')
                     if len(name_split) > 1:
-                        attachment['previewType']=name_split[len(name_split)-1]
+                        attachment['previewType'] = name_split[len(name_split) - 1]
             return_value = {
                 'complete': True,
                 'attachments': attachments,
@@ -342,6 +346,7 @@ def trello_card_attachments(**kwargs):
 
     return return_value
 
+
 @must_have_permission('write')
 @must_have_addon('trello', 'node')
 def trello_card_add(**kwargs):
@@ -349,8 +354,8 @@ def trello_card_add(**kwargs):
     node = node_settings.owner
     return_value = None
     try:
-        list_id = request.json.get('listid','')
-        new_card_name = request.json.get('cardname','')
+        list_id = request.json.get('listid', '')
+        new_card_name = request.json.get('cardname', '')
     except:
         raise OSFHTTPError(http.BAD_REQUEST)
 
@@ -371,7 +376,7 @@ def trello_card_add(**kwargs):
             }
             return return_value
         try:
-            return_value = trello_api.create_card_in_list(card_name=new_card_name,list_id=list_id)
+            return_value = trello_api.create_card_in_list(card_name=new_card_name, list_id=list_id)
         except TrelloError as e:
             return_value = {
                 'error': True,
@@ -390,11 +395,11 @@ def trello_card_update(**kwargs):
     node_settings = kwargs['node_addon']
     node = node_settings.owner
     try:
-        new_list_id = request.json.get('listid',None)
-        new_card_pos = request.json.get('cardpos',None)
-        card_id = request.json.get('cardid','')
-        new_card_name = request.json.get('cardname',None)
-        card_closed = request.json.get('closed',None)
+        new_list_id = request.json.get('listid', None)
+        new_card_pos = request.json.get('cardpos', None)
+        card_id = request.json.get('cardid', '')
+        new_card_name = request.json.get('cardname', None)
+        card_closed = request.json.get('closed', None)
     except:
         raise OSFHTTPError(http.BAD_REQUEST)
     else:
@@ -414,7 +419,8 @@ def trello_card_update(**kwargs):
             }
             return return_value
         try:
-            trello_api.update_card(card_id=card_id, id_list=new_list_id,pos=new_card_pos,name=new_card_name,closed=card_closed)
+            trello_api.update_card(card_id=card_id, id_list=new_list_id, pos=new_card_pos, name=new_card_name,
+                                   closed=card_closed)
         except TrelloError as e:
             return_value = {
                 'error': True,
@@ -432,7 +438,7 @@ def trello_card_delete(**kwargs):
     node = node_settings.owner
     return_value = None
     try:
-        card_id = request.json.get('cardid','')
+        card_id = request.json.get('cardid', '')
     except:
         raise OSFHTTPError(http.BAD_REQUEST)
 
@@ -460,7 +466,7 @@ def trello_card_delete(**kwargs):
                 'HTTPError': e[0][0],
                 'errorInfo': "Could not delete checklist",
                 'card_id': card_id,
-           }
+            }
             return return_value
         return return_value
 
@@ -471,7 +477,7 @@ def trello_card_description_update(**kwargs):
     node_settings = kwargs['node_addon']
     node = node_settings.owner
     try:
-        card_id = request.json.get('cardid','')
+        card_id = request.json.get('cardid', '')
         new_desc = request.json.get('desc', None)
     except:
         raise OSFHTTPError(http.BAD_REQUEST)
@@ -491,7 +497,7 @@ def trello_card_description_update(**kwargs):
             }
             return return_value
         try:
-            trello_api.update_card_description(card_id=card_id,desc=new_desc)
+            trello_api.update_card_description(card_id=card_id, desc=new_desc)
         except TrelloError as e:
             return_value = {
                 'error': True,
@@ -509,8 +515,8 @@ def trello_checklist_add(**kwargs):
     node = node_settings.owner
     return_value = None
     try:
-        card_id = request.json.get('cardid','')
-        checklist_name = request.json.get('checklistname','')
+        card_id = request.json.get('cardid', '')
+        checklist_name = request.json.get('checklistname', '')
     except:
         raise OSFHTTPError(http.BAD_REQUEST)
 
@@ -531,7 +537,7 @@ def trello_checklist_add(**kwargs):
             }
             return return_value
         try:
-            return_value = trello_api.create_checklist_in_card(card_id=card_id,name=checklist_name)
+            return_value = trello_api.create_checklist_in_card(card_id=card_id, name=checklist_name)
         except TrelloError as e:
             return_value = {
                 'error': True,
@@ -550,8 +556,8 @@ def trello_checklist_update(**kwargs):
     node = node_settings.owner
 
     try:
-        checklist_id = request.json.get('checklistid','')
-        new_checklist_name = request.json.get('checklistname',None)
+        checklist_id = request.json.get('checklistid', '')
+        new_checklist_name = request.json.get('checklistname', None)
     except:
         raise OSFHTTPError(http.BAD_REQUEST)
 
@@ -572,7 +578,7 @@ def trello_checklist_update(**kwargs):
             }
             return return_value
         try:
-            trello_api.update_checklist(checklist_id=checklist_id,name=new_checklist_name)
+            trello_api.update_checklist(checklist_id=checklist_id, name=new_checklist_name)
         except TrelloError as e:
             return_value = {
                 'error': True,
@@ -582,6 +588,7 @@ def trello_checklist_update(**kwargs):
             }
             return return_value
 
+
 @must_have_permission('write')
 @must_have_addon('trello', 'node')
 def trello_checklist_delete(**kwargs):
@@ -589,8 +596,8 @@ def trello_checklist_delete(**kwargs):
     node = node_settings.owner
     return_value = None
     try:
-        card_id = request.json.get('cardid','')
-        checklist_id = request.json.get('checklistid','')
+        card_id = request.json.get('cardid', '')
+        checklist_id = request.json.get('checklistid', '')
     except:
         raise OSFHTTPError(http.BAD_REQUEST)
 
@@ -617,7 +624,7 @@ def trello_checklist_delete(**kwargs):
                 'HTTPError': e[0][0],
                 'errorInfo': "Could not delete checklist",
                 'checklist_id': checklist_id,
-           }
+            }
             return return_value
         return return_value
 
@@ -629,8 +636,8 @@ def trello_checkitem_add(**kwargs):
     node = node_settings.owner
     return_value = None
     try:
-        checklist_id = request.json.get('checklistid','')
-        checkitem_name = request.json.get('checkitemname','')
+        checklist_id = request.json.get('checklistid', '')
+        checkitem_name = request.json.get('checkitemname', '')
     except:
         raise OSFHTTPError(http.BAD_REQUEST)
 
@@ -651,7 +658,8 @@ def trello_checkitem_add(**kwargs):
             }
             return return_value
         try:
-            return_value = trello_api.create_checkitem_in_checklist(checklist_id=checklist_id,checkitem_name=checkitem_name)
+            return_value = trello_api.create_checkitem_in_checklist(checklist_id=checklist_id,
+                                                                    checkitem_name=checkitem_name)
         except TrelloError as e:
             return_value = {
                 'error': True,
@@ -670,12 +678,12 @@ def trello_checkitem_update(**kwargs):
     node = node_settings.owner
     return_value = None
     try:
-        card_id = request.json.get('cardid','')
-        checklist_id = request.json.get('checklistid','')
-        checkitem_id = request.json.get('checkitemid','')
-        checkitem_state = request.json.get('state',None)
-        checkitem_pos = request.json.get('pos',None)
-        checkitem_name = request.json.get('name',None)
+        card_id = request.json.get('cardid', '')
+        checklist_id = request.json.get('checklistid', '')
+        checkitem_id = request.json.get('checkitemid', '')
+        checkitem_state = request.json.get('state', None)
+        checkitem_pos = request.json.get('pos', None)
+        checkitem_name = request.json.get('name', None)
     except:
         raise OSFHTTPError(http.BAD_REQUEST)
     if not (card_id and checklist_id and checkitem_id):
@@ -699,12 +707,12 @@ def trello_checkitem_update(**kwargs):
         try:
             return_value = trello_api.update_checkitem(
                 card_id=card_id,
-                 checklist_id=checklist_id,
-                 checkitem_id=checkitem_id,
-                 state=checkitem_state,
-                 name=checkitem_name,
-                 pos=checkitem_pos,
-                 )
+                checklist_id=checklist_id,
+                checkitem_id=checkitem_id,
+                state=checkitem_state,
+                name=checkitem_name,
+                pos=checkitem_pos,
+            )
         except TrelloError as e:
             return_value = {
                 'error': True,
@@ -713,7 +721,7 @@ def trello_checkitem_update(**kwargs):
                 'card_id': card_id,
                 'checklist_id': checklist_id,
                 'checkitem_id': checkitem_id,
-           }
+            }
             return return_value
     return return_value
 
@@ -725,8 +733,8 @@ def trello_checkitem_delete(**kwargs):
     node = node_settings.owner
     return_value = None
     try:
-        checkitem_id = request.json.get('checkitemid','')
-        checklist_id = request.json.get('checklistid','')
+        checkitem_id = request.json.get('checkitemid', '')
+        checklist_id = request.json.get('checklistid', '')
     except:
         raise OSFHTTPError(http.BAD_REQUEST)
 
@@ -748,7 +756,7 @@ def trello_checkitem_delete(**kwargs):
             }
             return return_value
         try:
-            return_value = trello_api.delete_checkitem(checkitem_id=checkitem_id,checklist_id=checklist_id)
+            return_value = trello_api.delete_checkitem(checkitem_id=checkitem_id, checklist_id=checklist_id)
         except TrelloError as e:
             return_value = {
                 'error': True,
@@ -756,9 +764,10 @@ def trello_checkitem_delete(**kwargs):
                 'errorInfo': "Could not delete checklist item",
                 'checklist_id': checklist_id,
                 'checkitem_id': checkitem_id,
-           }
+            }
             return return_value
         return return_value
+
 
 #TODO: Implement users having their own tokens. When that happens, update the following method with these rules:
 # Reasons why a user can write (user always needs their own user token)
