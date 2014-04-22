@@ -1,5 +1,11 @@
 """
+Views to get data to and from the javascript components onto various views. Essentially everything that's not the
+Auth views right now, though this could clearly be refactored.
 
+A note for people who come along and want to use this code: The pattern I used where I catch the TrelloError
+and pass it along as successful JSON with an error flag is not a good way to do it. It was a hack because
+I couldn't get past the exception reporting mechanism on the front end otherwise. There are better ways to do this,
+and if I had the time, I would go back and fix it. So don't copy that pattern.
 """
 
 import httplib as http

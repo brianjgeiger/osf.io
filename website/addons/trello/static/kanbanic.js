@@ -1,6 +1,9 @@
+// A note for people who come along and want to use this code: The pattern I used where I have a successful JSON return
+// but check for an error flag in it is not something to do in your code. It was a hack because
+// I couldn't get past the exception reporting mechanism on the front end otherwise. There are better ways to do this,
+// and if I had the time, I would go back and fix it. So don't copy that pattern.
+
 // Helper Functions
-
-
 
 function reportError(errorText){ // Light wrapper in case we need to change our error reporting mechanism
     alertify.error(errorText);
