@@ -16,7 +16,7 @@ from website.project.decorators import must_have_addon
 from website.project.views.node import _view_project
 from framework.auth import get_current_user
 from website import models
-from ..api import Trello
+from website.addons.trello.api import Trello
 import logging
 from dateutil import parser
 from ..exceptions import TrelloError
@@ -107,7 +107,7 @@ def trello_page(auth, project, node, **kwargs):
 @must_be_contributor_or_public
 @must_have_addon('trello', 'node')
 def trello_lists(**kwargs):
-    node_settings = kwargs['node_addon']
+    node_settings = kwargs.get('node_addon')
     trello_board_name = node_settings.trello_board_name.strip()
     trello_board_id = node_settings.trello_board_id
     user_can_edit = can_user_write_to_project_board(**kwargs)
@@ -154,7 +154,6 @@ def trello_lists(**kwargs):
             'trello_board_url': None,
             'trello_board_name': None,
             'user_can_edit': user_can_edit,
-
         }
     return return_value
 
