@@ -36,6 +36,24 @@ class TrelloAddonTestCase(AddonTestCase):
         settings.trello_board_id = 123
 
 
+expected_responses = {
+    'successful_board_lists':
+        {u'user_can_edit': True, u'trello_board_url': None, u'trello_board_name': u'foo', u'trello_lists': [
+            {u'subscribed': False, u'name': u'Future Versions', u'idBoard': u'53189b693b58e0d16ac26e51', u'pos': 24576,
+             u'closed': False, u'id': u'5329b9925ada884a59088461'},
+            {u'subscribed': False, u'name': u'Bugs', u'idBoard': u'53189b693b58e0d16ac26e51', u'pos': 26624,
+             u'closed': False, u'id': u'5331dd6d128bb1cb24dcb144'},
+            {u'subscribed': False, u'name': u'Features', u'idBoard': u'53189b693b58e0d16ac26e51', u'pos': 28672,
+             u'closed': False, u'id': u'53189b693b58e0d16ac26e52'},
+            {u'subscribed': False, u'name': u'Doing', u'idBoard': u'53189b693b58e0d16ac26e51', u'pos': 32768,
+             u'closed': False, u'id': u'53189b693b58e0d16ac26e53'},
+            {u'subscribed': False, u'name': u'Done', u'idBoard': u'53189b693b58e0d16ac26e51', u'pos': 49152,
+             u'closed': False, u'id': u'53189b693b58e0d16ac26e54'},
+            {u'subscribed': False, u'name': u'Playground', u'idBoard': u'53189b693b58e0d16ac26e51', u'pos': 114688,
+             u'closed': False, u'id': u'5319cf5f3f19d10f7e999b57'},
+            {u'subscribed': False, u'name': u'Empty List', u'idBoard': u'53189b693b58e0d16ac26e51', u'pos': 180224,
+             u'closed': False, u'id': u'53235737af540b2b49a8eab2'}], u'complete': True}
+}
 mock_responses = {
     'successful_board_lists':
         [{u'idBoard': u'53189b693b58e0d16ac26e51', u'subscribed': False, u'pos': 24576, u'closed': False,
