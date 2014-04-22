@@ -365,7 +365,7 @@ function buildDetailCard(data) {
 }
 
 function getAttachmentJSON(cardID){
-    var the_url = nodeURL+"trello/attachments/" + data.trello_card_id +"/";
+    var the_url = nodeURL+"trello/attachments/" + cardID+"/";
     var jqxhr = $.getJSON( the_url, function(data){
         if(data && data.error) //Caught an error in the model, so it needs to be reported
         {
