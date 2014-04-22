@@ -36,31 +36,22 @@ class TrelloAddonTestCase(AddonTestCase):
         settings.trello_board_id = 123
 
 
-mock_responses = {'successful_board_lists': [{u'idBoard': u'53189b693b58e0d16ac26e51', u'subscribed': False,
-                                              u'pos': 24576, u'closed': False,
-                                              u'id': u'5329b9925ada884a59088461', u'name': u'Future Versions'}, {
-                                                 u'idBoard': u'53189b693b58e0d16ac26e51', u'subscribed': False,
-                                                 u'pos': 26624, u'closed': False,
-                                                 u'id': u'5331dd6d128bb1cb24dcb144', u'name': u'Bugs'},
-                                             {u'idBoard': u'53189b693b58e0d16ac26e51',
-                                              u'subscribed': False, u'pos': 28672,
-                                              u'closed': False,
-                                              u'id': u'53189b693b58e0d16ac26e52',
-                                              u'name': u'Features'}, {
-                                                 u'idBoard': u'53189b693b58e0d16ac26e51', u'subscribed': False,
-                                                 u'pos': 32768, u'closed': False,
-                                                 u'id': u'53189b693b58e0d16ac26e53', u'name': u'Doing'},
-                                             {u'idBoard': u'53189b693b58e0d16ac26e51',
-                                              u'subscribed': False, u'pos': 49152,
-                                              u'closed': False,
-                                              u'id': u'53189b693b58e0d16ac26e54',
-                                              u'name': u'Done'}, {
-                                                 u'idBoard': u'53189b693b58e0d16ac26e51', u'subscribed': False,
-                                                 u'pos': 114688, u'closed': False,
-                                                 u'id': u'5319cf5f3f19d10f7e999b57', u'name': u'Playground'}, {
-                                                 u'idBoard': u'53189b693b58e0d16ac26e51', u'subscribed': False,
-                                                 u'pos': 180224, u'closed': False,
-                                                 u'id': u'53235737af540b2b49a8eab2', u'name': u'Empty List'}]
+mock_responses = {
+    'successful_board_lists':
+        [{u'idBoard': u'53189b693b58e0d16ac26e51', u'subscribed': False, u'pos': 24576, u'closed': False,
+          u'id': u'5329b9925ada884a59088461', u'name': u'Future Versions'},
+         {u'idBoard': u'53189b693b58e0d16ac26e51', u'subscribed': False, u'pos': 26624, u'closed': False,
+          u'id': u'5331dd6d128bb1cb24dcb144', u'name': u'Bugs'},
+         {u'idBoard': u'53189b693b58e0d16ac26e51', u'subscribed': False, u'pos': 28672, u'closed': False,
+          u'id': u'53189b693b58e0d16ac26e52', u'name': u'Features'},
+         {u'idBoard': u'53189b693b58e0d16ac26e51', u'subscribed': False, u'pos': 32768, u'closed': False,
+          u'id': u'53189b693b58e0d16ac26e53', u'name': u'Doing'},
+         {u'idBoard': u'53189b693b58e0d16ac26e51', u'subscribed': False, u'pos': 49152, u'closed': False,
+          u'id': u'53189b693b58e0d16ac26e54', u'name': u'Done'},
+         {u'idBoard': u'53189b693b58e0d16ac26e51', u'subscribed': False, u'pos': 114688, u'closed': False,
+          u'id': u'5319cf5f3f19d10f7e999b57', u'name': u'Playground'},
+         {u'idBoard': u'53189b693b58e0d16ac26e51', u'subscribed': False, u'pos': 180224, u'closed': False,
+          u'id': u'53235737af540b2b49a8eab2', u'name': u'Empty List'}]
 }
 
 
@@ -68,7 +59,6 @@ class MockTrello(object):
     trello_mock = mock.create_autospec(Trello)
 
     trello_mock.get_lists_from_board.return_value = mock_responses['successful_board_lists']
-
 
 
 @contextmanager
