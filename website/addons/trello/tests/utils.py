@@ -52,7 +52,12 @@ expected_responses = {
             {u'subscribed': False, u'name': u'Playground', u'idBoard': u'53189b693b58e0d16ac26e51', u'pos': 114688,
              u'closed': False, u'id': u'5319cf5f3f19d10f7e999b57'},
             {u'subscribed': False, u'name': u'Empty List', u'idBoard': u'53189b693b58e0d16ac26e51', u'pos': 180224,
-             u'closed': False, u'id': u'53235737af540b2b49a8eab2'}], u'complete': True}
+             u'closed': False, u'id': u'53235737af540b2b49a8eab2'}], u'complete': True},
+    'trello_exception_add_card':
+        {u'HTTPError': u'RandomError', u'error': True, u'errorInfo': u'Could not add a card', u'list_id': 1},
+    'trello_exception_board_lists':
+        {u'HTTPError': u'RandomError', u'complete': True, u'error': True, u'errorInfo': u'Could not load Trello Board',
+         u'trello_board_id': 123, u'trello_cards': {}, u'user_can_edit': True},
 }
 mock_responses = {
     'successful_board_lists':
