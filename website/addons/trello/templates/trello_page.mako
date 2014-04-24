@@ -99,7 +99,7 @@
                     </div>
                     <div class="trello_card_detail_add_checkitem_group" id="tcdacig-{{id}}" checklistID="{{id}}" cardID="{{cardid}}">
                          <textarea maxlength="16384" rows="2" name="tcdacin-{{id}}"
-                            listID="{{id}}" cardID="{{cardid}}"
+                            listID="{{id}}" cardID="{{cardid}}" placeholder="Item name"
                          class="add_trello_card_detail_add_checkitem_name" id="tcdacin-{{id}}"></textarea> <br />
                     <div class="trello_card_detail_add_checkitem_button" id="tcdacib-{{id}}" checklistID="{{id}}" cardID="{{cardid}}">
                         Add
@@ -215,7 +215,7 @@
                     {{#if ../user_can_edit}}
                         <div class="trello_card_detail_add_checkitem_group" id="tcdacig-{{id}}" checklistID="{{id}}" cardID="{{../../trello_card.id}}">
                                  <textarea maxlength="16384" rows="2" name="tcdacin-{{id}}"
-                                    listID="{{id}}" cardID="{{../../trello_card.id}}"
+                                    listID="{{id}}" cardID="{{../../trello_card.id}}" placeholder="Item name"
                                  class="add_trello_card_detail_add_checkitem_name" id="tcdacin-{{id}}"></textarea> <br />
                             <div class="trello_card_detail_add_checkitem_button" id="tcdacib-{{id}}" checklistID="{{id}}" cardID="{{../../trello_card.id}}">
                                 Add
@@ -235,7 +235,8 @@
             {{#if user_can_edit}}
                 <div class="trello_card_detail_add_checklist_group" id="tcdaclg-{{trello_card.id}}" cardID="{{trello_card.id}}">
                     <textarea maxlength="16384" rows="2" name="tcdacln-{{trello_card.id}}" cardID="{{trello_card.id}}"
-                     class="add_trello_card_detail_add_checklist_name" id="tcdacln-{{trello_card.id}}"></textarea> <br />
+                     class="add_trello_card_detail_add_checklist_name" id="tcdacln-{{trello_card.id}}"
+                            placeholder="Checklist name"></textarea> <br />
                     <div class="trello_card_detail_add_checklist_button" id="tcdaclb-{{trello_card.id}}" cardID="{{trello_card.id}}">
                         Add
                     </div>
@@ -309,7 +310,8 @@
                     </div>
                     <div class = "add_trello_card_group" id="atcg-{{id}}" listID = "{{id}}">
                         <textarea maxlength="16384" rows="2" name="atcn-{{id}}"
-                            class="add_trello_card_name" id="atcn-{{id}}" listID = "{{id}}"> </textarea> <br />
+                            class="add_trello_card_name" id="atcn-{{id}}" listID = "{{id}}"
+                                placeholder="Card name"> </textarea> <br />
                         <span class = "add_trello_card_button" id ="atcb-{{id}}" listID = "{{id}}">Add</span>
                         <span class = "add_trello_card_cancel" id ="atcc-{{id}}" listID = "{{id}}">X</span>
                     </div>
