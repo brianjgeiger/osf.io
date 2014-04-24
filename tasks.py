@@ -182,6 +182,12 @@ def test_addons():
     """
     test_module(module="website/addons/")
 
+@task
+def test_trello():
+    """Run all the tests in the addons directory.
+    """
+    test_module(module="website/addons/trello")
+
 
 @task
 def test():
