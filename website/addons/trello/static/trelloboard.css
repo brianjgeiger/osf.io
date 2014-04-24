@@ -1,6 +1,7 @@
 /* @override 
 	http://localhost:5000/addons/static/trello/trelloboard.css
 	http://127.0.0.1:8000/addons/static/trello/trelloboard.css
+	http://127.0.0.1:5000/static/addons/trello/trelloboard.css
 */
 
 div#KanbanBoard
@@ -168,6 +169,7 @@ span.add_trello_card_button {
 	display: inline-block;
 	background-color: #3db333;
 	color: #feffff;
+	border-radius:4px;
 }
 
 span.add_trello_card_cancel {
@@ -373,6 +375,7 @@ div.trello_card_detail_add_checkitem_group {
 	display: inline-block;
 	background-color: #3db333;
 	color: #feffff;
+	border-radius:4px;
 }
 
 .trello_card_detail_add_checkitem_link {
@@ -441,6 +444,7 @@ div.trello_card_detail_edit_checkitem_group {
 	display: inline-block;
 	background-color: #3db333;
 	color: #feffff;
+	border-radius:4px;
 }
 
 .trello_card_detail_edit_checkitem_link {
@@ -502,6 +506,7 @@ div.trello_card_detail_add_checklist_group {
 	display: inline-block;
 	background-color: #3db333;
 	color: #feffff;
+	border-radius:4px;
 }
 
 .trello_card_detail_add_checklist_link {
@@ -567,6 +572,7 @@ div.trello_card_detail_edit_checklist_group {
 	display: inline-block;
 	background-color: #3db333;
 	color: #feffff;
+	border-radius:4px;
 }
 
 .trello_card_detail_edit_checklist_link {
@@ -633,6 +639,7 @@ div.trello_card_detail_edit_name_group {
 	display: inline-block;
 	background-color: #3db333;
 	color: #feffff;
+	border-radius:4px;
 }
 
 .trello_card_detail_edit_name_link {
@@ -697,6 +704,7 @@ div.trello_card_detail_edit_description_group {
 	display: inline-block;
 	background-color: #3db333;
 	color: #feffff;
+	border-radius:4px;
 }
 
 .trello_card_detail_edit_description_link {
