@@ -175,6 +175,7 @@ function reloadCardFromTrello(cardID) {
 
 function makeCardListsSortable() {
     $( ".CardList" ).sortable({
+      helper: 'clone',
       connectWith: ".CardList",
       stop: function(ui, event){
         //        Gather card data
@@ -259,7 +260,7 @@ function restoreCardPosition(oldListDivID,cardDivID,oldList) {
 //
 
 var cardBeingDisplayed = false;
-function displayCard(cardID) {
+function displayCard(event,cardID) {
     if(!cardBeingDisplayed){
 //        Doubleclick catcher
         cardBeingDisplayed = true;
