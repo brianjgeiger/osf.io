@@ -130,7 +130,8 @@ CELERY_IMPORTS = (
 ADDONS_REQUESTED = [
     'wiki', 'osffiles',
     'github', 's3', 'figshare',
-    'badges', 'dropbox', 'trello',
+    'badges', 'dropbox',
+    'forward','trello'
 ]
 
 ADDON_CATEGORIES = [
