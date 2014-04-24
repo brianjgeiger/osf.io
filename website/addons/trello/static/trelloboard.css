@@ -119,7 +119,7 @@ user-select: none;
 }
 
 div.CardList .TrelloCard {
-	cursor: move;
+	cursor: default;
 }
 
 div.add_trello_card_link {
