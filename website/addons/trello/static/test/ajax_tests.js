@@ -574,7 +574,7 @@ function checkForAlertBox(alertBoxText,debug){
         if(debug) {
             console.log($(this).text());
         }
-        if($(this).text() ==  alertBoxText){
+        if($(this).text().toUpperCase() ==  alertBoxText.toUpperCase()){
             ok(true,"Found the error box");
         }
     });
@@ -1017,7 +1017,7 @@ function kanbanicAJAXTests(){
             var err = textStatus + ", " + error;
             var alertBoxError = "Could not add the card: "+err;
             ok(true,"Correctly called Exception");
-            equal(err,"error, Not Found", "404 Not Found");
+            equal(err.toUpperCase(),"error, Not Found".toUpperCase(), "404 Not Found");
             checkForAlertBox(alertBoxError,false);
         };
 
@@ -1130,7 +1130,7 @@ function kanbanicAJAXTests(){
             var err = textStatus + ", " + error;
             var alertBoxError = "Could not add the checklist item: "+err;
             ok(true,"Correctly called Exception");
-            equal(err,"error, Not Found", "404 Not Found");
+            equal(err.toUpperCase(),"error, Not Found".toUpperCase(), "404 Not Found");
             checkForAlertBox(alertBoxError,false);
         };
 
@@ -1243,7 +1243,7 @@ function kanbanicAJAXTests(){
             var err = textStatus + ", " + error;
             var alertBoxError = "Could not add the checklist: "+err;
             ok(true,"Correctly called Exception");
-            equal(err,"error, Not Found", "404 Not Found");
+            equal(err.toUpperCase(),"error, Not Found".toUpperCase(), "404 Not Found");
             checkForAlertBox(alertBoxError,false);
         };
 
@@ -1357,7 +1357,7 @@ function kanbanicAJAXTests(){
             var err = textStatus + ", " + error;
             var alertBoxError = "Could not edit the checklist item: "+err;
             ok(true,"Correctly called Exception");
-            equal(err,"error, Not Found", "404 Not Found");
+            equal(err.toUpperCase(),"error, Not Found".toUpperCase(), "404 Not Found");
             checkForAlertBox(alertBoxError,false);
         };
 
@@ -1470,7 +1470,7 @@ function kanbanicAJAXTests(){
             var err = textStatus + ", " + error;
             var alertBoxError = "Could not change the card name: "+err;
             ok(true,"Correctly called Exception");
-            equal(err,"error, Not Found", "404 Not Found");
+            equal(err.toUpperCase(),"error, Not Found".toUpperCase(), "404 Not Found");
             checkForAlertBox(alertBoxError,false);
         };
 
@@ -1582,7 +1582,7 @@ function kanbanicAJAXTests(){
             var err = textStatus + ", " + error;
             var alertBoxError = "Could not change the card description: "+err;
             ok(true,"Correctly called Exception");
-            equal(err,"error, Not Found", "404 Not Found");
+            equal(err.toUpperCase(),"error, Not Found".toUpperCase(), "404 Not Found");
             checkForAlertBox(alertBoxError,false);
         };
 
@@ -1695,7 +1695,7 @@ function kanbanicAJAXTests(){
             var err = textStatus + ", " + error;
             var alertBoxError = "Could not edit the checklist name: "+err;
             ok(true,"Correctly called Exception");
-            equal(err,"error, Not Found", "404 Not Found");
+            equal(err.toUpperCase(),"error, Not Found".toUpperCase(), "404 Not Found");
             checkForAlertBox(alertBoxError,false);
         };
 
@@ -1845,7 +1845,7 @@ function kanbanicAJAXTests(){
             var err = textStatus + ", " + error;
             var alertBoxError = "Could not change the checkitem state: "+err;
             ok(true,"Correctly called Exception");
-            equal(err,"error, Not Found", "404 Not Found");
+            equal(err.toUpperCase(),"error, Not Found".toUpperCase(), "404 Not Found");
             checkForAlertBox(alertBoxError,false);
             ok(!$("#tcdc-ci-1").is(':checked'),"Checkitem should not be checked after this.")
         };
