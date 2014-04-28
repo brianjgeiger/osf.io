@@ -20,13 +20,12 @@ from website.project.decorators import must_not_be_registration
 from website.project.decorators import must_be_contributor_or_public
 from website.project.decorators import must_have_addon
 from website.project.views.node import _view_project
-from framework.auth import get_current_user
-from website import models
 from website.addons.trello.api import Trello
 import logging
 from dateutil import parser
 from ..exceptions import TrelloError
 from requests import HTTPError as RequestsHTTPError
+from ..model import can_user_write_to_project_board
 
 logger = logging.getLogger(__name__)
 
@@ -73,15 +72,17 @@ def trello_set_config(**kwargs):
 
 @must_be_contributor_or_public
 @must_have_addon('trello', 'node')
-def trello_page(auth, project, node, **kwargs):
+def trello_page(project, node, **kwargs):
+    auth = kwargs['auth']
     node = node or project
     node_settings = kwargs['node_addon']
     trello = node.get_addon('trello')
-    trello_board_name = node_settings.trello_board_name.strip()
+    trello_board_name = node_settings.trello_board_name
     trello_board_id = node_settings.trello_board_id
     user_can_edit = can_user_write_to_project_board(**kwargs)
 
     if trello_board_name is not None:
+        trello_board_name = trello_board_name.strip()
         data = _view_project(node, auth)
         return_value = {
             'complete': True,
@@ -744,22 +745,3 @@ def trello_checkitem_delete(**kwargs):
             }
             return return_value
     return return_value
-
-
-#TODO: Implement users having their own tokens. When that happens, update the following method with these rules:
-# Reasons why a user can write (user always needs their own user token)
-# 1) Board is public
-# 2) Board is private, but user is a member of the board
-# 3) Board is private, but user is a member of organization that is allowed to write
-# Currently this is only checking for the user to have write permission to the project, not anything trello-related
-def can_user_write_to_project_board(**kwargs):
-    user_can_edit = False
-    user = get_current_user()
-
-    nid = kwargs.get('nid') or kwargs.get('pid')
-    node_model = models.Node.load(nid) if nid else None
-
-    if user and node_model and node_model.can_edit(user=user):
-        user_can_edit = True
-
-    return user_can_edit

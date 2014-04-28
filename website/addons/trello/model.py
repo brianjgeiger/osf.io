@@ -9,6 +9,7 @@ from website.addons.base import AddonUserSettingsBase, AddonNodeSettingsBase
 from framework.status import push_status_message
 from .api import Trello
 from . import messages
+from website import models
 import logging
 
 logger = logging.getLogger(__name__)
@@ -125,3 +126,22 @@ class AddonTrelloNodeSettings(AddonNodeSettingsBase):
                     'by {name}, authentication information has been deleted. You '
                     'can re-authenticate on the <a href="{url}">Settings</a> page'
                     ).format(**locals())
+
+
+#TODO: Implement users having their own tokens. When that happens, update the following method with these rules:
+# Reasons why a user can write (user always needs their own user token)
+# 1) Board is public
+# 2) Board is private, but user is a member of the board
+# 3) Board is private, but user is a member of organization that is allowed to write
+# Currently this is only checking for the user to have write permission to the project, not anything trello-related
+def can_user_write_to_project_board(**kwargs):
+    user_can_edit = False
+    user = kwargs['auth'].user
+
+    nid = kwargs.get('nid') or kwargs.get('pid')
+    node_model = models.Node.load(nid) if nid else None
+
+    if user and node_model and node_model.can_edit(user=user):
+        user_can_edit = True
+
+    return user_can_edit
