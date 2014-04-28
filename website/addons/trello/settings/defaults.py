@@ -2,5 +2,5 @@
 CLIENT_ID = None
 CLIENT_SECRET = None
 
-# GitHub access scope
+# Trello access scope
 SCOPE = ['read','write']
