@@ -26,7 +26,7 @@ from website.addons.trello.api import Trello
 import logging
 from dateutil import parser
 from ..exceptions import TrelloError
-from requests import HTTPError as requestsHTTPError
+from requests import HTTPError as RequestsHTTPError
 
 logger = logging.getLogger(__name__)
 
@@ -121,7 +121,7 @@ def trello_lists(**kwargs):
     if trello_board_name is not None:
         try:
             trello_api = Trello.from_settings(node_settings.user_settings)
-        except requestsHTTPError as e:
+        except RequestsHTTPError as e:
             return_value = {
                 'error': True,
                 'HTTPError': e[0][0],
@@ -181,7 +181,7 @@ def trello_cards_from_lists(**kwargs):
         user_can_edit = can_user_write_to_project_board(**kwargs)
         try:
             trello_api = Trello.from_settings(node_settings.user_settings)
-        except requestsHTTPError as e:
+        except RequestsHTTPError as e:
             return_value = {
                 'error': True,
                 'HTTPError': e[0][0],
@@ -242,7 +242,7 @@ def trello_card_details(**kwargs):
         user_can_edit = can_user_write_to_project_board(**kwargs)
         try:
             trello_api = Trello.from_settings(node_settings.user_settings)
-        except requestsHTTPError as e:
+        except RequestsHTTPError as e:
             return_value = {
                 'error': True,
                 'HTTPError': e[0][0],
@@ -354,7 +354,7 @@ def trello_card_add(**kwargs):
     if trello_board_name is not None:
         try:
             trello_api = Trello.from_settings(node_settings.user_settings)
-        except requestsHTTPError as e:
+        except RequestsHTTPError as e:
             return_value = {
                 'error': True,
                 'HTTPError': e[0][0],
@@ -396,7 +396,7 @@ def trello_card_update(**kwargs):
     if trello_board_name is not None:
         try:
             trello_api = Trello.from_settings(node_settings.user_settings)
-        except requestsHTTPError as e:
+        except RequestsHTTPError as e:
             return_value = {
                 'error': True,
                 'HTTPError': e[0][0],
@@ -435,7 +435,7 @@ def trello_card_delete(**kwargs):
     if trello_board_name is not None:
         try:
             trello_api = Trello.from_settings(node_settings.user_settings)
-        except requestsHTTPError as e:
+        except RequestsHTTPError as e:
             return_value = {
                 'error': True,
                 'HTTPError': e[0][0],
@@ -472,7 +472,7 @@ def trello_card_description_update(**kwargs):
     if trello_board_name is not None:
         try:
             trello_api = Trello.from_settings(node_settings.user_settings)
-        except requestsHTTPError as e:
+        except RequestsHTTPError as e:
             return_value = {
                 'error': True,
                 'HTTPError': e[0][0],
@@ -511,7 +511,7 @@ def trello_checklist_add(**kwargs):
     if trello_board_name is not None:
         try:
             trello_api = Trello.from_settings(node_settings.user_settings)
-        except requestsHTTPError as e:
+        except RequestsHTTPError as e:
             return_value = {
                 'error': True,
                 'HTTPError': e[0][0],
@@ -550,7 +550,7 @@ def trello_checklist_update(**kwargs):
     if trello_board_name is not None:
         try:
             trello_api = Trello.from_settings(node_settings.user_settings)
-        except requestsHTTPError as e:
+        except RequestsHTTPError as e:
             return_value = {
                 'error': True,
                 'HTTPError': e[0][0],
@@ -588,7 +588,7 @@ def trello_checklist_delete(**kwargs):
     if trello_board_name is not None:
         try:
             trello_api = Trello.from_settings(node_settings.user_settings)
-        except requestsHTTPError as e:
+        except RequestsHTTPError as e:
             return_value = {
                 'error': True,
                 'HTTPError': e[0][0],
@@ -628,7 +628,7 @@ def trello_checkitem_add(**kwargs):
     if trello_board_name is not None:
         try:
             trello_api = Trello.from_settings(node_settings.user_settings)
-        except requestsHTTPError as e:
+        except RequestsHTTPError as e:
             return_value = {
                 'error': True,
                 'HTTPError': e[0][0],
@@ -672,7 +672,7 @@ def trello_checkitem_update(**kwargs):
     if trello_board_name is not None:
         try:
             trello_api = Trello.from_settings(node_settings.user_settings)
-        except requestsHTTPError as e:
+        except RequestsHTTPError as e:
             return_value = {
                 'error': True,
                 'HTTPError': e[0][0],
@@ -723,7 +723,7 @@ def trello_checkitem_delete(**kwargs):
     if trello_board_name is not None:
         try:
             trello_api = Trello.from_settings(node_settings.user_settings)
-        except requestsHTTPError as e:
+        except RequestsHTTPError as e:
             return_value = {
                 'error': True,
                 'HTTPError': e[0][0],
