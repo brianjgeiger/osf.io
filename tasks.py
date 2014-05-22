@@ -92,11 +92,12 @@ def shell():
     return
 
 @task
-def mongo(daemon=False):
-    '''Run the mongod process.
-    '''
+def mongo(daemon=False,
+          logpath="/usr/local/var/log/mongodb/mongo.log"):
+    """Run the mongod process.
+    """
     port = settings.DB_PORT
-    cmd = "mongod --port {0}".format(port)
+    cmd = "mongod --port {0} --logpath {1}".format(port, logpath)
     if daemon:
         cmd += " --fork"
     run(cmd)
@@ -165,7 +166,8 @@ def test_module(module=None, verbosity=2):
     """
     test_cmd = 'nosetests'
     # Allow selecting specific submodule
-    args = " --verbosity={0} -s {1}".format(verbosity, module)
+    module_fmt = ' '.join(module) if isinstance(module, list) else module
+    args = " --verbosity={0} -s {1}".format(verbosity, module_fmt)
     # Use pty so the process buffers "correctly"
     run(test_cmd + args, pty=True)
 
@@ -180,7 +182,11 @@ def test_osf():
 def test_addons():
     """Run all the tests in the addons directory.
     """
-    test_module(module="website/addons/")
+    modules = []
+    for addon in settings.ADDONS_REQUESTED:
+        module = os.path.join(settings.BASE_PATH, 'addons', addon)
+        modules.append(module)
+    test_module(module=modules)
 
 
 @task
