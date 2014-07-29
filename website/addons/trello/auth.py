@@ -54,7 +54,8 @@ def oauth_get_token(owner_key, owner_secret, verifier):
     """Get OAuth access token.
 
     :param str owner_key: Authorization code from provider
-    :return str: OAuth access token
+    :return: OAuth access token
+    :rtype: str
 
     """
 
