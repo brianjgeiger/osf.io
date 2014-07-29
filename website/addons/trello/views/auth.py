@@ -138,7 +138,5 @@ def trello_oauth_callback(**kwargs):
 
         trello_node.user_settings = trello_user
         trello_node.save()
-
-    if node:
         return redirect(os.path.join(node.url, 'settings'))
     return redirect('/settings/')
