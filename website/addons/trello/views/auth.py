@@ -116,6 +116,8 @@ def trello_oauth_callback(**kwargs):
         raise HTTPError(http.NOT_FOUND)
 
     trello_user = user.get_addon('trello')
+    if not trello_user:
+        return redirect('/settings/')
 
     verifier = request.args.get('oauth_verifier')
 
