@@ -9,9 +9,6 @@ and if I had the time, I would go back and fix it. So don't copy that pattern.
 """
 
 import httplib as http
-
-# from requests.exceptions import HTTPError as RequestsHTTPError
-
 from framework import request
 from framework.exceptions import HTTPError as OSFHTTPError
 
