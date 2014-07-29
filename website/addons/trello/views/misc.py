@@ -615,15 +615,14 @@ def trello_checkitem_add(**kwargs):
 def trello_checkitem_update(**kwargs):
     node_settings = kwargs['node_addon']
     return_value = None
-    try:
-        card_id = request.json.get('cardid', '')
-        checklist_id = request.json.get('checklistid', '')
-        checkitem_id = request.json.get('checkitemid', '')
-        checkitem_state = request.json.get('state', None)
-        checkitem_pos = request.json.get('pos', None)
-        checkitem_name = request.json.get('name', None)
-    except:
-        raise OSFHTTPError(http.BAD_REQUEST)
+
+    card_id = request.json.get('cardid', '')
+    checklist_id = request.json.get('checklistid', '')
+    checkitem_id = request.json.get('checkitemid', '')
+    checkitem_state = request.json.get('state', None)
+    checkitem_pos = request.json.get('pos', None)
+    checkitem_name = request.json.get('name', None)
+
     if not (card_id and checklist_id and checkitem_id):
         raise OSFHTTPError(http.BAD_REQUEST)
 
