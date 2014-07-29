@@ -72,32 +72,28 @@ def trello_page(project, node, **kwargs):
     trello_board_name = node_settings.trello_board_name
     trello_board_id = node_settings.trello_board_id
     user_can_edit = can_user_write_to_project_board(**kwargs)
-
+    return_value = \
+        {
+            'addon_page_js': trello.config.include_js['page'],
+            'addon_page_css': trello.config.include_css['page'],
+            'user_can_edit': user_can_edit,
+            'node_url': node.api_url,
+        }
     if trello_board_name is not None:
         trello_board_name = trello_board_name.strip()
         data = _view_project(node, auth)
-        return_value = {
-            'complete': True,
-            'trello_board_name': trello_board_name,
-            'trello_board_id': trello_board_id,
-            'addon_page_js': trello.config.include_js['page'],
-            'addon_page_css': trello.config.include_css['page'],
-            'user_can_edit': user_can_edit,
-            'node_url': node.api_url,
-        }
+        return_value['complete'] = True
+        return_value['trello_board_name'] = trello_board_name
+        return_value['trello_board_id'] = trello_board_id
+
     else:
         data = _view_project(node, auth)
-        return_value = {
-            'complete': False,
-            'error': True,
-            'errorInfo': "Could not find board in project settings",
-            'trello_board_name': None,
-            'trello_board_id': None,
-            'addon_page_js': trello.config.include_js['page'],
-            'addon_page_css': trello.config.include_css['page'],
-            'user_can_edit': user_can_edit,
-            'node_url': node.api_url,
-        }
+        return_value['complete'] = False
+        return_value['error'] = True
+        return_value['errorInfo'] = "Could not find board in project settings"
+        return_value['trello_board_name'] = None
+        return_value['trello_board_id'] = None
+
     return_value.update(data)
     return return_value
 
