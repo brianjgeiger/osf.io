@@ -15,7 +15,7 @@ from framework import Q
 from framework.forms.utils import sanitize
 from framework.exceptions import HTTPError
 from framework.flask import request
-from framework.auth.decorators import Auth
+from framework.auth import Auth
 
 from website import settings, security
 from website.util import web_url_for
@@ -48,7 +48,7 @@ MEETING_DATA = {
         'name': 'ASB 2014',
         'info_url': 'http://www.sebiologists.org/meetings/talks_posters.html',
         'logo_url': None,
-        'active': True,
+        'active': False,
     },
     'aps2014': {
         'name': 'APS 2014',
@@ -58,6 +58,12 @@ MEETING_DATA = {
     },
     'annopeer2014': {
         'name': '#annopeer',
+        'info_url': None,
+        'logo_url': None,
+        'active': True,
+    },
+    'cpa2014': {
+        'name': 'CPA 2014',
         'info_url': None,
         'logo_url': None,
         'active': True,
@@ -387,5 +393,46 @@ def conference_results(meeting):
 
     return {
         'data': json.dumps(data),
+        'label': meeting,
         'meeting': MEETING_DATA[meeting],
     }
+
+
+# TODO: Test me @jmcarp
+def get_download_count(nodes):
+    from website.addons.osffiles.model import NodeFile
+    count = 0
+    for node in nodes:
+        if not node.files_current:
+            continue
+        file_id = node.files_current.values()[0]
+        file_obj = NodeFile.load(file_id)
+        if not file_obj:
+            continue
+        count += file_obj.download_count(node)
+    return count
+
+
+# TODO: Test me @jmcarp
+def conference_view(**kwargs):
+
+    meetings = []
+    for meeting, data in MEETING_DATA.iteritems():
+        query = (
+            Q('system_tags', 'eq', meeting)
+            & Q('is_public', 'eq', True)
+            & Q('is_deleted', 'eq', False)
+        )
+        projects = Node.find(query)
+        submissions = projects.count()
+        if submissions < settings.CONFERNCE_MIN_COUNT:
+            continue
+        meetings.append({
+            'name': data['name'],
+            'active': data['active'],
+            'url': web_url_for('conference_results', meeting=meeting),
+            'submissions': submissions,
+        })
+    meetings.sort(key=lambda meeting: meeting['submissions'], reverse=True)
+
+    return {'meetings': meetings}

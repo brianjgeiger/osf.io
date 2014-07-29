@@ -105,6 +105,15 @@
             });
         }
     }
+    if (item.buttons) {
+        item.buttons.forEach(function(button) {
+            buttonDefs.push({
+                text: button.text,
+                action: button.action,
+                cssClass: 'btn btn-primary btn-mini'
+            });
+        });
+    }
     return ['<span class="rubeus-buttons">', HGrid.Fmt.buttons(buttonDefs),
                 '</span><span data-status></span>'].join('');
     };
@@ -125,6 +134,15 @@
                 text: '<i class="icon-upload" ' + tooltipMarkup +  '></i>',
                 action: 'upload',
                 cssClass: 'btn btn-default btn-mini'
+            });
+        }
+        if (row.buttons) {
+            row.buttons.forEach(function(button) {
+                buttonDefs.push({
+                    text: button.text,
+                    action: button.action,
+                    cssClass: 'btn btn-primary btn-mini'
+                });
             });
         }
         if (buttonDefs) {
@@ -212,7 +230,11 @@
         },
         UPLOAD_PROGRESS: function(progress) {
             return '<span class="text-info">' + Math.floor(progress) + '%</span>';
-        }
+        },
+        RELEASING_STUDY: '<span class="text-info">Releasing Study. . .</span>',
+        UNKNOWN_ERROR: 'An unknown error occurred. If this issue persists, ' +
+            'please report it to <a href=\"mailto:support@osf.io\">' +
+            'support@osf.io</a>.'
     };
 
     var statusType = {
@@ -225,7 +247,8 @@
         DELETING: 'DELETING',
         DELETED: 'DELETED',
         UPLOAD_ERROR: 'UPLOAD_ERROR',
-        UPLOAD_PROGRESS: 'UPLOAD_PROGRESS'
+        UPLOAD_PROGRESS: 'UPLOAD_PROGRESS',
+        RELEASING_STUDY: 'RELEASING_STUDY'
     };
 
     Rubeus.Status = statusType;
@@ -298,6 +321,9 @@
         height: 900,
         ajaxOptions: {
             cache: false  // Prevent caching in IE
+        },
+        preprocessFilename: function(filename) {
+            return $('<div>').text(filename).html();
         },
         fetchUrl: function(row) {
             return row.urls.fetch || null;
@@ -378,7 +404,16 @@
             // FIXME: can't use change status, because the folder item is updated
             // on complete, which replaces the html row element
             // for now, use bootbox
-            bootbox.alert(message);
+            var messageText = resolveCfgOption.call(this, item, 'UPLOAD_ERROR');
+            if (!messageText) {
+                try {
+                    var messageData = JSON.parse(message);
+                    messageText = messageData.message_long;
+                } catch (error) {
+                    messageText = default_status.UNKNOWN_ERROR;
+                }
+            }
+            bootbox.alert(messageText);
         },
         uploadSuccess: function(file, row, data) {
             // If file hasn't changed, remove the duplicate item
@@ -560,4 +595,3 @@
 
     return Rubeus;
 }));
-

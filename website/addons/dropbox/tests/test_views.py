@@ -10,7 +10,7 @@ import datetime
 from werkzeug import FileStorage
 from webtest_plus import TestApp
 from webtest import Upload
-from framework.auth.decorators import Auth
+from framework.auth import Auth
 from website.util import api_url_for, web_url_for
 from website.project.model import NodeLog
 from tests.base import OsfTestCase, assert_is_redirect
@@ -20,6 +20,7 @@ from website.addons.dropbox.tests.utils import (
     DropboxAddonTestCase, app, mock_responses, MockDropbox, patch_client
 )
 from website.addons.dropbox.views.config import serialize_settings
+from website.addons.dropbox.views.hgrid import dropbox_addon_folder
 from website.addons.dropbox import utils
 
 mock_client = MockDropbox()
@@ -39,7 +40,11 @@ class TestAuthViews(OsfTestCase):
         assert_is_redirect(res)
 
     @mock.patch('website.addons.dropbox.views.auth.DropboxOAuth2Flow.finish')
-    def test_dropbox_oauth_finish(self, mock_finish):
+    @mock.patch('website.addons.dropbox.views.auth.get_client_from_user_settings')
+    def test_dropbox_oauth_finish(self, mock_get, mock_finish):
+        mock_client = mock.MagicMock()
+        mock_client.account_info.return_value = {'display_name': 'Mr. Drop Box'}
+        mock_get.return_value = mock_client
         mock_finish.return_value = ('mytoken123', 'mydropboxid', 'done')
         url = api_url_for('dropbox_oauth_finish')
         res = self.app.get(url)
@@ -278,6 +283,20 @@ class TestFilebrowserViews(DropboxAddonTestCase):
     @unittest.skip('finish this')
     def test_dropbox_addon_folder(self):
         assert 0, 'finish me'
+
+    def test_dropbox_addon_folder_if_folder_is_none(self):
+        # Something is returned on normal circumstances
+        root = dropbox_addon_folder(
+            node_settings=self.node_settings, auth=self.user.auth)
+        assert_true(root)
+
+        # Nothing is returned when there is no folder linked
+        self.node_settings.folder = None
+        self.node_settings.save()
+        root = dropbox_addon_folder(
+            node_settings=self.node_settings, auth=self.user.auth)
+        assert_is_none(root)
+
 
     @mock.patch('website.addons.dropbox.client.DropboxClient.metadata')
     def test_dropbox_hgrid_data_contents_deleted(self, mock_metadata):

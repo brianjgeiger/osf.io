@@ -48,6 +48,8 @@ cover/
 .webassets-cache
 website/static/public/css/*.css
 website/static/public/js/*.js
+website/static/vendor/node_modules/*
+website/static/vendor/bower_components/
 
 # OSF-specific
 #######################
@@ -55,19 +57,15 @@ website/cache/*
 website/settings/uploads/*
 website/uploads/*
 website/mfrcache/*
+website/gpg/*
 # Local settings
 */settings/local.py
-
-# Solr
-#######################
-scripts/solr-dev/logs/*
-scripts/solr-dev/solr-webapp/*
-scripts/solr-dev/solr/collection1/data/*
 
 # Add-ons
 #######################
 website/addons/*/settings/local.py
 website/templates/log_templates.mako
+.cache/
 osf.sublime-workspace
 osf.sublime-project
 .project

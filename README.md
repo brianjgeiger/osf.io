@@ -17,32 +17,66 @@ Solutions to many common issues may be found at the [OSF Wiki](https://osf.io/a9
 These instructions should work on Mac OSX >= 10.7
 
 - Create your virtualenv.
-- Copy `website/settings/local-dist.py` to `website/settings/local.py`. NOTE: This is your local settings file, which overrides the settings in `website/settings/defaults.py`. It will not be added to source control, so change it as you wish.
 
-```sh
+- Copy `website/settings/local-dist.py` to `website/settings/local.py.`  NOTE: This is your local settings file, which overrides the settings in `website/settings/defaults.py`. It will not be added to source control, so change it as you wish.
+
+```bash
 $ cp website/settings/local-dist.py website/settings/local.py
 ```
 
-- Install MongoDB. On MacOSX with [homebrew](http://brew.sh/) (click link for homebrew installation instructions), run:
+- You will need to:
+    - Create local.py files for addons that need them.
+    - Install MongoDB.
+    - Install libxml2 and libxslt (required for installing lxml).
+    - Install elasticsearch.
+    - Install GPG.
+    - Install requirements.
+    - Create a GPG key.
+    - Install npm
+    - Install bower
+    - Use bower to install Javascript components
 
-```bash
-$ brew update 
-$ brew install mongodb
-```
-
-- Install libxml2 and libxslt (required for installing lxml).
-
-```bash
-$ brew install libxml2
-$ brew install libxslt
-```
-
-- Install requirements.
+- To do so, on MacOSX with [homebrew](http://brew.sh/) (click link for homebrew installation instructions), run:
 
 ```bash
 $ pip install invoke
-$ invoke requirements --all
+$ invoke setup
 ```
+
+
+- Optionally, you may install the requirements for the Modular File Renderer:
+
+```bash
+$ invoke mfr_requirements
+```
+
+and for addons:
+
+```bash
+$ invoke addon_requirements
+```
+
+- On Linux systems, you may have to install python-pip, MongoDB, libxml2, libxslt, elasticsearch, and GPG manually before running the above commands.
+
+- If invoke setup hangs when 'Generating GnuPG key' (especially under linux), you may need to install some additonal software to make this work. For apt-getters this looks like: 
+
+```bash
+sudo apt-get install rng-tools
+```
+
+next edit /etc/default/rng-tools and set:
+
+```
+HRNGDEVICE=/dev/urandom
+```
+
+last start the rng-tools daemon with:
+
+```
+sudo /etc/init.d/rng-tools start
+```
+
+__source: http://www.howtoforge.com/helping-the-random-number-generator-to-gain-enough-entropy-with-rng-tools-debian-lenny __
 
 ## Starting Up
 
@@ -144,30 +178,6 @@ invoke celery_worker
 
 ## Using Search
 
-### Solr
-- Make sure [Java is installed](https://www.java.com/en/download/help/index_installing.xml)
-
-- In your `website/settings/local.py` file, set `SEARCH_ENGINE` to 'solr'.
-
-```python
-SEARCH_ENGINE = 'solr'
-```
-
-- Start the Solr server and migrate the models.
-
-```bash
-$ invoke solr
-$ invoke migrate_search
-```
-
-#### Starting A Local Solr Server
-
-```bash
-$ invoke solr
-```
-
-This will start a Solr server on port 8983.
-
 ### Elasticsearch
 
 - Install Elasticsearch
@@ -177,10 +187,11 @@ This will start a Solr server on port 8983.
 ```bash
 $ brew install elasticsearch
 ```
+_note: Oracle JDK 7 must be installed for elasticsearch to run_
 
 #### Ubuntu 
 
-````bash
+```bash
 $ wget https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-1.2.1.deb 
 $ sudo dpkg -i elasticsearch-1.2.1.deb
 ```
@@ -206,16 +217,39 @@ $ invoke elasticsearch
 
 ## Using Bower for front-end dependencies
 
-We use [bower](http://bower.io/) to automatically download and manage dependencies for front-end libraries.
+We use [bower](http://bower.io/) to automatically download and manage dependencies for front-end libraries. This should
+be installed with `invoke setup` (above)
 
 To get the bower CLI, you must have Node installed.
 
 ```bash
+# For MacOSX
 $ brew update && brew install node
 $ npm install -g bower
 ```
 
-To install a library:
+Installing Node and Bower on Ubuntu is slightly more complicated. Node is installed as `nodejs`, but Bower expects
+the binary to be called `node`. Symlink `nodejs` to `node` to fix, then verify that `node` is properly aliased:
+
+```bash
+# For Ubuntu
+$ sudo apt-get install nodejs
+$ sudo ln -s /usr/bin/nodejs /usr/bin/node
+$ node --version      # v0.10.25
+$ npm install -g bower
+```
+
+### To update existing front-end dependencies
+
+This will be the most common command you will use with `bower`. It will update all your front-end dependencies to the version required by the OSF. Think of it as the `pip install -r requirements.txt` for front-end assets.
+
+```bash
+$ bower install
+```
+
+### To add a new front-end library
+
+Use this command when adding a new front-end dependency
 
 ```bash
 $ bower install zeroclipboard --save
@@ -235,6 +269,7 @@ invoke mongo -d  # Runs mongod as a daemon
 invoke mailserver
 invoke rabbitmq
 invoke celery_worker
-invoke solr
+invoke elastic_search
 invoke server
 ```
+
