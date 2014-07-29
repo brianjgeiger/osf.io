@@ -7,6 +7,7 @@ from framework.auth.decorators import must_be_logged_in
 from framework.exceptions import HTTPError
 
 from website import models
+from website.util import web_url_for
 from website.project.decorators import must_have_permission
 from website.project.decorators import must_have_addon
 
@@ -117,7 +118,7 @@ def trello_oauth_callback(**kwargs):
 
     trello_user = user.get_addon('trello')
     if not trello_user:
-        return redirect('/settings/')
+        return redirect(web_url_for('user_profile'))
 
     verifier = request.args.get('oauth_verifier')
 
@@ -127,7 +128,7 @@ def trello_oauth_callback(**kwargs):
         verifier
     )
     if not access_token or not access_token_secret:
-        return redirect('/settings/')
+        return redirect(web_url_for('user_profile'))
 
     trello_user.oauth_request_token = None
     trello_user.oauth_request_token_secret = None
@@ -140,5 +141,5 @@ def trello_oauth_callback(**kwargs):
 
         trello_node.user_settings = trello_user
         trello_node.save()
-        return redirect(os.path.join(node.url, 'settings'))
-    return redirect('/settings/')
+        return redirect(web_url_for('node_setting'))
+    return redirect(web_url_for('user_profile'))
