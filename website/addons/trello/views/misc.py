@@ -38,36 +38,31 @@ def trello_set_config(**kwargs):
     node_settings = kwargs['node_addon']
     node = node_settings.owner
 
-    try:
-        trello_board_id = request.json.get('trello_board_id', '')
-        trello_board_name = request.json.get('trello_board_name', '')
-    except:
+    trello_board_id = request.json.get('trello_board_id')
+    trello_board_name = request.json.get('trello_board_name')
+
+    if not trello_board_id or not trello_board_name:
         raise OSFHTTPError(http.BAD_REQUEST)
 
-    if not trello_board_id:
-        raise OSFHTTPError(http.BAD_REQUEST)
+    changed = trello_board_id != node_settings.trello_board_id or trello_board_name != node_settings.trello_board_name
 
-    changed = (
-        trello_board_id != node_settings.trello_board_id or
-        trello_board_name != node_settings.trello_board_name
-    )
     if changed:
         node_settings.trello_board_id = trello_board_id
         node_settings.trello_board_name = trello_board_name
         node_settings.save()
 
-    node.add_log(
-        action='trello_content_linked',
-        params={
-            'project': node.parent_id,
-            'node': node._id,
-            'trello': {
-                'id': trello_board_id,
-                'trello_board_name': trello_board_name,
-            }
-        },
-        auth=auth,
-    )
+        node.add_log(
+            action='trello_content_linked',
+            params={
+                'project': node.parent_id,
+                'node': node._id,
+                'trello': {
+                    'id': trello_board_id,
+                    'trello_board_name': trello_board_name,
+                }
+            },
+            auth=auth,
+        )
 
 
 @must_be_contributor_or_public
@@ -86,7 +81,6 @@ def trello_page(project, node, **kwargs):
         data = _view_project(node, auth)
         return_value = {
             'complete': True,
-            # 'xml': xml,
             'trello_board_name': trello_board_name,
             'trello_board_id': trello_board_id,
             'addon_page_js': trello.config.include_js['page'],
