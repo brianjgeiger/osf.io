@@ -214,6 +214,27 @@ def trello_cards_from_lists(**kwargs):
     return return_value
 
 
+def get_checked_state(check_item):
+    if check_item['state'] == 'complete':
+        return 'checked'
+    else:
+        return ''
+
+
+def get_preview_url(previews):
+    for preview in previews:
+        if "url" in preview:
+            return preview[u'url']
+    return None
+
+
+def get_cover_url(attachments):
+    for attachment in attachments:
+        if "previews" in attachment:
+            return get_preview_url(attachment[u'previews'])
+    return None
+
+
 @must_be_contributor_or_public
 @must_have_addon('trello', 'node')
 def trello_card_details(**kwargs):
@@ -240,21 +261,15 @@ def trello_card_details(**kwargs):
         card = trello_api.get_card(card_id)
         if card[u'badges'][u'attachments'] > 0:
             attachments = trello_api.get_attachments_from_card(card[u'id'], attachment_filter="cover")
-            for attachment in attachments:
-                if "previews" in attachment:
-                    previews = attachment[u'previews']
-                    for preview in previews:
-                        if "url" in preview:
-                            card[u'coverURL'] = preview[u'url']
+            cover_url = get_cover_url(attachments)
+            if cover_url is not None:
+                card[u'coverURL'] = cover_url
         card[u'comments'] = trello_api.get_comments_from_card(card_id)
         card[u'checklists'] = trello_api.get_checklists_from_card(card_id)
         for checklist in card[u'checklists']:
             checklist[u'checkItems'] = trello_api.get_checkitems(checklist[u'id'])
-            for checkItem in checklist[u'checkItems']:
-                if checkItem['state'] == 'complete':
-                    checkItem['checked'] = 'checked'
-                else:
-                    checkItem['checked'] = ''
+            for check_item in checklist[u'checkItems']:
+                check_item['checked'] = get_checked_state(check_item)
         return_value = {
             'complete': True,
             'trello_card': card,
