@@ -61,7 +61,6 @@ def trello_oauth_start(**kwargs):
     return redirect(authorization_url)
 
 
-#TODO: Revoke authorization through Trello
 @must_have_addon('trello', 'user')
 def trello_oauth_delete_user(**kwargs):
     trello_user = kwargs['user_addon']
