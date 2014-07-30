@@ -229,3 +229,10 @@ class Trello(object):
     @trello_except
     def update_card_description(self, card_id, desc):
         return self.get_user_trello().cards.update_desc(card_id=card_id, value=desc)
+
+    @trello_except
+    def delete_token(self):
+        resp = requests.delete("https://trello.com/1/tokens/%s" % self.owner_token,
+                               params=dict(key=self.client_token, token=self.user_token), data=None)
+        resp.raise_for_status()
+        return json.loads(resp.content)

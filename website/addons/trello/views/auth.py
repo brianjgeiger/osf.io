@@ -1,6 +1,10 @@
 import os
 import httplib as http
 
+from ..api import Trello
+from ..auth import oauth_start_url, oauth_get_token
+from ..exceptions import TrelloError
+
 from framework import request, redirect
 from framework.auth import get_current_user
 from framework.auth.decorators import must_be_logged_in
@@ -10,8 +14,6 @@ from website import models
 from website.util import web_url_for
 from website.project.decorators import must_have_permission
 from website.project.decorators import must_have_addon
-
-from ..auth import oauth_start_url, oauth_get_token
 
 
 @must_have_permission('write')
@@ -63,10 +65,22 @@ def trello_oauth_start(**kwargs):
 @must_have_addon('trello', 'user')
 def trello_oauth_delete_user(**kwargs):
     trello_user = kwargs['user_addon']
-
-    trello_user.oauth_access_token = None
-    trello_user.oauth_token_type = None
-    trello_user.save()
+    user = get_current_user()
+    user_settings = user.get_addon('trello')
+    trello_api = Trello.from_settings(user_settings)
+    try:
+        trello_api.delete_token()
+    except TrelloError as error:
+        if error.message[0] == '401 Client Error: Unauthorized':
+                return (
+                    'Your Trello credentials were removed from the OSF, but we '
+                    'were unable to revoke your access token from Trello. Your '
+                    'Trello credentials may no longer be valid.'
+                )
+    finally:
+        trello_user.oauth_access_token = None
+        trello_user.oauth_token_type = None
+        trello_user.save()
 
     return {}
 

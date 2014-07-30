@@ -9,7 +9,7 @@
     <script type="text/javascript" src="${addon_js}"></script>
 %endfor
 
-<script id="kanban-card-template" type="text/x-handlebars-template">
+<script id="kanbanCardTemplate" type="text/x-handlebars-template">
     <div class = "TrelloCard" id="tc-{{id}}"
     onclick="displayCard(event,'{{id}}');"
     onmouseover="document.getElementById('tcli-{{id}}').style.display = 'inline';"

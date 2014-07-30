@@ -92,7 +92,7 @@ var testArchiveCardSuccess= function() {};
 //
 
 function loadListCards(listID) {
-    var cardTemplate = Handlebars.compile($("#kanban-card-template").html());
+    var cardTemplate = Handlebars.compile($("#kanbanCardTemplate").html());
     var the_url = nodeURL+"trello/list/" + listID +"/";
     $.getJSON( the_url, function(data){
         if(data.error) //Error reporting code for problems caught in the Model
@@ -149,7 +149,7 @@ function loadBoard() {
 //
 
 function reloadCardFromTrello(cardID) {
-    var cardTemplate = Handlebars.compile($("#kanban-card-template").html());
+    var cardTemplate = Handlebars.compile($("#kanbanCardTemplate").html());
     var the_url = nodeURL+"trello/card/"+cardID+"/";
     var jqxhr = $.getJSON( the_url, function(data){
         if(data.error) //Caught an error in the model, so it needs to be reported
@@ -427,7 +427,7 @@ function activateAddCardSubmit(listID){
             testAddCardError(data);
         }else { // Actual code
             // Add a card div to the bottom of the list
-              var cardTemplate = Handlebars.compile($("#kanban-card-template").html());
+              var cardTemplate = Handlebars.compile($("#kanbanCardTemplate").html());
               var newDiv = cardTemplate(data);
             $("#cl-" + listID).append(newDiv);
             // Clear out the contents of the textarea, hide the name input div,
