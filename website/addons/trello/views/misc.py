@@ -184,12 +184,9 @@ def trello_cards_from_lists(**kwargs):
                 card['due_date_string'] = ""
             if card[u'badges'][u'attachments'] > 0:
                 attachments = trello_api.get_attachments_from_card(card[u'id'], attachment_filter="cover")
-                for attachment in attachments:
-                    if "previews" in attachment:
-                        previews = attachment[u'previews']
-                        for preview in previews:
-                            if "url" in preview:
-                                card[u'coverURL'] = preview[u'url']
+                cover_url = get_cover_url(attachments)
+                if cover_url is not None:
+                    card[u'coverURL'] = cover_url
 
         return_value = {
             'complete': True,
