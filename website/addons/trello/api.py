@@ -65,11 +65,6 @@ class Trello(object):
                 user_token=user_token
             )
 
-    def _get_last_error(self):
-        e = self.last_error
-        self.last_error = None
-        return e
-
     @trello_except
     def get_trello(self):
         return TrelloApi(self.client_token, self.owner_token)
