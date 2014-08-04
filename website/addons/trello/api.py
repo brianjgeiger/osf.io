@@ -121,7 +121,7 @@ class Trello(object):
 
     @trello_except
     def get_attachments_from_card(self, card_id, fields=None, attachment_filter="true"):
-        resp = requests.get("https://trello.com/1/cards/%s/attachments" % card_id,
+        resp = requests.get("https://trello.com/1/cards/{0}/attachments".format(card_id),
                             params=dict(key=self.client_token,
                                         token=self.owner_token,
                                         fields=fields,
@@ -145,7 +145,7 @@ class Trello(object):
     @trello_except
     def get_board_prefs_from_user_perspective(self, board_id):
         if self.user_token is not None:
-            resp = requests.put("https://api.trello.com/1/boards/%s" % board_id,
+            resp = requests.put("https://api.trello.com/1/boards/{0}".format(board_id),
                                 params=dict(key=self.client_token, token=self.user_token),
                                 data=None)
             if resp.status_code == 401:
@@ -158,7 +158,7 @@ class Trello(object):
 
     @trello_except
     def get_board_prefs_from_owner_perspective(self, board_id):
-            resp = requests.put("https://api.trello.com/1/boards/%s" % board_id,
+            resp = requests.put("https://api.trello.com/1/boards/{0}".format(board_id),
                                 params=dict(key=self.client_token, token=self.owner_token),
                                 data=None)
             resp.raise_for_status()
@@ -167,7 +167,7 @@ class Trello(object):
     @trello_except
     def update_card(self, card_id, name=None, desc=None, closed=None, id_list=None, due=None, pos=None):
         if self.user_token is not None:
-            resp = requests.put("https://trello.com/1/cards/%s" % card_id,
+            resp = requests.put("https://trello.com/1/cards/{0}".format(card_id),
                                 params=dict(key=self.client_token, token=self.user_token),
                                 data=dict(name=name, desc=desc, closed=closed, idList=id_list, due=due, pos=pos))
             resp.raise_for_status()
@@ -182,8 +182,9 @@ class Trello(object):
     @trello_except
     def update_checkitem(self, card_id, checklist_id, checkitem_id, state=None, name=None, pos=None, closed=None):
         if self.user_token is not None:
-            resp = requests.put("https://trello.com/1/cards/%s/checklist/%s/checkItem/%s" %
-                                (card_id, checklist_id, checkitem_id),
+            resp = requests.put("https://trello.com/1/cards/{0}/checklist/{1}/checkItem/{2}".format(card_id,
+                                                                                                    checklist_id,
+                                                                                                    checkitem_id),
                                 params=dict(key=self.client_token, token=self.user_token),
                                 data=dict(idChecklist=checklist_id,
                                           idCheckItem=checkitem_id,
@@ -216,7 +217,7 @@ class Trello(object):
 
     @trello_except
     def create_checklist_in_card(self, card_id, name=None, value=None, source=None):
-        resp = requests.post("https://trello.com/1/cards/%s/checklists" % card_id,
+        resp = requests.post("https://trello.com/1/cards/{0}/checklists".format(card_id),
                              params=dict(key=self.client_token, token=self.user_token),
                              data=dict(name=name, value=value, idChecklistSource=source))
         resp.raise_for_status()
@@ -232,7 +233,7 @@ class Trello(object):
 
     @trello_except
     def delete_token(self):
-        resp = requests.delete("https://trello.com/1/tokens/%s" % self.owner_token,
+        resp = requests.delete("https://trello.com/1/tokens/{0}".format(self.owner_token),
                                params=dict(key=self.client_token, token=self.user_token), data=None)
         resp.raise_for_status()
         return json.loads(resp.content)
