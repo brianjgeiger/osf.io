@@ -774,7 +774,7 @@ div.ui-progressbar {
 	height: 10px;
 	display: block;
 	float: right;
-	z-index: 99999;
+	z-index: 1;
 	left: 0;
 	top: 50px;
 }
