@@ -3,9 +3,8 @@
 """
 
 
-from framework import fields
 from website.addons.base import AddonUserSettingsBase, AddonNodeSettingsBase
-
+from modularodm import fields
 from framework.status import push_status_message
 from .api import Trello
 from . import messages
