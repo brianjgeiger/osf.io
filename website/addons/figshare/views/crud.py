@@ -1,22 +1,26 @@
+# -*- coding: utf-8 -*-
+
 import os
 import datetime
 import httplib as http
 
 from urllib2 import urlopen
 
-from framework.flask import secure_filename
+from flask import request, make_response
+from modularodm import Q
 
-from framework import request, make_response
 from framework.exceptions import HTTPError
-from framework import redirect, Q
+from framework.flask import redirect
+from framework.auth.utils import privacy_info_handle
+from framework.utils import secure_filename
 from website.addons.base.views import check_file_guid
 
-from website.project import decorators
-from website.project.decorators import must_be_contributor_or_public, must_be_contributor
+from website.project import decorators  # noqa
+from website.project.decorators import must_be_contributor_or_public, must_be_contributor  # noqa
 from website.project.decorators import must_have_addon
 from website.project.views.node import _view_project
 from website.project.views.file import get_cache_content
-
+from website.project.model import has_anonymous_link
 from website.addons.figshare import settings as figshare_settings
 from website.addons.figshare.model import FigShareGuidFile
 
@@ -27,23 +31,6 @@ from website.addons.figshare import messages
 
 
 # ----------------- PROJECTS ---------------
-# PROJECTS: C
-@decorators.must_have_permission('write')
-@decorators.must_have_addon('figshare', 'node')
-@decorators.must_not_be_registration
-def figshare_create_project(**kwargs):
-    # TODO implement me
-    pass
-
-# PROJECTS: R
-
-
-@decorators.must_have_permission('write')
-@decorators.must_have_addon('figshare', 'node')
-@decorators.must_not_be_registration
-def figshare_get_project(**kwargs):
-    # TODO implement me
-    pass
 
 # PROJECTS: U
 
@@ -209,7 +196,7 @@ def figshare_publish_article(*args, **kwargs):
         raise HTTPError(http.BAD_REQUEST)
 
     cat = request.json.get('category', '')
-    tags = request.json.get('tags', '')
+    tags = request.json.get('tags', '')  # noqa
 
     if not cat:
         raise HTTPError(http.BAD_REQUEST)
@@ -294,6 +281,8 @@ def figshare_view_file(*args, **kwargs):
     article_id = kwargs.get('aid') or None
     file_id = kwargs.get('fid') or None
 
+    anonymous = has_anonymous_link(node, auth)
+
     if not article_id or not file_id:
         raise HTTPError(http.NOT_FOUND)
 
@@ -303,7 +292,7 @@ def figshare_view_file(*args, **kwargs):
     else:
         item = connect.article(node_settings, node_settings.figshare_id)
 
-    if not article_id in str(item):
+    if article_id not in str(item):
         raise HTTPError(http.NOT_FOUND)
     article = connect.article(node_settings, article_id)
 
@@ -338,7 +327,7 @@ def figshare_view_file(*args, **kwargs):
     if private:
         figshare_url += 'preview/_preview/{0}'.format(article['items'][0]['article_id'])
     else:
-        figshare_url += 'articles/{0}/{1}'.format(article['items'][0]['title'].replace(' ', '_'),article['items'][0]['article_id'])
+        figshare_url += 'articles/{0}/{1}'.format(article['items'][0]['title'].replace(' ', '_'), article['items'][0]['article_id'])
 
     version_url = "http://figshare.com/articles/{filename}/{file_id}".format(
         filename=article['items'][0]['title'], file_id=article['items'][0]['article_id'])
@@ -348,10 +337,12 @@ def figshare_view_file(*args, **kwargs):
     render_url = node.api_url + \
         'figshare/render/article/{aid}/file/{fid}'.format(aid=article_id, fid=file_id)
 
+    delete_url = node.api_url + 'figshare/article/{aid}/file/{fid}/'.format(aid=article_id, fid=file_id)
+
     filename = found['name']
     cache_file = get_cache_file(
-            article_id, file_id
-        )
+        article_id, file_id
+    )
     rendered = get_cache_content(node_settings, cache_file)
     if private:
         rendered = messages.FIGSHARE_VIEW_FILE_PRIVATE.format(url='http://figshare.com/')
@@ -370,21 +361,30 @@ def figshare_view_file(*args, **kwargs):
     categories = connect.categories()['items']  # TODO Cache this
     categories = ''.join(
         ["<option value='{val}'>{label}</option>".format(val=i['id'], label=i['name']) for i in categories])
+
     rv = {
+        'node': {
+            'id': node._id,
+            'title': node.title
+        },
         'file_name': filename,
-        'render_url': render_url,
         'rendered': rendered,
-        'download_url': found.get('download_url'),
         'file_status': article['items'][0]['status'],
         'file_version': article['items'][0]['version'],
         'doi': 'http://dx.doi.org/10.6084/m9.figshare.{0}'.format(article['items'][0]['article_id']),
-        'version_url': version_url,
-        'figshare_url': figshare_url,
         'parent_type': 'fileset' if article['items'][0]['defined_type'] == 'fileset' else 'singlefile',
         'parent_id': article['items'][0]['article_id'],
         'figshare_categories': categories,
         'figshare_title': article['items'][0]['title'],
         'figshare_desc': article['items'][0]['description'],
+        'urls': {
+            'render': render_url,
+            'download': found.get('download_url'),
+            'version': version_url,
+            'figshare': privacy_info_handle(figshare_url, anonymous),
+            'delete': delete_url,
+            'files': node.web_url_for('collect_file_trees')
+        }
     }
     rv.update(_view_project(node, auth, primary=True))
     return rv

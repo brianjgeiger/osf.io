@@ -24,7 +24,7 @@
     // Custom folder icon indicating private component
     Rubeus.Html.folderIconPrivate = '<img class="hg-icon hg-addon-icon" src="/static/img/hgrid/fatcowicons/folder_delete.png">';
     // Folder icon for pointers/links
-    Rubeus.Html.folderIconPointer = '<i class="icon-hand-right"></i>';
+    Rubeus.Html.folderIconPointer = '<i class="icon-link"></i>';
     // Class for folder name
     Rubeus.Html.folderTextClass = 'hg-folder-text';
 
@@ -89,19 +89,24 @@
     Rubeus.Col.ActionButtons = $.extend({}, HGrid.Col.ActionButtons);
     Rubeus.Col.ActionButtons.itemView = function(item) {
     var buttonDefs = [];
+    var tooltipMarkup = '';
     if(item.permissions){
         if(item.permissions.download !== false){
+            tooltipMarkup = genTooltipMarkup('Download');
             buttonDefs.push({
-                text: '<i class="icon-download-alt icon-white" title="" data-placement="right" data-toggle="tooltip" data-original-title="Download"></i>',
+                text: '<i class="icon-download-alt icon-white" title=""></i>',
                 action: 'download',
-                cssClass: 'btn btn-primary btn-mini'
+                cssClass: 'btn btn-primary btn-mini',
+                attributes: tooltipMarkup
             });
         }
         if (item.permissions.edit) {
+            tooltipMarkup = genTooltipMarkup('Remove');
             buttonDefs.push({
-                text: '&nbsp;<i class="icon-remove"title="" data-placement="right" data-toggle="tooltip" data-original-title="Delete"></i>',
+                text: '&nbsp;<i class="icon-remove" title=""></i>',
                 action: 'delete',
-                cssClass: 'btn btn-link btn-mini btn-delete'
+                cssClass: 'btn btn-link btn-mini btn-delete',
+                attributes: tooltipMarkup
             });
         }
     }
@@ -110,7 +115,8 @@
             buttonDefs.push({
                 text: button.text,
                 action: button.action,
-                cssClass: 'btn btn-primary btn-mini'
+                cssClass: 'btn btn-primary btn-mini',
+                attributes: button.attributes
             });
         });
     }
@@ -131,9 +137,10 @@
         if (this.options.uploads && row.urls.upload &&
                 (row.permissions && row.permissions.edit)) {
             buttonDefs.push({
-                text: '<i class="icon-upload" ' + tooltipMarkup +  '></i>',
+                text: '<i class="icon-upload" title=""></i>',
                 action: 'upload',
-                cssClass: 'btn btn-default btn-mini'
+                cssClass: 'btn btn-default btn-mini',
+                attributes: tooltipMarkup
             });
         }
         if (row.buttons) {
@@ -141,7 +148,8 @@
                 buttonDefs.push({
                     text: button.text,
                     action: button.action,
-                    cssClass: 'btn btn-primary btn-mini'
+                    cssClass: 'btn btn-primary btn-mini',
+                    attributes: button.attributes
                 });
             });
         }
@@ -150,6 +158,31 @@
                 '</span><span data-status></span>'].join('');
         }
         return '';
+    };
+
+    Rubeus.Utils = {};
+
+    /**
+     * Check whether newly uploaded item was added or updated. This is
+     * a hack that's necessary for services with indirect uploads (S3,
+     * OSF Storage) that don't tell us whether the file was added or
+     * updated.
+     */
+    Rubeus.Utils.itemUpdated = function(item, parent) {
+        var siblings = parent._node.children;
+        var matchCount = 0;
+        for (var i=0; i<siblings.length; i++) {
+            if (item.name === siblings[i].data.name) {
+                matchCount += 1;
+                // If `item` is being updated, it will appear twice in the grid:
+                // once for the original version, and a second time for the
+                // temporary item added on drop.
+                if (matchCount >= 2) {
+                    return true;
+                }
+            }
+        }
+        return false;
     };
 
     /**
@@ -169,8 +202,9 @@
      }
 
     HGrid.prototype.showButtons = function(row) {
+        var $rowElem;
         try {
-            var $rowElem = $(this.getRowElement(row.id));
+            $rowElem = $(this.getRowElement(row.id));
         } catch(error) {
             return this;
         }
@@ -180,8 +214,9 @@
     };
 
     HGrid.prototype.hideButtons = function(row) {
+        var $rowElem;
         try {
-            var $rowElem = $(this.getRowElement(row.id));
+            $rowElem = $(this.getRowElement(row.id));
         } catch (error) {
             return this;
         }
@@ -190,17 +225,31 @@
         return this;
     };
 
+    HGrid.prototype.delayRemoveRow = function(row) {
+        var self = this;
+        setTimeout(function() {
+            try {
+                $(self.getRowElement(row)).fadeOut(500, function() {
+                    self.removeItem(row.id);
+                });
+            } catch (error) {
+                self.removeItem(row.id);
+            }
+        }, 2000);
+    };
+
     /**
      * Changes the html in the status column.
      */
     HGrid.prototype.changeStatus = function(row, html, extra, fadeAfter, callback) {
+        var $rowElem, $status;
         try {
             // Raises TypeError if row's HTML is not rendered.
-            var $rowElem = $(this.getRowElement(row.id));
+            $rowElem = $(this.getRowElement(row.id));
         } catch (err) {
             return;
         }
-        var $status = $rowElem.find(Rubeus.statusSelector);
+        $status = $rowElem.find(Rubeus.statusSelector);
         this.hideButtons(row);
         $status.html(getStatusCfg(row.addon, html, extra));
         if (fadeAfter) {
@@ -231,10 +280,7 @@
         UPLOAD_PROGRESS: function(progress) {
             return '<span class="text-info">' + Math.floor(progress) + '%</span>';
         },
-        RELEASING_STUDY: '<span class="text-info">Releasing Study. . .</span>',
-        UNKNOWN_ERROR: 'An unknown error occurred. If this issue persists, ' +
-            'please report it to <a href=\"mailto:support@osf.io\">' +
-            'support@osf.io</a>.'
+        RELEASING_STUDY: '<span class="text-info">Releasing Study. . .</span>'
     };
 
     var statusType = {
@@ -358,7 +404,7 @@
             var $elem = $(evt.target);
             bootbox.confirm({
                 message: '<strong>NOTE</strong>: This action is irreversible.',
-                title: 'Delete <em>' + row.name + '</em>?',
+                title: 'Delete <em class="overflow">' + row.name + '</em>?',
                 callback: function(result) {
                     if (result) {
                         onConfirmDelete(row, self);
@@ -375,15 +421,11 @@
         maxFilesize: function(row) {
             return row.accept? (row.accept.maxSize || 128) : 128;
         },
-        // acceptedFiles: function(row) {
-        //     return row.accept.acceptedFiles || null;
-        // },
-        uploadUrl: function(row) {
-            var cfgOption = resolveCfgOption.call(this, row, 'uploadUrl', [row]);
-            return cfgOption || row.urls.upload;
-        },
 
         uploadAdded: function(file, row, folder) {
+            // Attach upload parameters to file object for use in `uploadFiles`
+            file.method = resolveCfgOption.call(this, folder, 'uploadMethod', [folder]) || 'POST';
+            file.url = folder.urls.upload || resolveCfgOption.call(this, folder, 'uploadUrl', [folder]);
             // Need to set the added row's addon for other callbacks to work
             var parent = this.getByID(row.parentID);
             row.addon = parent.addon;
@@ -392,27 +434,22 @@
             var cfgOption = resolveCfgOption.call(this, row, 'uploadAdded', [file, row]);
             return cfgOption || null;
         },
-        uploadMethod: function(row) {
-            var cfgOption = resolveCfgOption.call(this, row, 'uploadMethod', [row]);
-            return cfgOption || 'post';
-        },
         uploadSending: function(file, row, xhr, formData) {
             var cfgOption = resolveCfgOption.call(this, row, 'uploadSending', [file, row, xhr, formData]);
             return cfgOption || null;
         },
         uploadError: function(file, message, item, folder) {
+            var messageText = resolveCfgOption.call(this, item, 'UPLOAD_ERROR');
+            if (!messageText) {
+                if (typeof(message) === 'string') {
+                    messageText = message;
+                } else {
+                    messageText = message.message_long;
+                }
+            }
             // FIXME: can't use change status, because the folder item is updated
             // on complete, which replaces the html row element
             // for now, use bootbox
-            var messageText = resolveCfgOption.call(this, item, 'UPLOAD_ERROR');
-            if (!messageText) {
-                try {
-                    var messageData = JSON.parse(message);
-                    messageText = messageData.message_long;
-                } catch (error) {
-                    messageText = default_status.UNKNOWN_ERROR;
-                }
-            }
             bootbox.alert(messageText);
         },
         uploadSuccess: function(file, row, data) {
@@ -422,26 +459,10 @@
             var self = this;
             if (data.actionTaken === null) {
                 self.changeStatus(row, statusType.NO_CHANGES);
-                setTimeout(function() {
-                    try {
-                        $(self.getRowElement(row)).fadeOut(500, function() {
-                          self.removeItem(row.id);
-                        });
-                    } catch (error) {
-                        self.removeItem(row.id);
-                    }
-                }, 2000);
+                self.delayRemoveRow(row);
             } else if (data.actionTaken === 'file_updated') {
                 self.changeStatus(row, statusType.UPDATED);
-                setTimeout(function() {
-                    try {
-                        $(self.getRowElement(row)).fadeOut(500, function() {
-                            self.removeItem(row.id);
-                        });
-                    } catch (error) {
-                        self.removeItem(row.id);
-                    }
-                }, 2000);
+                self.delayRemoveRow(row);
             } else{
                 // Update the row with the returned server data
                 // This is necessary for the download and delete button to work.
@@ -496,7 +517,7 @@
         },
         uploadDenied: function(evt, row) {
             this.removeHighlight('highlight-denied');
-        },
+        }
     };
 
     function updateTooltips() {

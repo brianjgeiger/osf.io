@@ -10,8 +10,8 @@ Created on Jan 7, 2014
 import os
 
 from boto.exception import BotoServerError
+from modularodm import fields
 
-from framework import fields
 from framework.auth.core import Auth
 
 from website.addons.base import AddonUserSettingsBase, AddonNodeSettingsBase, GuidFile
@@ -191,8 +191,8 @@ class AddonS3NodeSettings(AddonNodeSettingsBase):
             return (
                 'Registering {cat} "{title}" will copy the authentication for its '
                 'Amazon Simple Storage add-on to the registered {cat}. '
-               # 'As well as turning versioning on in your bucket,'
-               # 'which may result in larger charges from Amazon'
+                # 'As well as turning versioning on in your bucket,'
+                # 'which may result in larger charges from Amazon'
             ).format(
                 cat=node.project_or_component,
                 title=node.title,

@@ -1,6 +1,9 @@
 <%inherit file="project/project_base.mako"/>
 <%def name="title()">${node['title']} Contributors</%def>
 
+<%include file="project/modal_generate_private_link.mako"/>
+<%include file="project/modal_add_contributor.mako"/>
+
 <div class="row">
     <div class="col-md-12">
 
@@ -49,7 +52,8 @@
                             isEnabled: canEdit,
                             afterRender: setupEditable,
                             options: {
-                                containment: '#manageContributors'
+                                containment: '#manageContributors',
+                                cancel: '.no-sort'
                             }
                         }">
                     </tbody>
@@ -92,7 +96,7 @@
                     <tr>
                         <td class="col-sm-3">
                             <div>
-                                <span class="link-name" data-bind="text: name, tooltip: {title: linkName}"></span>
+                                <span class="link-name overflow-block" data-bind="text: name, tooltip: {title: linkName}" style="width: 200px"></span>
                             </div>
                             <div class="btn-group">
                             <button class="btn btn-default btn-mini copy-button" data-trigger="manual" rel="tooltip" title="Click to copy the link"
@@ -115,7 +119,9 @@
                         <td class="col-sm-2">
                             <span class="link-create-date" data-bind="text: dateCreated.local, tooltip: {title: dateCreated.utc}"></span>
                         </td>
-                        <td class="col-sm-2" data-bind="text: creator"></td>
+                        <td class="col-sm-2" >
+                            <a data-bind="text: creator.fullname, attr: {href: creator.url}" class="overflow-block" style="width: 300px"></a>
+                        </td>
                         <td class="col-sm-1">
                             <span data-bind="text: anonymousDisplay"></span>
                         </td>
@@ -140,12 +146,17 @@
     <tr data-bind="click: unremove, css: {'contributor-delete-staged': deleteStaged}">
         <td>
             <img data-bind="attr: {src: contributor.gravatar_url}" />
-            <span data-bind="text: contributor.fullname"></span>
+            <span data-bind="ifnot: profileUrl">
+                <span data-bind="text: contributor.shortname"></span>
+            </span>
+            <span data-bind="if: profileUrl">
+                <a class="no-sort" data-bind="text: contributor.shortname, attr:{href: profileUrl}"></a>
+            </span>
         </td>
         <td>
             <!-- ko if: $parent.canEdit -->
                 <span data-bind="visible: notDeleteStaged">
-                    <a href="#" class="permission-editable" data-type="select"></a>
+                    <a href="#" class="permission-editable no-sort" data-type="select"></a>
                 </span>
                 <span data-bind="visible: deleteStaged">
                     <span data-bind="text: formatPermission"></span>
@@ -157,7 +168,7 @@
         </td>
         <td>
             <input
-                    type="checkbox"
+                    type="checkbox" class="no-sort"
                     data-bind="checked: visible, enable: $parent.canEdit"
                 />
         </td>
@@ -169,7 +180,7 @@
                     <a
                             data-bind="click: remove, clickBubble: false, tooltip: {title: removeContributor}"
                         >
-                                <i class="icon-remove text-danger"></i>
+                                <i class="icon-remove text-danger no-sort"></i>
                     </a>
                 <!-- /ko -->
                 <!-- ko if: deleteStaged -->
@@ -184,7 +195,7 @@
                             rel="tooltip"
                             title="Remove contributor"
                         >
-                        <i class="icon-remove text-danger"></i>
+                        <i class="icon-remove text-danger no-sort"></i>
                     </a>
                     <!-- /ko -->
             <!-- /ko -->
@@ -209,6 +220,24 @@
     <% import json %>
 
     <script type="text/javascript">
+
+    $script(['/static/js/contribAdder.js'], 'contribAdder');
+
+    $('body').on('nodeLoad', function(event, data) {
+        // If user is a contributor, initialize the contributor modal
+        // controller
+        if (data.user.can_edit) {
+            $script.ready('contribAdder', function() {
+                var contribAdder = new ContribAdder(
+                    '#addContributors',
+                    data.node.title,
+                    data.parent_node.id,
+                    data.parent_node.title
+                );
+            });
+        }
+        });
+
     $script(['/static/js/contribManager.js'], function() {
         var contributors = ${json.dumps(contributors)};
         var user = ${json.dumps(user)};
@@ -216,19 +245,21 @@
         var manager = new ContribManager('#manageContributors', contributors, user, isRegistration);
     });
 
-    $script(['/static/js/privateLinkManager.js',
-             '/static/js/privateLinkTable.js']);
+    % if 'admin' in user['permissions']:
+        $script(['/static/js/privateLinkManager.js',
+                 '/static/js/privateLinkTable.js']);
 
-    $script.ready(['privateLinkManager', 'privateLinkTable'], function () {
-        // Controls the modal
-        var configUrl = nodeApiUrl + 'get_editable_children/';
-        var privateLinkManager = new PrivateLinkManager('#addPrivateLink', configUrl);
+        $script.ready(['privateLinkManager', 'privateLinkTable'], function () {
+            // Controls the modal
+            var configUrl = nodeApiUrl + 'get_editable_children/';
+            var privateLinkManager = new PrivateLinkManager('#addPrivateLink', configUrl);
 
-        var tableUrl = nodeApiUrl + 'private_link/';
-        var privateLinkTable = new PrivateLinkTable('#linkScope', tableUrl);
-    });
+            var tableUrl = nodeApiUrl + 'private_link/';
+            var privateLinkTable = new PrivateLinkTable('#linkScope', tableUrl);
+        });
 
-    $("#privateLinkTable").on('click', ".link-url", function(e) { e.target.select() });
+        $("#privateLinkTable").on('click', ".link-url", function(e) { e.target.select() });
+    % endif
 
     </script>
 </%def>

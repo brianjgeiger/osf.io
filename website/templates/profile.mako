@@ -5,6 +5,7 @@
 
 <script>
     % if user["is_profile"]:
+        $.fn.editable.defaults.mode = 'inline';
         $(function() {
             $('#profile-fullname > span').editable({
                 type:  'text',
@@ -13,23 +14,19 @@
                 url:   '/api/v1/profile/${profile["id"]}/edit/',
                 title: 'Edit Full Name',
                 placement: 'bottom',
-                value: '${profile["fullname"]}',
+                value: '${profile["fullname"] | js_str}',
                 success: function(data) {
                     // Also change the display name in the user info table
                     $(".fullname").text(data['name']);
                 }
             });
 
-            var gravatar = $('#profile-gravatar')
-            gravatar
-                .on('error', function(e) {
-                    gravatar.attr('src', '/static/img/blank_avatar.png')
-                })
-                .attr('src', gravatar.attr('src') + '&d=404')
+            var gravatar = $('#profile-gravatar');
         });
     % endif
     $script(['/static/addons/badges/bake-badges.js'], 'bakery');
     $script(['/static/addons/badges/badge-popover.js'], 'display');
+    $script(['/static/js/logFeed.js']);
 </script>
 % if user['is_profile']:
     <%include file="profile/modal_change_avatar.mako"/>
@@ -43,13 +40,19 @@
 </div>
 % endif
 
+
 <div class="page-header">
     <a href="#changeAvatarModal" data-toggle="modal">
-        <img id='profile-gravatar' src="${profile['gravatar_url']}"
-                 rel="tooltip" title="click to change avatar" />
+        % if user['is_profile']:
+            <img id='profile-gravatar' src="${profile['gravatar_url']}"
+                rel="tooltip" title="click to change avatar"/>
+        % else:
+             <img id='profile-gravatar' src="${profile['gravatar_url']}"/>
+        % endif
     </a>
-    <h1 id="profile-fullname"><span>${profile["fullname"]}</span></h1>
+    <h1 id="profile-fullname"><span class="overflow">${profile["fullname"]}</span></h1>
 </div><!-- end-page-header -->
+
 
 <div class="row">
 
@@ -60,16 +63,20 @@
             <table class="table table-plain">
                 <tr>
                   <td>Name</td>
-                  <td class="fullname">${profile["fullname"]}</td>
+                  <td class="fullname overflow-block" width="300px">${profile["fullname"]}</td>
                 </tr>
-                <tr>
-                  <td>Member&nbsp;Since</td>
-                  <td>${profile['date_registered']}</td>
-                </tr>
-                <tr>
-                  <td>Public&nbsp;Profile</td>
-                  <td><a href="${profile['url']}">${profile['display_absolute_url']}</a></td>
-                </tr>
+                % if profile.get('date_registered'):
+                    <tr>
+                        <td>Member&nbsp;Since</td>
+                        <td>${profile['date_registered']}</td>
+                    </tr>
+                % endif
+                % if profile.get('url') and profile.get('display_absolute_url'):
+                    <tr>
+                        <td>Public&nbsp;Profile</td>
+                        <td><a href="${profile['url']}">${profile['display_absolute_url']}</a></td>
+                    </tr>
+                % endif
             </table>
         </div>
         <div>
@@ -91,7 +98,7 @@
             <li><a href="#schools" data-toggle="tab">Education</a></li>
         </ul>
 
-        <div class="tab-content">
+        <div class="tab-content" id="containDrag">
 
             <div class="tab-pane active" id="social">
                 <div data-bind="template: {name: 'profileSocial'}"></div>
@@ -176,7 +183,7 @@
     </div>
 </div><!-- end row -->
 
-<%include file="log_templates.mako"/>
+<%include file="_log_templates.mako"/>
 <%include file="include/profile/social.mako" />
 <%include file="include/profile/jobs.mako" />
 <%include file="include/profile/schools.mako" />
@@ -196,7 +203,7 @@
         };
         var social = new profile.Social('#social', socialUrls, ['edit', 'view']);
         var jobs = new profile.Jobs('#jobs', jobsUrls, ['edit', 'view']);
-        var schools = new profile.Schools('#schools', schoolsUrls, ['edit', 'view']);;
+        var schools = new profile.Schools('#schools', schoolsUrls, ['edit', 'view']);
     });
 
 </script>

@@ -37,6 +37,8 @@
         self.selection = ko.observableArray();
         self.notification = ko.observable('');
         self.inviteError = ko.observable('');
+        self.numberOfPages = ko.observable(0);
+        self.currentPage = ko.observable(0);
 
         self.nodes = ko.observableArray([]);
         self.nodesToChange = ko.observableArray();
@@ -97,6 +99,10 @@
             }
         }
 
+        self.startSearch = function() {
+            self.currentPage(0);
+            self.search();
+        };
 
         self.search = function() {
             self.notification(false);
@@ -106,17 +112,32 @@
                     {
                         query: self.query(),
                         excludeNode: nodeId,
+                        page: self.currentPage
                     },
                     function(result) {
                         var contributors = result.users.map(function(userData) {
                             return new Contributor(userData);
                         });
                         self.results(contributors);
+                        self.currentPage(result.page);
+                        self.numberOfPages(result.pages);
                     }
                 );
             } else {
                 self.results([]);
+                self.currentPage(0);
+                self.totalPages(0);
             }
+        };
+
+        self.nextPage = function() {
+            self.currentPage(self.currentPage() + 1);
+            self.search();
+        };
+
+        self.previousPage = function() {
+            self.currentPage(self.currentPage() - 1);
+            self.search();
         };
 
         self.importFromParent = function() {
@@ -144,7 +165,7 @@
                 function(result) {
                     if (!result.contributors.length) {
                         self.notification({
-                            'message': 'No recently added contributors not already included.',
+                            'message': 'All recent collaborators already included.',
                             'level': 'info'
                         });
                     }
@@ -154,9 +175,54 @@
                     }
                     self.results(contribs);
                 }
-            );
+            ).fail(function (xhr, textStatus, error) {
+                self.notification({
+                    'message':
+                        'OSF was unable to resolve your request. If this issue persists, ' +
+                        'please report it to <a href="mailto:support@osf.io">support@osf.io</a>.',
+                    'level': 'warning'
+                });
+                Raven.captureMessage('Could not GET recentlyAdded contributors.', {
+                    url: url,
+                    textStatus: textStatus,
+                    error: error
+                });
+            });
         };
 
+        self.mostInCommon = function() {
+            self.notification(false);
+            var url = nodeApiUrl + 'get_most_in_common_contributors/';
+            $.getJSON(
+                url,
+                {},
+                function(result) {
+                    if (!result.contributors.length) {
+                        self.notification({
+                            'message': 'All frequent collaborators already included.',
+                            'level': 'info'
+                        });
+                    }
+                    var contribs = [];
+                    for (var i=0; i< result.contributors.length; i++) {
+                        contribs.push(new Contributor(result.contributors[i]));
+                    }
+                    self.results(contribs);
+                }
+            ).fail(function (xhr, textStatus, error) {
+                self.notification({
+                    'message':
+                        'OSF was unable to resolve your request. If this issue persists, ' +
+                        'please report it to <a href="mailto:support@osf.io">support@osf.io</a>.',
+                    'level': 'warning'
+                });
+                Raven.captureMessage('Could not GET mostInCommon contributors.', {
+                    url: url,
+                    textStatus: textStatus,
+                    error: error
+                });
+            });
+        };
 
         self.addTips = function(elements) {
             elements.forEach(function(element) {
@@ -186,14 +252,15 @@
             self.setupEditable(elm, data);
         };
 
-        function postInviteRequest(fullname, email, options) {
-            var ajaxOpts = $.extend({
-                url: nodeApiUrl + 'invite_contributor/',
-                type: 'POST',
-                data: JSON.stringify({'fullname': fullname, 'email': email}),
-                dataType: 'json', contentType: 'application/json'
-            }, options);
-            return $.ajax(ajaxOpts);
+        function postInviteRequest(fullname, email) {
+            $.osf.postJSON(
+                nodeApiUrl + 'invite_contributor/',
+                {'fullname': fullname, 'email': email}
+            ).done(
+                onInviteSuccess
+            ).fail(
+                onInviteError
+            );
         }
 
         function onInviteSuccess(result) {
@@ -237,12 +304,7 @@
                 self.inviteError(validated);
                 return false;
             }
-            return postInviteRequest(self.inviteName(), self.inviteEmail(),
-                {
-                    success: onInviteSuccess,
-                    error: onInviteError
-                }
-            );
+            return postInviteRequest(self.inviteName(), self.inviteEmail());
         };
 
         self.add = function(data) {
@@ -313,24 +375,19 @@
         self.submit = function() {
             $.osf.block();
             $('.modal').modal('hide');
-            $.ajax({
-                url: nodeApiUrl + 'contributors/',
-                type: 'post',
-                contentType: 'application/json',
-                dataType: 'json',
-                data: JSON.stringify({
+            $.osf.postJSON(
+                nodeApiUrl + 'contributors/',
+                {
                     users: self.selection().map(function(user) {
                         return ko.toJS(user);
                     }),
                     node_ids: self.nodesToChange()
-                }),
-                success: function() {
-                        window.location.reload();
-                },
-                error: function(){
-                    $.osf.unblock();
-                    bootbox.alert('Add contributor failed.');
                 }
+            ).done(function() {
+                window.location.reload();
+            }).fail(function() {
+                $.osf.unblock();
+                bootbox.alert('Add contributor failed.');
             });
         };
 

@@ -1,11 +1,14 @@
 # -*- coding: utf-8 -*-
-import httplib as http
-import os
 
+import os
+import httplib as http
+
+from flask import request
 from modularodm import Q
 from modularodm.exceptions import ModularOdmException
 
 from website.project.model import NodeLog
+from framework.flask import redirect  # VOL-aware redirect
 from website.project.utils import serialize_node
 from website.project.decorators import must_have_permission
 from website.project.decorators import must_not_be_registration
@@ -13,7 +16,6 @@ from website.project.decorators import must_have_addon
 from website.project.decorators import must_be_contributor_or_public
 from website.addons.base.views import check_file_guid
 
-from framework import request, redirect
 from framework.exceptions import HTTPError
 
 from website.addons.dropbox.model import DropboxFile
@@ -125,6 +127,18 @@ def dropbox_get_revisions(path, node_addon, auth, **kwargs):
         revision['view'] = view_url
     return {
         'result': revisions,
+        # Hyperlinks sans revision ID
+        'urls': {
+            'download': node.web_url_for('dropbox_download', path=path),
+            'delete': node.api_url_for('dropbox_delete_file', path=path),
+            'view': node.web_url_for('dropbox_view_file', path=path),
+            'files': node.web_url_for('collect_file_trees'),
+        },
+        'node': {
+            'id': node._id,
+            'title': node.title,
+        },
+        'path': path,
         'registered': node.registered_date.isoformat() if node.registered_date else None,
     }, http.OK
 
