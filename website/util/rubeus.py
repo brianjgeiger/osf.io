@@ -73,7 +73,8 @@ def build_addon_root(node_settings, name, permissions=None,
     :param addonNodeSettingsBase node_settings: Addon settings
     :param String name: Additional information for the folder title
         eg. Repo name for Github or bucket name for S3
-    :param dict or Auth permissions: Dictionary of permissions for the addon's content or Auth for use in node.can_X methods
+    :param dict or Auth permissions: Dictionary of permissions for the addon's content or
+        Auth for use in node.can_X methods
     :param dict urls: Hgrid related urls
     :param String extra: Html to be appened to the addon folder name
         eg. Branch switcher for github
@@ -137,11 +138,13 @@ def build_addon_button(text, action, title=""):
         button['attributes'] = 'title="{title}" data-toggle="tooltip" data-placement="right" '.format(title=title)
     return button
 
+
 def sort_by_name(hgrid_data):
     return_value = hgrid_data
     if hgrid_data is not None:
         return_value = sorted(hgrid_data, key=lambda item: item['name'].lower())
     return return_value
+
 
 class NodeProjectCollector(object):
 
@@ -154,10 +157,11 @@ class NodeProjectCollector(object):
         self.can_edit = node.can_edit(auth) and not node.is_registration
         self.just_one_level = just_one_level
 
-    def _collect_components(self, node, visited):
+    def _collect_components(self, node):
         rv = []
         for child in reversed(node.nodes):  # (child.resolve()._id not in visited or node.is_folder) and
-            if child is not None and not child.is_deleted and child.resolve().can_view(auth=self.auth) and node.can_view(self.auth):
+            if child is not None and not child.is_deleted and child.resolve().can_view(auth=self.auth) and \
+                    node.can_view(self.auth):
                 # visited.append(child.resolve()._id)
                 rv.append(self._serialize_node(child, visited=None, parent_is_folder=node.is_folder))
         return rv
