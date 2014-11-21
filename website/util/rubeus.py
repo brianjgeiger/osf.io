@@ -251,7 +251,7 @@ class NodeProjectCollector(object):
     def to_hgrid(self):
         """Return the Rubeus.JS representation of the node's children, not including addons
         """
-        root = self._collect_components(self.node, visited=None)
+        root = self._collect_components(self.node)
         # This will be important when we mix files and projects together: self._collect_addons(self.node) +
         if self.node.is_dashboard:
             root.insert(0, self.collect_all_projects_smart_folder())
