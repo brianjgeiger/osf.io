@@ -20,6 +20,7 @@ from api.registrations.serializers import (
     RegistrationContributorsSerializer,
     RegistrationProviderSerializer
 )
+from api.comments.serializers import RegistrationCommentSerializer
 
 from api.nodes.views import (
     NodeMixin, ODMFilterMixin, NodeContributorsList, NodeRegistrationsList,
@@ -315,7 +316,9 @@ class RegistrationForksList(NodeForksList, RegistrationMixin):
     view_category = 'registrations'
     view_name = 'registration-forks'
 
+
 class RegistrationCommentsList(NodeCommentsList, RegistrationMixin):
+    serializer_class = RegistrationCommentSerializer
     view_category = 'registrations'
     view_name = 'registration-comments'
 
