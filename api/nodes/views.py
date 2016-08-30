@@ -3,6 +3,7 @@ from rest_framework import generics, permissions as drf_permissions
 from rest_framework.exceptions import PermissionDenied, ValidationError, NotFound, MethodNotAllowed
 from rest_framework.status import HTTP_204_NO_CONTENT
 from rest_framework.response import Response
+from rest_framework.mixins import CreateModelMixin
 
 from framework.auth.oauth_scopes import CoreScopes
 from framework.postcommit_tasks.handlers import enqueue_postcommit_task
@@ -2756,7 +2757,7 @@ class NodeInstitutionsRelationship(JSONAPIBaseView, generics.RetrieveUpdateDestr
         return ret
 
 
-class NodeWikiList(JSONAPIBaseView, generics.ListAPIView, NodeMixin, ODMFilterMixin):
+class NodeWikiList(JSONAPIBaseView, generics.ListAPIView, CreateModelMixin, NodeMixin, ODMFilterMixin):
     """List of wiki pages on a node. *Read only*.
 
     Paginated list of the node's current wiki page versions ordered by their `date_modified.` Each resource contains the
@@ -2827,6 +2828,9 @@ class NodeWikiList(JSONAPIBaseView, generics.ListAPIView, NodeMixin, ODMFilterMi
 
     def get_queryset(self):
         return NodeWikiPage.find(self.get_query_from_request())
+
+    def put(self, request, *args, **kwargs):
+        return self.create(request, *args, **kwargs)
 
 
 class NodeLinkedNodesRelationship(LinkedNodesRelationship, NodeMixin):

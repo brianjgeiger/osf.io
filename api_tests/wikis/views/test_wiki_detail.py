@@ -5,38 +5,59 @@ from nose.tools import *  # flake8: noqa
 from api.base.settings.defaults import API_BASE
 from website.addons.wiki.model import NodeWikiPage
 from tests.base import ApiWikiTestCase
-from tests.factories import (ProjectFactory, RegistrationFactory,
+from tests.factories import (ProjectFactory, RegistrationFactory, WithdrawnRegistrationFactory,
                              NodeWikiFactory, PrivateLinkFactory)
 
 
 class TestWikiDetailView(ApiWikiTestCase):
 
-    def _set_up_public_project_with_wiki_page(self, project_options=None):
+    def _set_up_public_project_with_wiki_page(self, project_options=None, is_publicly_editable=False):
         project_options = project_options or {}
         self.public_project = ProjectFactory(is_public=True, creator=self.user, **project_options)
-        self.public_wiki = self._add_project_wiki_page(self.public_project, self.user)
+        self.public_wiki = self._add_project_wiki_page(self.public_project, self.user, is_publicly_editable=is_publicly_editable)
         self.public_url = '/{}wikis/{}/'.format(API_BASE, self.public_wiki._id)
+        self.updated_content = "This is new content."
+        res = self.app.get(self.public_url, auth=self.user.auth)
+        self.update_link = res.json['data']['links']['upload']
+        self.delete_link = res.json['data']['links']['delete']
 
     def _set_up_private_project_with_wiki_page(self):
         self.private_project = ProjectFactory(creator=self.user)
         self.private_wiki = self._add_project_wiki_page(self.private_project, self.user)
         self.private_url = '/{}wikis/{}/'.format(API_BASE, self.private_wiki._id)
+        self.updated_content = "This is new content."
+        res = self.app.get(self.private_url, auth=self.user.auth)
+        self.update_link = res.json['data']['links']['upload']
+        self.delete_link = res.json['data']['links']['delete']
 
     def _set_up_public_registration_with_wiki_page(self):
         self._set_up_public_project_with_wiki_page()
         self.public_registration = RegistrationFactory(project=self.public_project, user=self.user, is_public=True)
         self.public_registration_wiki_id = self.public_registration.wiki_pages_versions['home'][0]
+        self.public_registration_wiki = NodeWikiPage.load(self.public_registration_wiki_id)
         self.public_registration.wiki_pages_current = {'home': self.public_registration_wiki_id}
         self.public_registration.save()
         self.public_registration_url = '/{}wikis/{}/'.format(API_BASE, self.public_registration_wiki_id)
+        res = self.app.get(self.public_registration_url, auth=self.user.auth)
+        self.update_link = res.json['data']['links']['upload']
+        self.delete_link = res.json['data']['links']['delete']
 
     def _set_up_private_registration_with_wiki_page(self):
         self._set_up_private_project_with_wiki_page()
         self.private_registration = RegistrationFactory(project=self.private_project, user=self.user)
         self.private_registration_wiki_id = self.private_registration.wiki_pages_versions['home'][0]
+        self.private_registration_wiki = NodeWikiPage.load(self.private_registration_wiki_id)
         self.private_registration.wiki_pages_current = {'home': self.private_registration_wiki_id}
         self.private_registration.save()
         self.private_registration_url = '/{}wikis/{}/'.format(API_BASE, self.private_registration_wiki_id)
+        res = self.app.get(self.private_registration_url, auth=self.user.auth)
+        self.update_link = res.json['data']['links']['upload']
+        self.delete_link = res.json['data']['links']['delete']
+
+    def _set_up_withdrawn_registration_with_wiki_page(self):
+        self._set_up_public_registration_with_wiki_page()
+        self.withdrawn_registration = WithdrawnRegistrationFactory(registration=self.public_registration, user=self.user)
+        self.withdrawn_registration_url = '/{}wikis/{}/'.format(API_BASE, self.public_registration_wiki_id)
 
     def test_public_node_logged_out_user_can_view_wiki(self):
         self._set_up_public_project_with_wiki_page()
@@ -176,7 +197,7 @@ class TestWikiDetailView(ApiWikiTestCase):
         assert_equal(res.status_code, 200)
         assert_equal(can_comment, False)
 
-    def test_any_loggedin_user_can_comment_on_open_project(self):
+    def test_any_logged_in_user_can_comment_on_open_project(self):
         self._set_up_public_project_with_wiki_page(project_options={'comment_level': 'public'})
         res = self.app.get(self.public_url, auth=self.non_contributor.auth)
         can_comment = res.json['data']['attributes']['current_user_can_comment']
@@ -211,3 +232,138 @@ class TestWikiDetailView(ApiWikiTestCase):
         url = '/{}wikis/{}/'.format(API_BASE, old_version._id)
         res = self.app.get(url, expect_errors=True)
         assert_equal(res.status_code, 404)
+
+    def test_delete_public_wiki_page_as_contributor(self):
+        self._set_up_public_project_with_wiki_page()
+        res = self.app.delete(self.delete_link, auth=self.user.auth)
+        assert_equal(res.status_code, 204)
+        self.public_wiki.reload()
+        assert_true(self.public_wiki.is_deleted)
+
+    def test_do_not_delete_public_wiki_page_as_non_contributor(self):
+        self._set_up_public_project_with_wiki_page()
+        res = self.app.delete(self.delete_link, auth=self.non_contributor.auth, expect_errors=True)
+        assert_equal(res.status_code, 403)
+        self.public_wiki.reload()
+        assert_false(self.public_wiki.is_deleted)
+
+    def test_do_not_delete_public_wiki_page_as_unauthenticated(self):
+        self._set_up_public_project_with_wiki_page()
+        res = self.app.delete(self.delete_link, expect_errors=True)
+        assert_equal(res.status_code, 401)
+        self.public_wiki.reload()
+        assert_false(self.public_wiki.is_deleted)
+
+    def test_do_not_delete_public_wiki_page_as_approved_public_editor(self):
+        self._set_up_public_project_with_wiki_page(is_publicly_editable=True)
+        res = self.app.delete(self.delete_link, auth=self.non_contributor.auth, expect_errors=True)
+        assert_equal(res.status_code, 403)
+        self.public_wiki.reload()
+        assert_false(self.public_wiki.is_deleted)
+
+    def test_do_not_delete_old_version_of_public_wiki(self):
+        self._set_up_public_project_with_wiki_page()
+        current_wiki = NodeWikiFactory(node=self.public_project, user=self.user)
+        old_version_id = self.public_project.wiki_pages_versions[current_wiki.page_name][-2]
+        old_version = NodeWikiPage.load(old_version_id)
+        url = '/{}wikis/{}/'.format(API_BASE, old_version._id)
+        res = self.app.delete(url, auth=self.user.auth, expect_errors=True)
+        assert_equal(res.status_code, 404)
+        old_version.reload()
+        assert_false(old_version.is_deleted)
+
+    def test_delete_private_wiki_page_as_contributor(self):
+        self._set_up_private_project_with_wiki_page()
+        res = self.app.delete(self.delete_link, auth=self.user.auth)
+        assert_equal(res.status_code, 204)
+        self.private_wiki.reload()
+        assert_true(self.private_wiki.is_deleted)
+
+    def test_do_not_delete_private_wiki_page_as_non_contributor(self):
+        self._set_up_private_project_with_wiki_page()
+        res = self.app.delete(self.delete_link, auth=self.non_contributor.auth, expect_errors=True)
+        assert_equal(res.status_code, 403)
+        self.private_wiki.reload()
+        assert_false(self.private_wiki.is_deleted)
+
+    def test_do_not_delete_private_wiki_page_as_unauthenticated(self):
+        self._set_up_private_project_with_wiki_page()
+        res = self.app.delete(self.delete_link, expect_errors=True)
+        assert_equal(res.status_code, 401)
+        self.private_wiki.reload()
+        assert_false(self.private_wiki.is_deleted)
+
+    def test_do_not_delete_old_version_of_private_wiki(self):
+        self._set_up_private_project_with_wiki_page()
+        current_wiki = NodeWikiFactory(node=self.private_project, user=self.user)
+        old_version_id = self.public_project.wiki_pages_versions[current_wiki.page_name][-2]
+        old_version = NodeWikiPage.load(old_version_id)
+        url = '/{}wikis/{}/'.format(API_BASE, old_version._id)
+        res = self.app.delete(url, auth=self.user.auth, expect_errors=True)
+        assert_equal(res.status_code, 404)
+        old_version.reload()
+        assert_false(old_version.is_deleted)
+
+    def test_do_not_delete_wiki_on_public_registration(self):
+        self._set_up_public_registration_with_wiki_page()
+        res = self.app.delete(self.delete_link, auth=self.non_contributor.auth, expect_errors=True)
+        assert_equal(res.status_code, 405)
+        self.public_registration_wiki.reload()
+        assert_false(self.public_registration_wiki.is_deleted)
+
+    def test_do_not_delete_wiki_on_embargoed_registration(self):
+        self._set_up_public_registration_with_wiki_page()
+        res = self.app.delete(self.delete_link, auth=self.non_contributor.auth, expect_errors=True)
+        assert_equal(res.status_code, 405)
+        self.private_registration_wiki.reload()
+        assert_false(self.private_registration_wiki.is_deleted)
+
+    def test_do_not_delete_wiki_on_withdrawn_registration(self):
+        self._set_up_withdrawn_registration_with_wiki_page()
+        res = self.app.delete(self.delete_link, auth=self.user.auth, expect_errors=True)
+        assert_equal(res.status_code, 405)
+
+    def test_update_public_wiki_page_as_contributor(self):
+        self._set_up_public_project_with_wiki_page()
+        res = self.app.put(self.update_link, self.updated_content, auth=self.user.auth)
+        assert_equal(res.status_code, 200)
+        content_link = res.json['data']['links']['download']
+        wiki_id = res.json['data']['id']
+        new_wiki = NodeWikiPage.load(wiki_id)
+        new_wiki_content = self.app.get(content_link, auth=self.user.auth)
+        self.public_wiki.reload()
+
+        assert_true(self.public_wiki.is_deleted)
+
+    def test_update_public_wiki_page_as_approved_public_editor(self):
+        pass
+
+    def test_do_not_update_public_wiki_page_as_non_contributor(self):
+        pass
+
+    def test_do_not_update_public_wiki_page_unauthenticated(self):
+        pass
+
+    def test_update_private_wiki_page_as_contributor(self):
+        pass
+
+    def test_do_not_update_private_wiki_page_as_non_contributor(self):
+        pass
+
+    def test_do_not_update_private_wiki_page_unauthenticated(self):
+        pass
+
+    def test_do_not_update_old_version_of_public_wiki(self):
+        pass
+
+    def test_do_not_update_old_version_of_private_wiki(self):
+        pass
+
+    def test_do_not_update_wiki_on_public_registration(self):
+        pass
+
+    def test_do_not_update_wiki_on_embargoed_registration(self):
+        pass
+
+    def test_do_not_update_wiki_on_withdrawn_registration(self):
+        pass

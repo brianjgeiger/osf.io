@@ -7,6 +7,7 @@ from api.base.utils import absolute_reverse
 
 from framework.auth.core import Auth
 
+
 class WikiSerializer(JSONAPISerializer):
 
     filterable_fields = frozenset([

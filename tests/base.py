@@ -437,10 +437,10 @@ class ApiWikiTestCase(ApiTestCase):
         self.user = AuthUserFactory()
         self.non_contributor = AuthUserFactory()
 
-    def _add_project_wiki_page(self, node, user):
+    def _add_project_wiki_page(self, node, user, is_publicly_editable=False):
         from tests.factories import NodeWikiFactory
         # API will only return current wiki pages
-        return NodeWikiFactory(node=node, user=user)
+        return NodeWikiFactory(node=node, user=user, is_publicly_editable=is_publicly_editable)
 
 # From Flask-Security: https://github.com/mattupstate/flask-security/blob/develop/flask_security/utils.py
 class CaptureSignals(object):

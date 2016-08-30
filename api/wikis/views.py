@@ -40,7 +40,7 @@ class WikiMixin(object):
         return wiki
 
 
-class WikiDetail(JSONAPIBaseView, generics.RetrieveAPIView, WikiMixin):
+class WikiDetail(JSONAPIBaseView, generics.RetrieveUpdateDestroyAPIView, WikiMixin):
     """Details about a specific wiki. *Read-only*.
 
     ###Permissions

@@ -97,6 +97,39 @@ class TestNodeWikiList(ApiWikiTestCase):
         assert_equal(res.status_code, 403)
         assert_equal(res.json['errors'][0]['detail'], 'You do not have permission to perform this action.')
 
+    def test_create_public_wiki_as_contributor(self):
+        pass
+
+    def test_do_not_create_public_wiki_as_approved_public_editor(self):
+        pass
+
+    def test_do_not_create_public_wiki_as_non_contributor(self):
+        pass
+
+    def test_do_not_create_public_wiki_as_unauthenticated(self):
+        pass
+
+    def test_create_private_wiki_as_contributor(self):
+        pass
+
+    def test_do_not_create_private_wiki_as_non_contributor(self):
+        pass
+
+    def test_do_not_create_private_wiki_as_unauthenticated(self):
+        pass
+
+    def test_do_not_create_wiki_with_same_name_as_existing_wiki(self):
+        pass
+
+    def test_do_not_create_wiki_as_contributor_on_public_registration(self):
+        pass
+
+    def test_do_not_create_wiki_as_contributor_on_embargoed_registration(self):
+        pass
+
+    def test_do_not_create_wiki_as_contributor_on_withdrawn_registration(self):
+        pass
+
 
 class TestFilterNodeWikiList(ApiTestCase):
 
