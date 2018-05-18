@@ -116,4 +116,4 @@ class TestSubscriptionDetail:
         res = app.delete_json_api(url, auth=user.auth)
         assert res.status_code == 204
         res = app.get(url, auth=user.auth, expect_errors=True)
-        assert res.status_code == 403 # User is removed from the subscription rather than the subscription being deleted
+        assert res.status_code == 403   # User is removed from the subscription rather than the subscription being deleted
