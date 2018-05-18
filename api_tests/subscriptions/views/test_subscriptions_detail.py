@@ -104,3 +104,16 @@ class TestSubscriptionDetail:
         res = app.patch_json_api(url, payload, auth=user.auth)
         assert res.status_code == 200
         assert res.json['data']['attributes']['frequency'] == 'none'
+
+        # DELETE with valid notification id
+        # Invalid user
+        res = app.delete_json_api(url, auth=user_no_auth.auth, expect_errors=True)
+        assert res.status_code == 403
+        # No user
+        res = app.delete_json_api(url, expect_errors=True)
+        assert res.status_code == 401
+        # Valid user
+        res = app.delete_json_api(url, auth=user.auth)
+        assert res.status_code == 204
+        res = app.get(url, auth=user.auth, expect_errors=True)
+        assert res.status_code == 403 # User is removed from the subscription rather than the subscription being deleted

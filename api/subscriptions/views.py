@@ -34,7 +34,7 @@ class SubscriptionList(JSONAPIBaseView, generics.ListAPIView, ListFilterMixin):
         return self.get_queryset_from_request()
 
 
-class SubscriptionDetail(JSONAPIBaseView, generics.RetrieveUpdateAPIView):
+class SubscriptionDetail(JSONAPIBaseView, generics.RetrieveUpdateDestroyAPIView):
     view_name = 'notification-subscription-detail'
     view_category = 'notification-subscriptions'
     serializer_class = SubscriptionSerializer
@@ -55,3 +55,9 @@ class SubscriptionDetail(JSONAPIBaseView, generics.RetrieveUpdateAPIView):
             raise NotFound
         self.check_object_permissions(self.request, obj)
         return obj
+
+    # overrides DestroyAPIView
+    def perform_destroy(self, instance):
+        """Deleting a subscription just means removing the user from it"""
+        obj = self.get_object()
+        obj.remove_user_from_subscription(user=self.request.user)
