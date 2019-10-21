@@ -81,11 +81,12 @@ class ChronosSerializer(object):
             'LICENSE': preprint.license.node_license.name.upper() if preprint.license and preprint.license.node_license.name != 'No license' else 'NL',
         }
 
-    @classmethod
-    def serialize_user(cls, user):
-        if not bool(user.given_name) and not bool(user.family_name):
+    @staticmethod
+    def serialize_user(user):
+        if not (bool(user.given_name) and bool(user.family_name)):
+            user_name = user.given_name if bool(user.given_name) else user.fullname
             raise ValueError(
-                'Cannot submit because user {} requires a given and family name'.format(user.given_name if user.given_name and user.family_name else user.fullname)
+                'Cannot submit because user {} requires a given and family name'.format(user_name)
             )
 
         return {
